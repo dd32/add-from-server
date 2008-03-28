@@ -11,7 +11,7 @@ Stable tag: 1.2
 
 WordPress 2.5 includes a new Media manager, However, It only knows about files which have been uploaded via the WordPress interface, Not files which have been uploaded via other means(eg, FTP).
 
-So i present, “Add From Server” a WordPress plugin which allows you to browse the filesystem on the webserver and copy any files into the WordPress uploads system, Once “imported” it’ll be treated as any other uploaded file, and you can access it via the Media Li
+So i present, "Add From Server" a WordPress plugin which allows you to browse the filesystem on the webserver and copy any files into the WordPress uploads system, Once "imported" it'll be treated as any other uploaded file, and you can access it via the Media Li
 
 == Changelog ==
 
