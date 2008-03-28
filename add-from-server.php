@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Add From Server
-Version: 1.1
+Version: 1.2
 Plugin URI: http://dd32.id.au/wordpress-plugins/add-from-server/
 Description: Plugin to allow the Media Manager to add files from the webservers filesystem. <strong>Note:</strong> All files are copied to the uploads directory.
 Author: Dion Hulse
@@ -16,8 +16,8 @@ function frmsvr_activated(){
 			deactivate_plugins(__FILE__);
 		wp_die('<h1>Add From Server</h1> Sorry, This plugin requires WordPress 2.5+');
 	}
-		
-	add_option('frmsvr_last_folder', ABSPATH . '/wp-content/');
+	if( ! get_option('frmsvr_last_folder') )
+		add_option('frmsvr_last_folder', ABSPATH . '/wp-content/');
 }
 
 register_deactivation_hook(__FILE__, 'frmsvr_deactivated');
@@ -47,7 +47,10 @@ function frmsvr_get_cwd(){
 	else
 		$subpath = get_option('frmsvr_last_folder');
 
-	$path = path_join(ABSPATH, realpath($subpath));
+	$path = ABSPATH;
+	if( $subpath && !empty($subpath) )
+		$path = path_join($path, realpath($subpath));
+
 	$path = str_replace('\\','/',$path);
 	$path = trailingslashit($path);
 	
@@ -79,9 +82,9 @@ function frmsvr_list_files($dest = 'return'){
 }
 
 function frmsrv_walk_files($files = array()){
-	$post_id = $_REQUEST['post_id'];
+	$post_id = intval($_REQUEST['post_id']);
 	$base = frmsvr_get_cwd();
-	$folderurl = get_option('siteurl') . "/wp-admin/media-upload.php?tab=server&post_id=$post_id&directory=";
+	$folderurl = get_option('siteurl') . '/wp-admin/media-upload.php?tab=server&post_id=' . $post_id . '&directory=';
 	
 	$return = "<form action='$folderurl$base' method='POST'><table>";
 	$return .= "<tr>
@@ -128,10 +131,12 @@ function frmsvr_handle_import($files) {
 		$file = realpath($file);
 		$id = frmsvr_handle_file($file);
 		if( $id ){
+			echo "<script type='text/javascript'>jQuery('#attachments-count').text(1 * jQuery('#attachments-count').text() + 1);</script>";
 			echo "<div class='updated'><p><em>$file</em> has been added to Media library</p></div>";
 		}
 	}
 }
+
 function frmsvr_handle_file($file){
 	$post_id = $_REQUEST['post_id'];
 	
@@ -143,23 +148,42 @@ function frmsvr_handle_file($file){
 		$ext = ltrim(strrchr($file['name'], '.'), '.');
 
 	// A writable uploads dir will pass this test. Again, there's no point overriding this one.
-	if ( ! ( ( $uploads = wp_upload_dir() ) && false === $uploads['error'] ) )
+	if ( ! ( ( $uploads = wp_upload_dir( gmdate('Y-m-d H:i:s', filemtime($file)) ) ) && false === $uploads['error'] ) )
 		wp_die( $uploads['error'] );
 
-	$filename = wp_unique_filename( $uploads['path'], $file, $unique_filename_callback );
 
-	// Move the file to the uploads dir
-	$new_file = $uploads['path'] . '/' . $filename;
-	if ( false === @ copy( $file, $new_file ) )
-		wp_die( printf( __('The uploaded file could not be copied to %s.' ), $uploads['path'] ));
+	$uploads_folder = defined('UPLOADS') ? UPLOADS : (trim(get_option('upload_path')) === '' ? 'wp-content/uploads' : get_option('upload_path'));
 
-	// Set correct file permissions
-	$stat = stat( dirname( $new_file ));
-	$perms = $stat['mode'] & 0000666;
-	@ chmod( $new_file, $perms );
+	//Is the file allready in the uploads folder?
+	if( preg_match('|^' . str_replace('\\','\\\\',realpath(ABSPATH . $uploads_folder)) . '(.*)|i', $file, $mat) ) {
+		//First line of business.. Check that file isnt allready in the media library!.
 
-	// Compute the URL
-	$url = $uploads['url'] . '/' . $filename;
+		$filename = basename($file);
+		$new_file = $file;
+		if ( !$url = get_option('upload_url_path') )
+			$url = trailingslashit(get_option('siteurl'));
+		
+		$url .= rtrim($uploads_folder,'/') . '/' . ltrim(str_replace('\\', '/', $mat[1]),'/');;
+		
+		global $wpdb;
+		$results = $wpdb->get_col("SELECT ID FROM `{$wpdb->posts}` WHERE `guid` = '$url' AND `post_type` = 'attachment'");
+		if( count($results) > 0 )
+			return $results[0]; //Kill function off at this point.. It exists in the media library allready.
+	} else {	
+		$filename = wp_unique_filename( $uploads['path'], basename($file), $unique_filename_callback );
+
+		// copy the file to the uploads dir
+		$new_file = $uploads['path'] . '/' . $filename;
+		if ( false === @ copy( $file, $new_file ) )
+			wp_die( printf( __('The uploaded file could not be copied to %s.' ), $uploads['path'] ));
+	
+		// Set correct file permissions
+		$stat = stat( dirname( $new_file ));
+		$perms = $stat['mode'] & 0000666;
+		@ chmod( $new_file, $perms );
+		// Compute the URL
+		$url = $uploads['url'] . '/' . $filename;
+	}
 	
 	$title = preg_replace('/\.[^.]+$/', '', basename($file));
 	$content = '';
@@ -195,7 +219,7 @@ function frmsvr_handle_file($file){
 function frmsvr_mainform(){
 	media_upload_header();
 	$post_id = intval($_REQUEST['post_id']);
-	$form_action_url = get_option('siteurl') . "/wp-admin/media-upload.php?tab=server&post_id=$post_id";
+	$form_action_url = get_option('siteurl') . '/wp-admin/media-upload.php?tab=server&post_id=' . $post_id;
 	
 	$cwd = frmsvr_get_cwd();
 	
