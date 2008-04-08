@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Add From Server
-Version: 1.2
+Version: 1.3
 Plugin URI: http://dd32.id.au/wordpress-plugins/add-from-server/
 Description: Plugin to allow the Media Manager to add files from the webservers filesystem. <strong>Note:</strong> All files are copied to the uploads directory.
 Author: Dion Hulse
@@ -116,7 +116,15 @@ function frmsrv_walk_files($files = array()){
 		}
 	}
 	$return .= '</table>';
-	
+
+	//Let the plugin work with the "Post Uploads" plugin of mine :)	
+	if( function_exists('pu_checkbox') ){
+		$ret = pu_checkbox(false);
+		if( $ret )
+			$ret .= '(<em>Note: Will not take effect if selected file is within an upload folder at present</em>)<br />';
+		$return .= $ret;
+	}
+
 	$return .= '
 			<input type="submit" name="submit" value="Import selected files" />
 			</form>';
