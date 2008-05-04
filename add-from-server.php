@@ -122,7 +122,7 @@ function frmsrv_walk_files($files = array()){
 		}
 	}
 	$return .= '<tr>
-					<th colspan="2" style="text-align: left;"><a href="javascript:checkAll(document.getElementById(\'add-from-server-form\'));">' . __('Toggle All', 'add-from-server') . '</a></th>
+					<th colspan="2" style="text-align: left;"><a href="javascript:checkAll();">' . __('Toggle All', 'add-from-server') . '</a></th>
 				</tr>';
 	$return .= '</table>';
 
