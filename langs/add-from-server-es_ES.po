@@ -1,0 +1,73 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: add-from-server\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-05-04 15:28+1000\n"
+"PO-Revision-Date: 2008-05-04 16:02+1000\n"
+"Last-Translator: Dion Hulse <contact@dd32.id.au>\n"
+"Language-Team: dd32.id.au <contact@dd32.id.au>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Spanish\n"
+"X-Poedit-Country: SPAIN\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: add-from-server.php:17
+msgid "<h1>Add From Server</h1> Sorry, This plugin requires WordPress 2.5+"
+msgstr "<h1>Añadir Desde Servidor</h1> Lo siento, Este plugin requiere WordPress 2.5+"
+
+#: add-from-server.php:36
+#: add-from-server.php:255
+msgid "Add From Server"
+msgstr "Añadir Desde Servidor"
+
+#: add-from-server.php:97
+msgid "Import"
+msgstr "Importar"
+
+#: add-from-server.php:98
+msgid "Filename"
+msgstr "Nombre de Archivo"
+
+#: add-from-server.php:104
+msgid "Parent Folder"
+msgstr "Carpeta Superior"
+
+#: add-from-server.php:125
+msgid "Toggle All"
+msgstr "Accione la palanca De Todos"
+
+#: add-from-server.php:133
+msgid "Note: Will not take effect if selected file is within an upload folder at present"
+msgstr "La nota: no tomará efecto si el archivo seleccionado está dentro de una carpeta del upload actualmente"
+
+#: add-from-server.php:138
+msgid "Do not add selected files to current post Gallery"
+msgstr "No agregue los archivos seleccionados a la galería actual del poste"
+
+#: add-from-server.php:141
+msgid "Import selected files"
+msgstr "Importar Archivos Seleccionados"
+
+#: add-from-server.php:157
+#, php-format
+msgid "<em>%s</em> has been added to Media library"
+msgstr "<em>%s</em>  ha sido añadido a la Librería Multimedia"
+
+#: add-from-server.php:201
+#, php-format
+msgid "The uploaded file could not be moved to %s."
+msgstr "El archivo no puede ser copiado a %s."
+
+#: add-from-server.php:257
+#, php-format
+msgid "Once you have selected files to be imported, Head over to the <a href=\"%s\">Media Library tab</a> to add them to your post."
+msgstr "Una vez que hayas seleccionado los archivos que vas a importar, Ve a la pestaña <a href=\"%s\">Librería Multimedia</a> para añadirlos a tu post."
+
+#: add-from-server.php:259
+msgid "Current Directory"
+msgstr "Directorio Actual"
+
