@@ -27,7 +27,7 @@ function frmsvr_deactivated(){
 
 add_action('init', 'frmsvr_init');
 function frmsvr_init(){
-    load_plugin_textdomain('add-from-server', ABSPATH . PLUGINDIR . '/' . dirname(plugin_basename(__FILE__) . '/langs/'));
+    load_plugin_textdomain('add-from-server', PLUGINDIR . '/' . dirname(plugin_basename(__FILE__)) . '/langs/');
 }
 
 add_filter('media_upload_tabs', 'frmsvr_tabs');
