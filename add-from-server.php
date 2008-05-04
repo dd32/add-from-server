@@ -27,8 +27,7 @@ function frmsvr_deactivated(){
 
 add_action('init', 'frmsvr_init');
 function frmsvr_init(){
-	var_dump(PLUGINDIR . '/' . dirname(plugin_basename(__FILE__)));
-    load_plugin_textdomain('add-from-server', PLUGINDIR . '/' . dirname(plugin_basename(__FILE__)));
+    load_plugin_textdomain('add-from-server', ABSPATH . PLUGINDIR . '/' . dirname(plugin_basename(__FILE__) . '/langs/'));
 }
 
 add_filter('media_upload_tabs', 'frmsvr_tabs');
@@ -43,6 +42,7 @@ function frmsvr_file(){
 	if( ! current_user_can( 'unfiltered_upload' ) )
 		return;
 	add_action('admin_head', 'media_admin_css');
+	wp_enqueue_script('admin-forms');
 	return wp_iframe('frmsvr_mainform');
 }
 
@@ -94,9 +94,9 @@ function frmsrv_walk_files($files = array()){
 	
 	$return = "<form action='$folderurl$base' method='POST'><table>";
 	$return .= "<tr>
-					<th>" . __('Import', 'add-from-server') . "</th>
-					<th>" . __('Filename', 'add-from-server') . "</th>
-				</tr>";
+					<th>" . __('Import', 'add-from-server') . '</th>
+					<th>' . __('Filename', 'add-from-server') . '</th>
+				</tr>';
 	$parent = realpath($base . '/..');
 
 	$return .= "<tr>
@@ -121,15 +121,21 @@ function frmsrv_walk_files($files = array()){
 						</tr>";
 		}
 	}
+	$return .= '<tr>
+					<th colspan="2" style="text-align: left;"><a href="javascript:checkAll(document.getElementById(\'add-from-server-form\'));">' . __('Toggle All', 'add-from-server') . '</a></th>
+				</tr>';
 	$return .= '</table>';
 
 	//Let the plugin work with the "Post Uploads" plugin of mine :)	
 	if( function_exists('pu_checkbox') ){
 		$ret = pu_checkbox(false);
 		if( $ret )
-			$ret .= sprintf('(<em>%s</em>)<br />', __('Note: Will not take effect if selected file is within an upload folder at present', 'add-from-server'));
-		$return .= $ret;
+			$ret .= sprintf('(<em>%s</em>)', __('Note: Will not take effect if selected file is within an upload folder at present', 'add-from-server'));
+		$return .= '<p>' . $ret . '</p>';
 	}
+	
+	//Offer to not assoc. with this post.
+	$return .= '<p><input type="checkbox" name="no-gallery" />' . __('Do not add selected files to current post Gallery', 'add-from-server') . '</p>';
 
 	$return .= '
 			<input type="submit" name="submit" value=" ' . __('Import selected files', 'add-from-server') . '" />
@@ -141,9 +147,11 @@ function frmsrv_walk_files($files = array()){
 function frmsvr_handle_import($files) {
 	if( empty($files) )
 		return;
+	$gallery = isset($_POST['no-gallery']) && $_POST['no-gallery'] ? false : true;
+
 	foreach($files as $file){
 		$file = realpath($file);
-		$id = frmsvr_handle_file($file);
+		$id = frmsvr_handle_file($file, $gallery);
 		if( $id ){
 			echo "<script type='text/javascript'>jQuery('#attachments-count').text(1 * jQuery('#attachments-count').text() + 1);</script>";
 			echo '<div class="updated"><p>' . sprintf(__('<em>%s</em> has been added to Media library', 'add-from-server'), $file) . '</p></div>';
@@ -151,8 +159,9 @@ function frmsvr_handle_import($files) {
 	}
 }
 
-function frmsvr_handle_file($file){
-	$post_id = $_REQUEST['post_id'];
+function frmsvr_handle_file($file, $gallery = true){
+
+	$post_id = $gallery && isset($_REQUEST['post_id']) ? $_REQUEST['post_id'] : 0; //If the post id is set and we're adding to a gallery.
 	
 	$wp_filetype = wp_check_filetype( $file, null );
 

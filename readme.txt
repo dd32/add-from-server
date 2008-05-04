@@ -23,6 +23,11 @@ So i present, "Add From Server" a WordPress plugin which allows you to browse th
  * Fixed filename oddness including old directory names
  * Added a check to see if the file exists in the Media library allready
  * Added a check to see if the file is allready in the uploads folder before importing, and if so, simply add it to the database, do not mash the filesystem
+= 1.3 =
+ * Internationalisation; Partial French translation
+ * Internationalisation; Partial Spanish translation
+ * Checkbox select all
+ * Import into non-post attachment
 
 == Future Features ==
 Please note that these are simply features i'd like to do, There is no timeframe, or guarantee that it will be in the next version.
