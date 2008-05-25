@@ -41,9 +41,13 @@ add_action('media_upload_server', 'frmsvr_file');
 function frmsvr_file(){
 	if( ! current_user_can( 'unfiltered_upload' ) )
 		return;
-	add_action('admin_head', 'media_admin_css');
+	add_action('admin_head', 'frmsvr_admin_css');
 	wp_enqueue_script('admin-forms');
 	return wp_iframe('frmsvr_mainform');
+}
+
+function frmsvr_admin_css(){
+	wp_admin_css('css/media');
 }
 
 function frmsvr_get_cwd(){
@@ -182,18 +186,26 @@ function frmsvr_handle_file($file, $gallery = true){
 	//Is the file allready in the uploads folder?
 	if( preg_match('|^' . str_replace('\\','\\\\',realpath(ABSPATH . $uploads_folder)) . '(.*)|i', $file, $mat) ) {
 		//First line of business.. Check that file isnt allready in the media library!.
-
+		$mat[1] = str_replace('\\', '/', $mat[1]); //Sanitize windows paths.
+		
 		$filename = basename($file);
 		$new_file = $file;
 		if ( !$url = get_option('upload_url_path') )
 			$url = trailingslashit(get_option('siteurl'));
 		
-		$url .= rtrim($uploads_folder,'/') . '/' . ltrim(str_replace('\\', '/', $mat[1]),'/');;
+		$url .= rtrim($uploads_folder,'/') . '/' . ltrim($mat[1],'/');;
 		
 		global $wpdb;
 		$results = $wpdb->get_col( $wpdb->prepare("SELECT ID FROM `{$wpdb->posts}` WHERE `guid` = '%s' AND `post_type` = 'attachment'", $url) );
 		if( count($results) > 0 )
 			return $results[0]; //Kill function off at this point.. It exists in the media library allready.
+		
+		//Ok, Its in the uploads folder, But NOT in WordPress's media library.
+		if( preg_match("|(\d+)/(\d+)|", $mat[1], $datemat) ) {
+			$time = mktime(0,0,0,$datemat[2], 1, $datemat[1]);
+			$post_date = date( 'Y-m-d H:i:s', $time);
+			$post_date_gmt = gmdate( 'Y-m-d H:i:s', $time);
+		}
 	} else {	
 		$filename = wp_unique_filename( $uploads['path'], basename($file), $unique_filename_callback );
 
@@ -220,6 +232,11 @@ function frmsvr_handle_file($file, $gallery = true){
 		if ( trim($image_meta['caption']) )
 			$content = $image_meta['caption'];
 	}
+	
+	if ( empty($post_date) )
+		$post_date = current_time('mysql');
+	if ( empty($post_date_gmt) )
+		$post_date_gmt = current_time('mysql', 1);
 
 	// Construct the attachment array
 	$attachment = array(
@@ -229,6 +246,8 @@ function frmsvr_handle_file($file, $gallery = true){
 		'post_title' => $title,
 		'post_name' => $title,
 		'post_content' => $content,
+		'post_date' => $post_date,
+		'post_date_gmt' => $post_date_gmt
 	);
 
 	// Save the data
