@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Add From Server
-Version: 1.3.2
+Version: 1.4
 Plugin URI: http://dd32.id.au/wordpress-plugins/add-from-server/
 Description: Plugin to allow the Media Manager to add files from the webservers filesystem. <strong>Note:</strong> All files are copied to the uploads directory.
 Author: Dion Hulse
@@ -109,9 +109,11 @@ function frmsrv_walk_files($files = array()){
 					<td>&nbsp;</td>
 					<td><strong><a href='$folderurl$parent'>" . __('Parent Folder', 'add-from-server') . "</a></strong></td>
 				</tr>";
+	$file_count = 0;
 	foreach($files as $file){
 		$filename = $file['name'];
 		if( $file['file'] ){
+			$file_count++;
 			//File
 			$sanname = str_replace('.', '', $filename);
 			$return .= "<tr>
@@ -126,8 +128,9 @@ function frmsrv_walk_files($files = array()){
 						</tr>";
 		}
 	}
-	$return .= '<tr>
-					<th colspan="2" style="text-align: left;"><a href="javascript:checkAll(jQuery(\'#filesystem-list-form\'));">' . __('Toggle All', 'add-from-server') . '</a></th>
+	if( $file_count > 0 )
+		$return .= '<tr>
+					<th colspan="2" style="text-align: left;"><a href="javascript:void(0);" onclick="checkAll(jQuery(\'#filesystem-list-form\'));">' . __('Toggle All', 'add-from-server') . '</a></th>
 				</tr>';
 	$return .= '</tbody>';
 	$return .= '</table>';
