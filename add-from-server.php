@@ -49,7 +49,7 @@ class add_from_server {
 
 	function activate(){
 		global $wp_version;
-		if( ! version_compare( $wp_version, '2.7-alpha', '>=') ){
+		if( ! version_compare( $wp_version, '2.6-alpha', '>=') ) {
 			if( function_exists('deactivate_plugins') )
 				deactivate_plugins(__FILE__);
 			wp_die(__('<h1>Add From Server</h1> Sorry, This plugin requires WordPress 2.7+', 'add-from-server'));
@@ -123,12 +123,6 @@ class add_from_server {
 
 	//Handle an individual file import.
 	function handle_import_file($file, $import_to_gallery) {
-
-		$wp_filetype = wp_check_filetype( $file, null );
-
-		extract( $wp_filetype );
-
-		var_dump($wp_filetype);
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
 		if ( ! ( ( $uploads = wp_upload_dir() ) && false === $uploads['error'] ) )
@@ -228,8 +222,11 @@ class add_from_server {
 		$cwd = preg_replace('![^/]+/\.\./!', '', $cwd);
 		$cwd = preg_replace('!//!', '/', $cwd);
 
+		if ( ! is_readable($cwd) && get_option('frmsvr_last_folder') )
+			$cwd = get_option('frmsvr_last_folder');
+
 		if ( ! is_readable($cwd) )
-			$cwd = get_option('frmsvr_last_folder', str_replace('\\', '/', WP_CONTENT_DIR));
+			$cwd = str_replace('\\', '/', WP_CONTENT_DIR);
 
 		$cwd = untrailingslashit($cwd);
 
