@@ -47,10 +47,15 @@ Note: French, Spanish, and German translation are included. I cannot nativly spe
 = 1.3.2 =
  * French translation changes from Ozh & Olivier
  * Fixed the checkbox list for certain unknown browsers.
-= 1.4 -
+= 1.4 =
  * German Translation
  * More stuffing around with the checkbox that doesnt work for anyone, yet works on every test system i've tried
  * Set the date on imported files to that of their uploads folder
+= 1.5 =
+ * WP2.7 SSL Support
+ * WP2.7 Checkbox support
+ * WP2.7 upload modifications
+ * Files/folders are sorted by name
 
 == Future Features ==
 Please note that these are simply features i'd like to do, There is no timeframe, or guarantee that it will be in the next version.

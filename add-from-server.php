@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Add From Server
-Version: 1.4
+Version: 1.5
 Plugin URI: http://dd32.id.au/wordpress-plugins/add-from-server/
 Description: Plugin to allow the Media Manager to add files from the webservers filesystem. <strong>Note:</strong> All files are copied to the uploads directory.
 Author: Dion Hulse
@@ -68,6 +68,11 @@ function frmsvr_get_cwd(){
 	
 	return $path;
 }
+
+function frmsvr_sort_name($a, $b) {
+	return strcmp($a['name'], $b['name']);
+}
+
 function frmsvr_list_files($dest = 'return'){
 	$cwd = frmsvr_get_cwd();
 	$dir = dir($cwd);
@@ -82,6 +87,12 @@ function frmsvr_list_files($dest = 'return'){
 		else 
 			$files[] = array('name' => $file, 'dir' => false, 'file' => true );
 	}
+
+	//Sort them by name.
+	usort($dirs, 'frmsvr_sort_name');
+	usort($files, 'frmsvr_sort_name');
+
+
 	$list = array_merge($dirs, $files); //Organises it into dirs first, then files.
 	
 	$content = frmsrv_walk_files($list);
@@ -94,7 +105,7 @@ function frmsvr_list_files($dest = 'return'){
 function frmsrv_walk_files($files = array()){
 	$post_id = intval($_REQUEST['post_id']);
 	$base = frmsvr_get_cwd();
-	$folderurl = get_option('siteurl') . '/wp-admin/media-upload.php?tab=server&post_id=' . $post_id . '&directory=';
+	$folderurl = admin_url('media-upload.php?tab=server&post_id=' . $post_id . '&directory=');
 	
 	$return = "<form action='$folderurl$base' id='filesystem-list-form' method='POST'><table>";
 	$return .= "<thead><tr>
@@ -117,7 +128,7 @@ function frmsrv_walk_files($files = array()){
 			//File
 			$sanname = str_replace('.', '', $filename);
 			$return .= "<tr>
-							<td><input type='checkbox' id='file-$sanname' name='files[$base$filename]' /></td>
+							<td class='check-column'><input type='checkbox' id='file-$sanname' name='files[$base$filename]' /></td>
 							<td><label for='file-$sanname'>$filename</label></td>
 						</tr>";
 		} else {
@@ -130,13 +141,13 @@ function frmsrv_walk_files($files = array()){
 	}
 	if( $file_count > 0 )
 		$return .= '<tr>
-					<th colspan="2" style="text-align: left;"><a href="javascript:void(0);" onclick="checkAll(jQuery(\'#filesystem-list-form\'));">' . __('Toggle All', 'add-from-server') . '</a></th>
+					<th colspan="2" style="text-align: left;"><a href="javascript:void(0);" onclick="checkAll(\'#filesystem-list-form\');">' . __('Toggle All', 'add-from-server') . '</a></th>
 				</tr>';
 	$return .= '</tbody>';
 	$return .= '</table>';
 
 	//Let the plugin work with the "Post Uploads" plugin of mine :)	
-	if( function_exists('pu_checkbox') ){
+	if( function_exists('pu_checkbox') ) {
 		$ret = pu_checkbox(false);
 		if( $ret )
 			$ret .= sprintf('(<em>%s</em>)', __('Note: Will not take effect if selected file is within an upload folder at present', 'add-from-server'));
@@ -183,20 +194,23 @@ function frmsvr_handle_file($file, $gallery = true){
 	if ( ! ( ( $uploads = wp_upload_dir( gmdate('Y-m-d H:i:s', filemtime($file)) ) ) && false === $uploads['error'] ) )
 		wp_die( $uploads['error'] );
 
+	$uploads_folder = defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR : ABSPATH . 'wp-content/uploads';
 
-	$uploads_folder = defined('UPLOADS') ? UPLOADS : (trim(get_option('upload_path')) === '' ? 'wp-content/uploads' : get_option('upload_path'));
+	if ( '' !== trim(get_option('upload_path')) )
+		$uploads_folder = get_option('upload_path');
+
+	if ( defined('UPLOADS') )
+		$uploads_folder = UPLOADS;
 
 	//Is the file allready in the uploads folder?
-	if( preg_match('|^' . str_replace('\\','\\\\',realpath(ABSPATH . $uploads_folder)) . '(.*)|i', $file, $mat) ) {
+	if( preg_match('|^' . preg_quote($uploads_folder) . '(.*)|i', $file, $mat) ) {
 		//First line of business.. Check that file isnt allready in the media library!.
 		$mat[1] = str_replace('\\', '/', $mat[1]); //Sanitize windows paths.
 		
 		$filename = basename($file);
 		$new_file = $file;
-		if ( !$url = get_option('upload_url_path') )
-			$url = trailingslashit(get_option('siteurl'));
 		
-		$url .= rtrim($uploads_folder,'/') . '/' . ltrim($mat[1],'/');;
+		$url = path_join($uploads['url'], ltrim($mat[1],'/'));
 		
 		global $wpdb;
 		$results = $wpdb->get_col( $wpdb->prepare("SELECT ID FROM `{$wpdb->posts}` WHERE `guid` = '%s' AND `post_type` = 'attachment'", $url) );
@@ -210,12 +224,12 @@ function frmsvr_handle_file($file, $gallery = true){
 			$post_date_gmt = gmdate( 'Y-m-d H:i:s', $time);
 		}
 	} else {	
-		$filename = wp_unique_filename( $uploads['path'], basename($file), $unique_filename_callback );
+		$filename = wp_unique_filename( $uploads['path'], basename($file));
 
 		// copy the file to the uploads dir
 		$new_file = $uploads['path'] . '/' . $filename;
-		if ( false === @ copy( $file, $new_file ) )
-			return $upload_error_handler( $file, sprintf( __('The uploaded file could not be moved to %s.' ), $uploads['path'] ) );
+		if ( false === @copy( $file, $new_file ) )
+			wp_die(sprintf( __('The selected file could not be moved to %s.', 'add-from-server'), $uploads['path']));
 	
 		// Set correct file permissions
 		$stat = stat( dirname( $new_file ));
@@ -256,7 +270,9 @@ function frmsvr_handle_file($file, $gallery = true){
 	// Save the data
 	$id = wp_insert_attachment($attachment, $new_file, $post_parent);
 	if ( !is_wp_error($id) ) {
-		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $new_file ) );
+		$data = wp_generate_attachment_metadata( $id, $new_file );
+		var_dump($data);
+		wp_update_attachment_metadata( $id, $data );
 	}
 
 	return $id;
