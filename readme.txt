@@ -1,19 +1,19 @@
 === Add From Server ===
 Contributors: dd32
 Tags: 2.5, admin, media, uploads, post
-Requires at least: 2.5
-Tested up to: 2.5
+Requires at least: 2.7
+Tested up to: 2.7
 Stable tag: 1.4
 
 "Add From Server" is a quick plugin which allows you to import media & files into the WordPress uploads manager from the Webservers filesystem
 
 == Description ==
 
-WordPress 2.5 includes a new Media manager, However, It only knows about files which have been uploaded via the WordPress interface, Not files which have been uploaded via other means(eg, FTP).
+WordPress 2.5+ includes a new Media manager, However, It only knows about files which have been uploaded via the WordPress interface, Not files which have been uploaded via other means(eg, FTP).
 
-So i present, "Add From Server" a WordPress plugin which allows you to browse the filesystem on the webserver and copy any files into the WordPress uploads system, Once "imported" it'll be treated as any other uploaded file, and you can access it via the Media Li
+So i present, "Add From Server" a WordPress plugin which allows you to browse the filesystem on the webserver and copy any files into the WordPress uploads system, Once "imported" it'll be treated as any other uploaded file, and you can access it via the Media 
 
-Note: French, Spanish, and German translation are included. I cannot nativly speak these languages, If you find an error, or would like me to add your translation, You can contact me via: http://dd32.id.au/contact-me/
+Note: French, Spanish, German and Farsi translations are included. I cannot nativly speak these languages, If you find an error, or would like me to add your translation, You can contact me via: http://dd32.id.au/contact-me/
 
 == FAQ ==
 
@@ -40,8 +40,8 @@ Note: French, Spanish, and German translation are included. I cannot nativly spe
  * Added a check to see if the file exists in the Media library allready
  * Added a check to see if the file is allready in the uploads folder before importing, and if so, simply add it to the database, do not mash the filesystem
 = 1.3 =
- * Internationalisation; French translation (Apologies if not 100% accurate, Please do submit language fixes :))
- * Internationalisation; Spanish translation (Apologies if not 100% accurate, Please do submit language fixes :))
+ * Internationalisation; French translation
+ * Internationalisation; Spanish translation
  * Checkbox select all
  * Import into non-post attachment
 = 1.3.2 =
@@ -51,11 +51,15 @@ Note: French, Spanish, and German translation are included. I cannot nativly spe
  * German Translation
  * More stuffing around with the checkbox that doesnt work for anyone, yet works on every test system i've tried
  * Set the date on imported files to that of their uploads folder
-= 1.5 =
+= 2.0 =
+ * Requires WordPress 2.7+ (From now on, My Plugins will only be supported for the current stable branch)
  * WP2.7 SSL Support
- * WP2.7 Checkbox support
+ * WP2.7 checkbox support
  * WP2.7 upload modifications
+ * WP2.7 Styling
  * Files/folders are sorted by name
+ * Update Notification changelogs (On the plugins page)
+ * Completely rewritten, Hopefully this'll fix some long-time bugs which have affected some.
 
 == Future Features ==
 Please note that these are simply features i'd like to do, There is no timeframe, or guarantee that it will be in the next version.

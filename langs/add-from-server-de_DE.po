@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Add From Server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-04 15:46+1000\n"
+"POT-Creation-Date: 2008-11-09 00:16+1000\n"
 "PO-Revision-Date: \n"
-"Last-Translator: flöschen <translations@dev.floeschen.ch>\n"
+"Last-Translator: Dion Hulse <contact@dd32.id.au>\n"
 "Language-Team: Flöschen <translations@dev.floeschen.ch>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -12,63 +12,72 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: SWITZERLAND\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-Poedit-Basepath: C:\\www\\wordpress\\wp-content\\plugins\\add-from-server\n"
+"X-Poedit-Basepath: ../\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: add-from-server.php:17
-msgid "<h1>Add From Server</h1> Sorry, This plugin requires WordPress 2.5+"
-msgstr "<h1>Add From Server</h1> Sorry, dieses Plugin benötigt WordPress 2.5+"
+#: add-from-server.php:19
+msgid "<h1>Add From Server</h1> Sorry, This plugin requires WordPress 2.7+"
+msgstr "<h1>Add From Server</h1> Sorry, dieses Plugin benötigt WordPress 2.7+"
 
-#: add-from-server.php:36
-#: add-from-server.php:255
+#: plugin-code.php:19
+#: plugin-code.php:39
 msgid "Add From Server"
 msgstr "Add From Server"
 
-#: add-from-server.php:97
-msgid "Import"
-msgstr "Importiere"
+#: plugin-code.php:65
+#, php-format
+msgid "<em>%s</em> was <strong>not</strong> imported due to an error: %s"
+msgstr ""
 
-#: add-from-server.php:98
-msgid "Filename"
-msgstr "Dateiname"
-
-#: add-from-server.php:104
-msgid "Parent Folder"
-msgstr "Übergeordnetes Verzeichnis"
-
-#: add-from-server.php:125
-msgid "Toggle All"
-msgstr "Wähle alle aus"
-
-#: add-from-server.php:133
-msgid "Note: Will not take effect if selected file is within an upload folder at present"
-msgstr "Beachte: Dies wird keine Auswirkungen haben, wenn die ausgewählte Datei momentan innerhalb eines Upload-Verzeichnisses ist."
-
-#: add-from-server.php:138
-msgid "Do not add selected files to current post Gallery"
-msgstr "Füge die ausgewählte Datei nicht zur Galerie für den aktuellen Artikel hinzu."
-
-#: add-from-server.php:141
-msgid "Import selected files"
-msgstr "Importiere ausgewählte Dateien"
-
-#: add-from-server.php:157
+#: plugin-code.php:69
 #, php-format
 msgid "<em>%s</em> has been added to Media library"
 msgstr "<em>%s</em> wurde zur Mediathek hinzugefügt."
 
-#: add-from-server.php:201
-#, php-format
-msgid "The uploaded file could not be moved to %s."
+#: plugin-code.php:112
+#, fuzzy, php-format
+msgid "The selected file could not be moved to %s."
 msgstr "Die hochgeladene Datei konnte nicht nach %s bewegt werden."
 
-#: add-from-server.php:257
+#: plugin-code.php:203
+#, php-format
+msgid "<strong>Current Directory:</strong> <span id=\"cwd\">%s</span>"
+msgstr "<strong>aktuelles Verzeichnis:</strong> <span id=\"cwd\">%s</span>"
+
+#: plugin-code.php:205
 #, php-format
 msgid "Once you have selected files to be imported, Head over to the <a href=\"%s\">Media Library tab</a> to add them to your post."
 msgstr "Wenn du die ausgewählten Dateien importiert hast, gehe zur <a href=\"%s\">Mediathek</a> um sie zu deinem Artikel hinzuzufügen."
 
-#: add-from-server.php:259
-msgid "Current Directory"
-msgstr "aktuelles Verzeichnis"
+#: plugin-code.php:210
+#: plugin-code.php:257
+#, fuzzy
+msgid "File"
+msgstr "Dateiname"
+
+#: plugin-code.php:217
+msgid "Parent Folder"
+msgstr "Übergeordnetes Verzeichnis"
+
+#: plugin-code.php:263
+msgid "Do not add selected files to current post Gallery"
+msgstr "Füge die ausgewählte Datei nicht zur Galerie für den aktuellen Artikel hinzu."
+
+#: plugin-code.php:264
+msgid "Import"
+msgstr "Importiere"
+
+#~ msgid "Toggle All"
+#~ msgstr "Wähle alle aus"
+#~ msgid ""
+#~ "Note: Will not take effect if selected file is within an upload folder at "
+#~ "present"
+#~ msgstr ""
+#~ "Beachte: Dies wird keine Auswirkungen haben, wenn die ausgewählte Datei "
+#~ "momentan innerhalb eines Upload-Verzeichnisses ist."
+#~ msgid "Import selected files"
+#~ msgstr "Importiere ausgewählte Dateien"
+#~ msgid "Current Directory"
+#~ msgstr "aktuelles Verzeichnis"
 

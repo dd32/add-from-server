@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Add From Server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-10-11 17:29+1000\n"
+"POT-Creation-Date: 2008-11-09 00:12+1000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Dion Hulse <contact@dd32.id.au>\n"
 "Language-Team:  <contact@dd32.id.au>\n"
@@ -12,63 +12,58 @@ msgstr ""
 "X-Poedit-Language: French\n"
 "X-Poedit-Country: Australia\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-Poedit-Basepath: C:\\www\\wordpress\\wp-content\\plugins\\add-from-server\n"
+"X-Poedit-Basepath: ../\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: add-from-server.php:17
-msgid "<h1>Add From Server</h1> Sorry, This plugin requires WordPress 2.5+"
+#: add-from-server.php:19
+msgid "<h1>Add From Server</h1> Sorry, This plugin requires WordPress 2.7+"
 msgstr ""
 
-#: add-from-server.php:36
-#: add-from-server.php:295
+#: plugin-code.php:19
+#: plugin-code.php:39
 msgid "Add From Server"
 msgstr ""
 
-#: add-from-server.php:112
-msgid "Import"
+#: plugin-code.php:65
+#, php-format
+msgid "<em>%s</em> was <strong>not</strong> imported due to an error: %s"
 msgstr ""
 
-#: add-from-server.php:113
-msgid "Filename"
-msgstr ""
-
-#: add-from-server.php:121
-msgid "Parent Folder"
-msgstr ""
-
-#: add-from-server.php:144
-msgid "Toggle All"
-msgstr ""
-
-#: add-from-server.php:153
-msgid "Note: Will not take effect if selected file is within an upload folder at present"
-msgstr ""
-
-#: add-from-server.php:158
-msgid "Do not add selected files to current post Gallery"
-msgstr ""
-
-#: add-from-server.php:161
-msgid "Import selected files"
-msgstr ""
-
-#: add-from-server.php:177
+#: plugin-code.php:69
 #, php-format
 msgid "<em>%s</em> has been added to Media library"
 msgstr ""
 
-#: add-from-server.php:232
+#: plugin-code.php:112
 #, php-format
 msgid "The selected file could not be moved to %s."
 msgstr ""
 
-#: add-from-server.php:297
+#: plugin-code.php:203
+#, php-format
+msgid "<strong>Current Directory:</strong> <span id=\"cwd\">%s</span>"
+msgstr ""
+
+#: plugin-code.php:205
 #, php-format
 msgid "Once you have selected files to be imported, Head over to the <a href=\"%s\">Media Library tab</a> to add them to your post."
 msgstr ""
 
-#: add-from-server.php:299
-msgid "Current Directory"
+#: plugin-code.php:210
+#: plugin-code.php:257
+msgid "File"
+msgstr ""
+
+#: plugin-code.php:217
+msgid "Parent Folder"
+msgstr ""
+
+#: plugin-code.php:263
+msgid "Do not add selected files to current post Gallery"
+msgstr ""
+
+#: plugin-code.php:264
+msgid "Import"
 msgstr ""
 
