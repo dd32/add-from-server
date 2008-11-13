@@ -21,6 +21,7 @@ class add_from_server {
 
 		//Set the version of the DD32 library this plugin requires.
 		$GLOBALS['dd32_version'] = isset($GLOBALS['dd32_version']) ? max($GLOBALS['dd32_version'], $this->dd32_requires) : $this->dd32_requires;
+		add_action('init', array(&$this, 'load_dd32'), 20);
 
 		//Register general hooks.
 		add_action('admin_init', array(&$this, 'admin_init'));
@@ -28,10 +29,15 @@ class add_from_server {
 		register_deactivation_hook(__FILE__, array(&$this, 'deactivate'));
 	}
 	
+	function load_dd32() {
+		//Load common library
+		include 'inc/class.dd32.php';
+	}
+	
 	function admin_init() {
 		//Load any translation files needed:
-		load_plugin_textdomain('add-from-server', '', WP_PLUGINS_DIR . '/' . $this->folder . '/langs/');
-		
+		load_plugin_textdomain('add-from-server', '', $this->folder . '/langs/');
+
 		//Register our JS & CSS
 		wp_register_script('add-from-server', plugins_url( $this->folder . '/add-from-server.js' ), array('jquery'), 1);
 		wp_register_style ('add-from-server', plugins_url( $this->folder . '/add-from-server.css' ));
@@ -49,7 +55,7 @@ class add_from_server {
 
 	function activate(){
 		global $wp_version;
-		if( ! version_compare( $wp_version, '2.6-alpha', '>=') ) {
+		if( ! version_compare( $wp_version, '2.7-alpha', '>=') ) {
 			if( function_exists('deactivate_plugins') )
 				deactivate_plugins(__FILE__);
 			wp_die(__('<h1>Add From Server</h1> Sorry, This plugin requires WordPress 2.7+', 'add-from-server'));

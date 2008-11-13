@@ -13,7 +13,7 @@ WordPress 2.5+ includes a new Media manager, However, It only knows about files 
 
 So i present, "Add From Server" a WordPress plugin which allows you to browse the filesystem on the webserver and copy any files into the WordPress uploads system, Once "imported" it'll be treated as any other uploaded file, and you can access it via the Media 
 
-Note: French, Spanish, German and Farsi translations are included. I cannot nativly speak these languages, If you find an error, or would like me to add your translation, You can contact me via: http://dd32.id.au/contact-me/
+Note: French, Spanish, German and Persion translations are included. I cannot nativly speak these languages, If you find an error, or would like me to add your translation, You can contact me via: http://dd32.id.au/contact-me/
 
 == FAQ ==
 
@@ -60,6 +60,8 @@ Note: French, Spanish, German and Farsi translations are included. I cannot nati
  * Files/folders are sorted by name
  * Update Notification changelogs (On the plugins page)
  * Completely rewritten, Hopefully this'll fix some long-time bugs which have affected some.
+ * Persion translation from sourena
+ * Italian translation from Stafano
 
 == Future Features ==
 Please note that these are simply features i'd like to do, There is no timeframe, or guarantee that it will be in the next version.

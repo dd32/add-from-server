@@ -1,7 +1,7 @@
 <?php
 if ( 1 >= $GLOBALS['dd32_version'] ) {
 class DD32 {
-
+	var $version = 1;
 	function DD32() {
 		
 	}
@@ -63,9 +63,7 @@ class DD32 {
 
 	//Function adds a list of changes after the plugin in the plugins table.
 	function add_changelog($plugin, $url) {
-		if ( empty($plugin) || empty($url) )
-			return;
-		add_action("after_plugin_row_$plugin", create_function('$data', 'var_dump(DD32::add_changelog_rows("' . $plugin .'", "' . $url . '", $data));'), 10, 2);
+		add_action("after_plugin_row_$plugin", create_function('$data', 'DD32::add_changelog_rows("' . $plugin .'", "' . $url . '", $data);'), 10, 2);
 	}
 	function add_changelog_rows($plugin, $url, $plugin_data) {
 
