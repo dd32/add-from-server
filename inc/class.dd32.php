@@ -1,5 +1,5 @@
 <?php
-if ( 1 >= $GLOBALS['dd32_version'] ) {
+if ( 1 >= $GLOBALS['dd32_version'] && !class_exists('DD32') ) {
 class DD32 {
 	var $version = 1;
 	function DD32() {

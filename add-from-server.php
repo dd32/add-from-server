@@ -42,9 +42,6 @@ class add_from_server {
 		wp_register_script('add-from-server', plugins_url( $this->folder . '/add-from-server.js' ), array('jquery'), 1);
 		wp_register_style ('add-from-server', plugins_url( $this->folder . '/add-from-server.css' ));
 
-		//Load common library
-		include 'inc/class.dd32.php';
-
 		DD32::add_configure($this->basename, __('Add From Server', 'add-from-server'), admin_url('media-upload.php?tab=server&TB_iframe=true'), array('class' => 'thickbox'));
 		DD32::add_changelog($this->basename, 'http://svn.wp-plugins.org/add-from-server/trunk/readme.txt');
 
