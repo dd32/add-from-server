@@ -111,16 +111,20 @@ class add_from_server {
 			$files = array_map('stripslashes', $_POST['files']);
 
 			$cwd = trailingslashit(stripslashes($_POST['cwd']));
+			$post_id = isset($_REQUEST['post_id']) ? intval($_REQUEST['post_id']) : 0;
 			$import_to_gallery = !( isset($_POST['no-gallery']) && 'on' == $_POST['no-gallery'] );
+			if ( ! $import_to_gallery )
+				$post_id = 0;
 
 			foreach ( (array)$files as $file ) {
 				$filename = $cwd . $file;
-				$id = $this->handle_import_file($filename, $import_to_gallery);
+				$id = $this->handle_import_file($filename, $post_id);
 				if ( is_wp_error($id) ) {
 					echo '<div class="updated error"><p>' . sprintf(__('<em>%s</em> was <strong>not</strong> imported due to an error: %s', 'add-from-server'), $file, $id) . '</p></div>';
 				} else {
 					//increment the gallery count
-					echo "<script type='text/javascript'>jQuery('#attachments-count').text(1 * jQuery('#attachments-count').text() + 1);</script>";
+					if ( $import_to_gallery )
+						echo "<script type='text/javascript'>jQuery('#attachments-count').text(1 * jQuery('#attachments-count').text() + 1);</script>";
 					echo '<div class="updated"><p>' . sprintf(__('<em>%s</em> has been added to Media library', 'add-from-server'), $file) . '</p></div>';
 				}
 			}
@@ -128,11 +132,20 @@ class add_from_server {
 	}
 
 	//Handle an individual file import.
-	function handle_import_file($file, $import_to_gallery) {
+	function handle_import_file($file, $post_id) {
+	
+		$time = current_time('mysql', true);
+		if ( $post = get_post($post_id) )
+			if ( '0000-00-00 00:00:00' != $post->post_date_gmt )
+				$time = $post->post_date_gmt;
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
-		if ( ! ( ( $uploads = wp_upload_dir() ) && false === $uploads['error'] ) )
+		if ( ! ( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] ) )
 			return new WP_Error($uploads['error']);
+
+		$wp_filetype = wp_check_filetype( $file, null );
+
+		extract( $wp_filetype );
 
 		//Is the file allready in the uploads folder?
 		if( preg_match('|^' . preg_quote(str_replace('\\', '/', $uploads['basedir'])) . '(.*)$|i', $file, $mat) ) {
@@ -207,7 +220,7 @@ class add_from_server {
 			$data = wp_generate_attachment_metadata( $id, $new_file );
 			wp_update_attachment_metadata( $id, $data );
 		}
-
+//var_dump($id, $data, $new_file);
 		return $id;
 	}
 
@@ -215,6 +228,8 @@ class add_from_server {
 	function main_content() {
 
 		$post_id = isset($_REQUEST['post_id']) ? intval($_REQUEST['post_id']) : 0;
+		$import_to_gallery = !( isset($_POST['no-gallery']) && 'on' == $_POST['no-gallery'] );
+		
 		$url = admin_url('media-upload.php?tab=server&post_id=' . $post_id);
 
 		$cwd = trailingslashit(get_option('frmsvr_last_folder', str_replace('\\', '/', WP_CONTENT_DIR)));
@@ -315,7 +330,7 @@ class add_from_server {
 		<p class="ml-submit">
 		<input type="hidden" name="cwd" value="<?php echo attribute_escape( $cwd ); ?>" />
 		<?php if ( $post_id != 0 ) : ?>
-		<input type="checkbox" name="no-gallery" id="no-gallery" /> <label for="no-gallery"><?php _e('Do not add selected files to current post Gallery', 'add-from-server')?></label><br />
+		<input type="checkbox" name="no-gallery" id="no-gallery" <?php if ( !$import_to_gallery ) echo 'checked="checked"' ?> /> <label for="no-gallery"><?php _e('Do not add selected files to current post Gallery', 'add-from-server')?></label><br />
 		<?php endif; ?>
 		<input type="submit" class="button savebutton" name="import" value="<?php echo attribute_escape( __('Import', 'add-from-server') ); ?>" /> 
 		</p>
