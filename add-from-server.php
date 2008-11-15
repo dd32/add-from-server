@@ -13,6 +13,7 @@ class add_from_server {
 	var $dd32_requires = 1;
 	var $basename = '';
 	var $folder = '';
+	var $version = '2.0-alpha';
 	
 	function add_from_server() {
 		//Set the directory of the plugin:
@@ -39,15 +40,20 @@ class add_from_server {
 		load_plugin_textdomain('add-from-server', '', $this->folder . '/langs/');
 
 		//Register our JS & CSS
-		wp_register_script('add-from-server', plugins_url( $this->folder . '/add-from-server.js' ), array('jquery'), 1);
-		wp_register_style ('add-from-server', plugins_url( $this->folder . '/add-from-server.css' ));
+		wp_register_script('add-from-server', plugins_url( $this->folder . '/add-from-server.js' ), array('jquery'), $this->version);
+		wp_register_style ('add-from-server', plugins_url( $this->folder . '/add-from-server.css' ), array(), $this->version);
 
-		DD32::add_configure($this->basename, __('Add From Server', 'add-from-server'), admin_url('media-upload.php?tab=server&TB_iframe=true'), array('class' => 'thickbox'));
+		//Enqueue JS & CSS
+		add_action('load-media_page_add-from-server', array(&$this, 'add_head_files') );
+		add_action('media_upload_server', array(&$this, 'add_head_files') );
+
+		DD32::add_configure($this->basename, __('Add From Server', 'add-from-server'), admin_url('media-new.php?page=add-from-server'));
 		DD32::add_changelog($this->basename, 'http://svn.wp-plugins.org/add-from-server/trunk/readme.txt');
 
 		//Add actions/filters
 		add_filter('media_upload_tabs', array(&$this, 'tabs'));
 		add_action('media_upload_server', array(&$this, 'tab_handler'));
+		add_media_page( __('Add From Server', 'add-from-server'), __('Add From Server', 'add-from-server'), 'unfiltered_upload', 'add-from-server', array(&$this, 'menu_page') );
 	}
 
 	function activate(){
@@ -69,17 +75,20 @@ class add_from_server {
 			$tabs['server'] = __('Add From Server', 'add-from-server');
 		return $tabs;
 	}
+	
+	function add_head_files() {
+		//Enqueue support files.
+		if ( 'media_upload_server' == current_filter() )
+			wp_enqueue_style('media');
+		wp_enqueue_style('add-from-server');
+		wp_enqueue_script('admin-forms');
+		wp_enqueue_script('add-from-server');
+	}
 
 	//Handle the actual page:
 	function tab_handler(){
 		if( ! current_user_can( 'unfiltered_upload' ) )
 			return;
-
-		//Enqueue support files.
-		wp_enqueue_style('media');
-		wp_enqueue_style('add-from-server');
-		wp_enqueue_script('admin-forms');
-		wp_enqueue_script('add-from-server');
 
 		//Set the body ID
 		$GLOBALS['body_id'] = 'media-upload';
@@ -98,6 +107,21 @@ class add_from_server {
 
 		//Do a footer
 		iframe_footer();
+	}
+	
+	function menu_page() {
+		if( ! current_user_can( 'unfiltered_upload' ) )
+			return;
+
+		//Add the Media buttons	
+		media_upload_header();
+
+		//Handle any imports:
+		$this->handle_imports();
+
+		//Do the content
+		$this->main_content();
+
 	}
 
 	//Handle the imports
@@ -129,12 +153,13 @@ class add_from_server {
 	}
 
 	//Handle an individual file import.
-	function handle_import_file($file, $post_id) {
-	
-		$time = current_time('mysql', true);
-		if ( $post = get_post($post_id) )
-			if ( '0000-00-00 00:00:00' != $post->post_date_gmt )
-				$time = $post->post_date_gmt;
+	function handle_import_file($file, $post_id = 0) {
+
+		$time = current_time('mysql');
+		if ( $post = get_post($post_id) ) {
+			if ( substr( $post->post_date, 0, 4 ) > 0 )
+				$time = $post->post_date;
+		}
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
 		if ( ! ( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] ) )
@@ -183,15 +208,15 @@ class add_from_server {
 		// Compute the URL
 		$url = $uploads['url'] . '/' . $filename;
 
-		$title = preg_replace('/\.[^.]+$/', '', basename($new_file));
+		$title = preg_replace('!\.[^.]+$!', '', basename($file));
 		$content = '';
 
 		// use image exif/iptc data for title and caption defaults if possible
 		if ( $image_meta = @wp_read_image_metadata($new_file) ) {
-			if ( trim($image_meta['title']) )
-				$title = $image_meta['title'];
-			if ( trim($image_meta['caption']) )
-				$content = $image_meta['caption'];
+			if ( '' != trim($image_meta['title']) )
+				$title = trim($image_meta['title']);
+			if ( '' != trim($image_meta['caption']) )
+				$content = trim($image_meta['caption']);
 		}
 
 		if ( empty($post_date) )
@@ -212,22 +237,28 @@ class add_from_server {
 		);
 
 		// Save the data
-		$id = wp_insert_attachment($attachment, $new_file, $post_parent);
+		$id = wp_insert_attachment($attachment, $new_file, $post_id);
 		if ( !is_wp_error($id) ) {
 			$data = wp_generate_attachment_metadata( $id, $new_file );
 			wp_update_attachment_metadata( $id, $data );
 		}
-//var_dump($id, $data, $new_file);
+
 		return $id;
 	}
 
 	//Create the content for the page
 	function main_content() {
-
+		global $pagenow;
 		$post_id = isset($_REQUEST['post_id']) ? intval($_REQUEST['post_id']) : 0;
 		$import_to_gallery = !( isset($_POST['no-gallery']) && 'on' == $_POST['no-gallery'] );
-		
-		$url = admin_url('media-upload.php?tab=server&post_id=' . $post_id);
+
+		if ( 'media-new.php' == $pagenow )
+			$url = admin_url('media-new.php?page=add-from-server');
+		else
+			$url = admin_url('media-upload.php?tab=server');
+
+		if ( $post_id )
+			$url = add_query_arg('post_id', $post_id, $url);
 
 		$cwd = trailingslashit(get_option('frmsvr_last_folder', str_replace('\\', '/', WP_CONTENT_DIR)));
 
