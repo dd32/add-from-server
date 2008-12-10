@@ -13,21 +13,18 @@ WordPress 2.5+ includes a new Media manager, However, It only knows about files 
 
 So i present, "Add From Server" a WordPress plugin which allows you to browse the filesystem on the webserver and copy any files into the WordPress uploads system, Once "imported" it'll be treated as any other uploaded file, and you can access it via the Media 
 
-Note: French, Spanish, German and Persion translations are included. I cannot nativly speak these languages, If you find an error, or would like me to add your translation, You can contact me via: http://dd32.id.au/contact-me/
+Note: French, Spanish, German, Persion and Italian translations are included. I cannot nativly speak these languages, If you find an error, or would like me to add your translation, You can contact me via: http://dd32.id.au/contact-me/
 
 == FAQ ==
 
  Q. Where is the page for this plugins?
- A. You can find the page for this plugin in the Add-Media dialogue. The Add Media dialogue is accessable via the New Post/New Page screen, They're the Icons beside the Visual/HTML tab option.
+ A. You can find the page for this plugin in the Add-Media dialogue. The Add Media dialogue is accessable via the New Post/New Page screen, They're the Icons beside the Visual/HTML tab option. Under 2.7, There is also a tab under Media.
 
  Q. What happens when I import a file?
  A. When a file is imported, It is first Copied to the /wp-content/uploads/ folder and placed in the current months folder. The date will be set to today.
 
  Q. What happens when I import a file which is allready in the uploads folder?
  A. If a file is allready in the uploads folder, Then it is not copied anywhere, Instead, the file will stay in its current location, and the date for the media manager will be taken from the URL (ie. import a file in /uploads/2008/01/ and it will be stored in the media library as January 2008)
-
- Q. I'd like to add some files to an old post, But when i add them, they are in the current month's folder! Help! 
- A. This plugin doesnt care for the date of a file, Instead, You may find that my other plugin is useful, It allows you to add attachments and store them in the current months folder, Or a folder based on the post date of the post. dPost Uploads: http://wordpress.org/extend/plugins/dpost-uploads/
 
 == Changelog ==
 

@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Add From Server
-Version: 2.0-alpha
+Version: 2.0
 Plugin URI: http://dd32.id.au/wordpress-plugins/add-from-server/
 Description: Plugin to allow the Media Manager to add files from the webservers filesystem. <strong>Note:</strong> All files are copied to the uploads directory.
 Author: Dion Hulse
@@ -13,7 +13,7 @@ class add_from_server {
 	var $dd32_requires = 1;
 	var $basename = '';
 	var $folder = '';
-	var $version = '2.0-alpha';
+	var $version = '2.0-beta';
 	
 	function add_from_server() {
 		//Set the directory of the plugin:
@@ -208,6 +208,12 @@ class add_from_server {
 		// Compute the URL
 		$url = $uploads['url'] . '/' . $filename;
 
+		//Apply upload filters
+		$return = apply_filters( 'wp_handle_upload', array( 'file' => $new_file, 'url' => $url, 'type' => $type ) );
+		$new_file = $return['file'];
+		$url = $return['url'];
+		$type = $return['type'];
+
 		$title = preg_replace('!\.[^.]+$!', '', basename($file));
 		$content = '';
 
@@ -260,13 +266,13 @@ class add_from_server {
 		if ( $post_id )
 			$url = add_query_arg('post_id', $post_id, $url);
 
-		$cwd = trailingslashit(get_option('frmsvr_last_folder', str_replace('\\', '/', WP_CONTENT_DIR)));
+		$cwd = trailingslashit(get_option('frmsvr_last_folder', WP_CONTENT_DIR));
 
 		if ( isset($_REQUEST['directory']) ) 
-			$cwd .= stripslashes($_REQUEST['directory']);
+			$cwd .= stripslashes(urldecode($_REQUEST['directory']));
 
 		if ( isset($_REQUEST['adirectory']) )
-			$cwd = stripslashes($_REQUEST['adirectory']);
+			$cwd = stripslashes(urldecode($_REQUEST['adirectory']));
 
 		$cwd = preg_replace('![^/]+/\.\./!', '', $cwd);
 		$cwd = preg_replace('!//!', '/', $cwd);
@@ -275,7 +281,9 @@ class add_from_server {
 			$cwd = get_option('frmsvr_last_folder');
 
 		if ( ! is_readable($cwd) )
-			$cwd = str_replace('\\', '/', WP_CONTENT_DIR);
+			$cwd = WP_CONTENT_DIR;
+
+		$cwd = str_replace('\\', '/', $cwd);
 
 		$cwd = untrailingslashit($cwd);
 
@@ -298,6 +306,28 @@ class add_from_server {
 		?>
 		<div class="frmsvr_wrap">
 		<p><?php printf(__('<strong>Current Directory:</strong> <span id="cwd">%s</span>', 'add-from-server'), $dirparts) ?></p>
+		<!-- <?php //Lets save this for 2.1, Get it in the code for the translation updates..
+			$quickjumps = array();
+			$quickjumps[] = array( __('WordPress Root', 'add-from-server'), ABSPATH );
+			if ( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] )
+				$quickjumps[] = array( __('Uploads Folder', 'add-from-server'), $uploads['path']);
+
+			$quickjumps = apply_filters('frmsvr_quickjumps', $quickjumps);
+
+			if ( ! empty($quickjumps) ) {
+				echo '<p>';
+				_e('<strong>Quick Jump:</strong> ', 'add-from-server');
+				$pieces = array();
+				foreach( $quickjumps as $jump ) {
+					list( $text, $adir ) = $jump;
+					$adir = str_replace('\\', '/', $adir);
+					$durl = add_query_arg(array('adirectory' => addslashes($adir)), $url);
+					$pieces[] = "<a href='$durl'>$text</a>";
+				}
+				echo implode(' | ', $pieces);
+				echo '</p>';
+			}
+		 ?> -->
 		<form method="post" action="<?php echo $url ?>">
 		<p><?php printf(__('Once you have selected files to be imported, Head over to the <a href="%s">Media Library tab</a> to add them to your post.', 'add-from-server'), clean_url(admin_url('media-upload.php?type=image&tab=library&post_id=' . $post_id)) ); ?></p>
 		<table class="widefat">
