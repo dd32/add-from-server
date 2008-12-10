@@ -9,11 +9,13 @@ Stable tag: 2.0
 
 == Description ==
 
+Note: Requires WordPress 2.7 for version 2.0+, If you're using WordPress 2.6, get version 1.4 from http://wordpress.org/extend/plugins/add-from-server/download/
+
 WordPress 2.5+ includes a new Media manager, However, It only knows about files which have been uploaded via the WordPress interface, Not files which have been uploaded via other means(eg, FTP).
 
 So i present, "Add From Server" a WordPress plugin which allows you to browse the filesystem on the webserver and copy any files into the WordPress uploads system, Once "imported" it'll be treated as any other uploaded file, and you can access it via the Media 
 
-Note: French, Spanish, German, Persion and Italian translations are included. I cannot nativly speak these languages, If you find an error, or would like me to add your translation, You can contact me via: http://dd32.id.au/contact-me/
+Note: French, Spanish, German, Persion, Italian and Russian translations are included. I cannot nativly speak these languages, If you find an error, or would like me to add your translation, You can contact me via: http://dd32.id.au/contact-me/
 
 == FAQ ==
 
@@ -59,6 +61,8 @@ Note: French, Spanish, German, Persion and Italian translations are included. I 
  * Completely rewritten, Hopefully this'll fix some long-time bugs which have affected some.
  * Persion translation from sourena
  * Italian translation from Stafano
+= 2.0.1 =
+ * Russian Translation from Lecactus
 
 == Future Features ==
 Please note that these are simply features i'd like to do, There is no timeframe, or guarantee that it will be in the next version.
