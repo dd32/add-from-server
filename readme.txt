@@ -3,7 +3,7 @@ Contributors: dd32
 Tags: 2.5, admin, media, uploads, post
 Requires at least: 2.7
 Tested up to: 2.7
-Stable tag: 1.4
+Stable tag: 2.0
 
 "Add From Server" is a quick plugin which allows you to import media & files into the WordPress uploads manager from the Webservers filesystem
 

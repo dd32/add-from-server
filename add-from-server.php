@@ -13,7 +13,7 @@ class add_from_server {
 	var $dd32_requires = 1;
 	var $basename = '';
 	var $folder = '';
-	var $version = '2.0-beta';
+	var $version = '2.0';
 	
 	function add_from_server() {
 		//Set the directory of the plugin:
