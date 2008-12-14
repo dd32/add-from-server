@@ -1,7 +1,7 @@
 <?php
-if ( 1 >= $GLOBALS['dd32_version'] && !class_exists('DD32') ) {
+if ( 2 >= $GLOBALS['dd32_version'] && !class_exists('DD32') ) {
 class DD32 {
-	var $version = 1;
+	var $version = 2;
 	function DD32() {
 		
 	}
@@ -75,7 +75,7 @@ class DD32 {
 			return;
 
 		$changelogs = get_option('dd32_changelogs', array());
-		if ( ! isset($changelogs[$url]) ) {
+		if ( ! isset($changelogs[$url]) || !isset($changelogs[$url]['time']) || $changelogs[$url]['time'] < time()-24*60*60 ) {
 			$log = wp_remote_get($url);
 			if ( $log['response']['code'] != 200 )
 				return;
@@ -94,10 +94,10 @@ class DD32 {
 						$changes[ $change_version ][] = trim($change);
 			}
 			
-			$changelogs[ $url ] = $changes;
+			$changelogs[ $url ] = array('time' => time(), 'changes' => $changes);
 			update_option('dd32_changelogs', $changelogs);
 		} else {
-			$changes = $changelogs[ $url ];
+			$changes = $changelogs[ $url ]['changes'];
 		}
 
 		foreach ( (array) $changes as $version => $changelog_item ) {
