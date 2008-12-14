@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Add From Server
-Version: 2.0
+Version: 2.0.1
 Plugin URI: http://dd32.id.au/wordpress-plugins/add-from-server/
 Description: Plugin to allow the Media Manager to add files from the webservers filesystem. <strong>Note:</strong> All files are copied to the uploads directory.
 Author: Dion Hulse
@@ -10,7 +10,7 @@ Author URI: http://dd32.id.au/
 
 class add_from_server {
 	
-	var $dd32_requires = 1;
+	var $dd32_requires = 2;
 	var $basename = '';
 	var $folder = '';
 	var $version = '2.0';
