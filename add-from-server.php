@@ -8,6 +8,7 @@ Author: Dion Hulse
 Author URI: http://dd32.id.au/
 */
 
+$GLOBALS['add-from-server'] = new add_from_server();
 class add_from_server {
 	
 	var $dd32_requires = 2;
@@ -397,7 +398,5 @@ class add_from_server {
 	<?php
 	}
 }//end class
-
-add_action('init', create_function('', '$GLOBALS["add-from-server"] = new add_from_server();'), 5);
 
 ?>
