@@ -68,6 +68,7 @@ Note: French, Spanish, German, Persion, Italian and Russian translations are inc
  * Fix bugs related to hints showing up linking to the wrong page
  * Do not show the Inline uploaders tabs in the normal uploader :)
  * Fix 2.8.1's plugin security mashes..
+= 2.2 =
 
 == Future Features ==
 Please note that these are simply features i'd like to do, There is no timeframe, or guarantee that it will be in the next version.
