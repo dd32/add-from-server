@@ -2,8 +2,7 @@
 Contributors: dd32
 Tags: 2.5, admin, media, uploads, post
 Requires at least: 2.7
-Tested up to: 2.7
-Stable tag: 2.0
+Stable tag: 2.1
 
 "Add From Server" is a quick plugin which allows you to import media & files into the WordPress uploads manager from the Webservers filesystem
 
@@ -63,6 +62,12 @@ Note: French, Spanish, German, Persion, Italian and Russian translations are inc
  * Italian translation from Stafano
 = 2.0.1 =
  * Russian Translation from Lecactus
+= 2.1 =
+ * Introduce QuickJump
+ * Fix bugs related to the Admin navigation disapearing
+ * Fix bugs related to hints showing up linking to the wrong page
+ * Do not show the Inline uploaders tabs in the normal uploader :)
+ * Fix 2.8.1's plugin security mashes..
 
 == Future Features ==
 Please note that these are simply features i'd like to do, There is no timeframe, or guarantee that it will be in the next version.

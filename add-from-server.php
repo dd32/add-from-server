@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Add From Server
-Version: 2.0.1
+Version: 2.1
 Plugin URI: http://dd32.id.au/wordpress-plugins/add-from-server/
 Description: Plugin to allow the Media Manager to add files from the webservers filesystem. <strong>Note:</strong> All files are copied to the uploads directory.
 Author: Dion Hulse
@@ -14,7 +14,7 @@ class add_from_server {
 	var $dd32_requires = 2;
 	var $basename = '';
 	var $folder = '';
-	var $version = '2.0';
+	var $version = '2.1';
 	
 	function add_from_server() {
 		//Set the directory of the plugin:
@@ -27,7 +27,7 @@ class add_from_server {
 
 		//Register general hooks.
 		add_action('admin_init', array(&$this, 'admin_init'));
-		register_activation_hook(__FILE__, array(&$this, 'activate'));
+		add_action('admin_menu', array(&$this, 'admin_menu'));
 		register_deactivation_hook(__FILE__, array(&$this, 'deactivate'));
 	}
 	
@@ -54,18 +54,12 @@ class add_from_server {
 		//Add actions/filters
 		add_filter('media_upload_tabs', array(&$this, 'tabs'));
 		add_action('media_upload_server', array(&$this, 'tab_handler'));
+	}
+
+	function admin_menu() {
 		add_media_page( __('Add From Server', 'add-from-server'), __('Add From Server', 'add-from-server'), 'unfiltered_upload', 'add-from-server', array(&$this, 'menu_page') );
 	}
 
-	function activate(){
-		global $wp_version;
-		if( ! version_compare( $wp_version, '2.7-alpha', '>=') ) {
-			if( function_exists('deactivate_plugins') )
-				deactivate_plugins(__FILE__);
-			wp_die(__('<h1>Add From Server</h1> Sorry, This plugin requires WordPress 2.7+', 'add-from-server'));
-		}
-	}
-	
 	function deactivate(){
 		delete_option('frmsvr_last_folder');
 	}
@@ -113,9 +107,6 @@ class add_from_server {
 	function menu_page() {
 		if( ! current_user_can( 'unfiltered_upload' ) )
 			return;
-
-		//Add the Media buttons	
-		media_upload_header();
 
 		//Handle any imports:
 		$this->handle_imports();
@@ -259,8 +250,8 @@ class add_from_server {
 		$post_id = isset($_REQUEST['post_id']) ? intval($_REQUEST['post_id']) : 0;
 		$import_to_gallery = !( isset($_POST['no-gallery']) && 'on' == $_POST['no-gallery'] );
 
-		if ( 'media-new.php' == $pagenow )
-			$url = admin_url('media-new.php?page=add-from-server');
+		if ( 'upload.php' == $pagenow )
+			$url = admin_url('upload.php?page=add-from-server');
 		else
 			$url = admin_url('media-upload.php?tab=server');
 
@@ -307,7 +298,7 @@ class add_from_server {
 		?>
 		<div class="frmsvr_wrap">
 		<p><?php printf(__('<strong>Current Directory:</strong> <span id="cwd">%s</span>', 'add-from-server'), $dirparts) ?></p>
-		<!-- <?php //Lets save this for 2.1, Get it in the code for the translation updates..
+		<?php 
 			$quickjumps = array();
 			$quickjumps[] = array( __('WordPress Root', 'add-from-server'), ABSPATH );
 			if ( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] )
@@ -328,9 +319,11 @@ class add_from_server {
 				echo implode(' | ', $pieces);
 				echo '</p>';
 			}
-		 ?> -->
+		 ?>
 		<form method="post" action="<?php echo $url ?>">
+         <?php if ( 'media-upload.php' == $GLOBALS['pagenow'] ) : ?>
 		<p><?php printf(__('Once you have selected files to be imported, Head over to the <a href="%s">Media Library tab</a> to add them to your post.', 'add-from-server'), clean_url(admin_url('media-upload.php?type=image&tab=library&post_id=' . $post_id)) ); ?></p>
+        <?php endif; ?>
 		<table class="widefat">
 		<thead>
 			<tr>
