@@ -301,7 +301,7 @@ class add_from_server {
 		<?php 
 			$quickjumps = array();
 			$quickjumps[] = array( __('WordPress Root', 'add-from-server'), ABSPATH );
-			if ( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] )
+			if ( ( $uploads = wp_upload_dir() ) && false === $uploads['error'] )
 				$quickjumps[] = array( __('Uploads Folder', 'add-from-server'), $uploads['path']);
 
 			$quickjumps = apply_filters('frmsvr_quickjumps', $quickjumps);
