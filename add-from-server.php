@@ -57,7 +57,7 @@ class add_from_server {
 	}
 
 	function admin_menu() {
-		add_media_page( __('Add From Server', 'add-from-server'), __('Add From Server', 'add-from-server'), 'unfiltered_upload', 'add-from-server', array(&$this, 'menu_page') );
+		add_media_page( __('Add From Server', 'add-from-server'), __('Add From Server', 'add-from-server'), 'upload_files', 'add-from-server', array(&$this, 'menu_page') );
 	}
 
 	function deactivate(){
@@ -66,7 +66,7 @@ class add_from_server {
 
 	//Add a tab to the media uploader:
 	function tabs($tabs) {
-		if( current_user_can( 'unfiltered_upload' ) )
+		if( current_user_can( 'upload_files' ) )
 			$tabs['server'] = __('Add From Server', 'add-from-server');
 		return $tabs;
 	}
@@ -82,7 +82,7 @@ class add_from_server {
 
 	//Handle the actual page:
 	function tab_handler(){
-		if( ! current_user_can( 'unfiltered_upload' ) )
+		if( ! current_user_can( 'upload_files' ) )
 			return;
 
 		//Set the body ID
@@ -105,7 +105,7 @@ class add_from_server {
 	}
 	
 	function menu_page() {
-		if( ! current_user_can( 'unfiltered_upload' ) )
+		if( ! current_user_can( 'upload_files' ) )
 			return;
 
 		//Handle any imports:
@@ -160,6 +160,9 @@ class add_from_server {
 		$wp_filetype = wp_check_filetype( $file, null );
 
 		extract( $wp_filetype );
+		
+		if ( ( !$type || !$ext ) && !current_user_can( 'unfiltered_upload' ) )
+			return new WP_Error('wrong_file_type', __( 'File type does not meet security guidelines. Try another.' ) ); //A WP-core string..
 
 		//Is the file allready in the uploads folder?
 		if( preg_match('|^' . preg_quote(str_replace('\\', '/', $uploads['basedir'])) . '(.*)$|i', $file, $mat) ) {
@@ -303,6 +306,7 @@ class add_from_server {
 			$quickjumps[] = array( __('WordPress Root', 'add-from-server'), ABSPATH );
 			if ( ( $uploads = wp_upload_dir() ) && false === $uploads['error'] )
 				$quickjumps[] = array( __('Uploads Folder', 'add-from-server'), $uploads['path']);
+			$quickjumps[] = array( __('Content Folder', 'add-from-server'), WP_CONTENT_DIR );
 
 			$quickjumps = apply_filters('frmsvr_quickjumps', $quickjumps);
 
