@@ -2,7 +2,7 @@
 Contributors: dd32
 Tags: 2.5, admin, media, uploads, post
 Requires at least: 2.8
-Stable tag: 2.2
+Stable tag: 2.2.1
 
 "Add From Server" is a quick plugin which allows you to import media & files into the WordPress uploads manager from the Webservers filesystem
 
@@ -31,6 +31,9 @@ Note: French, Spanish, German, Persion, Italian and Russian translations are inc
  A. This will occur in when using 2.2+, This is due to WordPress requiring Whitelisting(of the file extension..) for ALL file uploads now (WordPress 2.8.5+). The solution is to use a plugin which adds the mime types you wish to upload to the whistlist.. This makes things much more secure. If you'd prefer to restore the old behaviour, You may add the following define to your wp-config.php file: define(‘ALLOW_UNFILTERED_UPLOADS’, true);
 
 == Changelog ==
+
+= 2.2.1 =
+ * Remove svn:externals, The WordPress .zip packager does NOT like making peoples life easier when you've got multiple plugins.
 
 = 2.2 =
  * Slight error warning changes
