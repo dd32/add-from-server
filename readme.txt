@@ -27,11 +27,14 @@ Note: French, Spanish, German, Persion, Italian and Russian translations are inc
  Q. What happens when I import a file which is allready in the uploads folder?
  A. If a file is allready in the uploads folder, Then it is not copied anywhere, Instead, the file will stay in its current location, and the date for the media manager will be taken from the URL (ie. import a file in /uploads/2008/01/ and it will be stored in the media library as January 2008)
 
+ Q. I recieve the error: <strong>File type does not meet security guidelines. Try another.</strong>
+ A. This will occur in when using 2.2+, This is due to WordPress requiring Whitelisting(of the file extension..) for ALL file uploads now (WordPress 2.8.5+). The solution is to use a plugin which adds the mime types you wish to upload to the whistlist.. This makes things much more secure. If you'd prefer to restore the old behaviour, You may add the following define to your wp-config.php file: define(‘ALLOW_UNFILTERED_UPLOADS’, true);
+
 == Changelog ==
 
 = 2.2 =
  * Slight error warning changes
- * WARNING: 2.8.5/2.9 compatibility: ALL users who can upload files will now have access to the Add From Server functionality, This is due to security changes in wordpress removing the unfiltered uploads functionality. This has the side effect that you cannot upload ALL types of files too, If you hit a file which does not meet "security guidelines" you need to use a plugin to change the list of supported filetypes, or optionally, enable all filetypes again by adding this to your wp-config.php file: define(‘ALLOW_UNFILTERED_UPLOADS’, true);
+ * WARNING: 2.8.5/2.9 compatibility: ALL users who can upload files will now have access to the Add From Server functionality, This is due to security changes in wordpress removing the unfiltered uploads functionality. This has the side effect that you cannot upload ALL types of files too, See the FAQ for some more info.
  * Re-ordered changelog for 2.8 changelog compatibility.
 
 = 2.1 =
