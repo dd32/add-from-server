@@ -133,7 +133,7 @@ class add_from_server {
 				$filename = $cwd . $file;
 				$id = $this->handle_import_file($filename, $post_id);
 				if ( is_wp_error($id) ) {
-					echo '<div class="updated error"><p>' . sprintf(__('<em>%s</em> was <strong>not</strong> imported due to an error: %s', 'add-from-server'), $file, $id) . '</p></div>';
+					echo '<div class="updated error"><p>' . sprintf(__('<em>%s</em> was <strong>not</strong> imported due to an error: %s', 'add-from-server'), $file, $id->get_error_message() ) . '</p></div>';
 				} else {
 					//increment the gallery count
 					if ( $import_to_gallery )
