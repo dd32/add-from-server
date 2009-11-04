@@ -32,6 +32,9 @@ Note: French, Spanish, German, Persion, Italian and Russian translations are inc
 
 == Changelog ==
 
+= 2.x =
+ * French update from Denis Rebaud
+
 = 2.2.1 =
  * Remove svn:externals, The WordPress .zip packager does NOT like making peoples life easier when you've got multiple plugins.
 
