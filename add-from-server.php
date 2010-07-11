@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Add From Server
-Version: 2.2.1
+Version: 2.3
 Plugin URI: http://dd32.id.au/wordpress-plugins/add-from-server/
 Description: Plugin to allow the Media Manager to add files from the webservers filesystem. <strong>Note:</strong> All files are copied to the uploads directory.
 Author: Dion Hulse
@@ -11,29 +11,19 @@ Author URI: http://dd32.id.au/
 $GLOBALS['add-from-server'] = new add_from_server();
 class add_from_server {
 	
-	var $dd32_requires = 2;
 	var $basename = '';
 	var $folder = '';
-	var $version = '2.2.1';
+	var $version = '2.3';
 	
 	function add_from_server() {
 		//Set the directory of the plugin:
 		$this->basename = plugin_basename(__FILE__);
 		$this->folder = dirname($this->basename);
 
-		//Set the version of the DD32 library this plugin requires.
-		$GLOBALS['dd32_version'] = isset($GLOBALS['dd32_version']) ? max($GLOBALS['dd32_version'], $this->dd32_requires) : $this->dd32_requires;
-		add_action('init', array(&$this, 'load_dd32'), 20);
-
 		//Register general hooks.
 		add_action('admin_init', array(&$this, 'admin_init'));
 		add_action('admin_menu', array(&$this, 'admin_menu'));
 		register_deactivation_hook(__FILE__, array(&$this, 'deactivate'));
-	}
-	
-	function load_dd32() {
-		//Load common library
-		include 'inc/class.dd32.php';
 	}
 	
 	function admin_init() {
@@ -48,8 +38,7 @@ class add_from_server {
 		add_action('load-media_page_add-from-server', array(&$this, 'add_head_files') );
 		add_action('media_upload_server', array(&$this, 'add_head_files') );
 
-		DD32::add_configure($this->basename, __('Add From Server', 'add-from-server'), admin_url('media-new.php?page=add-from-server'));
-		//DD32::add_changelog($this->basename, 'http://svn.wp-plugins.org/add-from-server/trunk/readme.txt');
+		add_filter('plugin_action_links_' . $this->basename, array(&$this, 'add_configure_link'));
 
 		//Add actions/filters
 		add_filter('media_upload_tabs', array(&$this, 'tabs'));
@@ -59,6 +48,10 @@ class add_from_server {
 	function admin_menu() {
 		add_media_page( __('Add From Server', 'add-from-server'), __('Add From Server', 'add-from-server'), 'upload_files', 'add-from-server', array(&$this, 'menu_page') );
 	}
+	function add_configure_link($links) {
+		$link = '<a href="' . admin_url('upload.php?page=add-from-server') . '">' . __('Add From Server', 'add-from-server') . '</a>';
+		return array_merge(array($link), $links);
+	}
 
 	function deactivate(){
 		delete_option('frmsvr_last_folder');
@@ -66,7 +59,7 @@ class add_from_server {
 
 	//Add a tab to the media uploader:
 	function tabs($tabs) {
-		if( current_user_can( 'upload_files' ) )
+		if ( current_user_can( 'upload_files' ) )
 			$tabs['server'] = __('Add From Server', 'add-from-server');
 		return $tabs;
 	}
@@ -82,7 +75,7 @@ class add_from_server {
 
 	//Handle the actual page:
 	function tab_handler(){
-		if( ! current_user_can( 'upload_files' ) )
+		if ( ! current_user_can( 'upload_files' ) )
 			return;
 
 		//Set the body ID
@@ -105,7 +98,7 @@ class add_from_server {
 	}
 	
 	function menu_page() {
-		if( ! current_user_can( 'upload_files' ) )
+		if ( ! current_user_can( 'upload_files' ) )
 			return;
 
 		//Handle any imports:
@@ -284,7 +277,7 @@ class add_from_server {
 
 		update_option('frmsvr_last_folder', $cwd);
 
-		$files = DD32::find_files($cwd, array('levels' => 1));
+		$files = $this->find_files($cwd, array('levels' => 1));
 
 		$parts = explode('/', rtrim($cwd, '/'));
 		$dir = $cwd;
@@ -292,7 +285,7 @@ class add_from_server {
 		for ( $i = count($parts) - 1; $i >= 0; $i-- ) {
 			$piece = $parts[$i];
 			$adir = implode('/', array_slice($parts, 0, $i+1));
-			$durl = clean_url(add_query_arg(array('adirectory' => $adir), $url));
+			$durl = esc_url(add_query_arg(array('adirectory' => $adir), $url));
 			$dirparts = "<a href='$durl'>$piece</a>/ $dirparts";
 			$dir = dirname($dir);
 		}
@@ -326,7 +319,7 @@ class add_from_server {
 		 ?>
 		<form method="post" action="<?php echo $url ?>">
          <?php if ( 'media-upload.php' == $GLOBALS['pagenow'] ) : ?>
-		<p><?php printf(__('Once you have selected files to be imported, Head over to the <a href="%s">Media Library tab</a> to add them to your post.', 'add-from-server'), clean_url(admin_url('media-upload.php?type=image&tab=library&post_id=' . $post_id)) ); ?></p>
+		<p><?php printf(__('Once you have selected files to be imported, Head over to the <a href="%s">Media Library tab</a> to add them to your post.', 'add-from-server'), esc_url(admin_url('media-upload.php?type=image&tab=library&post_id=' . $post_id)) ); ?></p>
         <?php endif; ?>
 		<table class="widefat">
 		<thead>
@@ -338,8 +331,8 @@ class add_from_server {
 		<tbody>
 			<tr>
 				<td>&nbsp;</td>
-				<!-- <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo attribute_escape($file) ?>' /></td> -->
-				<td><a href="<?php echo add_query_arg(array('directory' => '../'), $url) ?>" title="<?php echo attribute_escape(dirname($cwd)) ?>"><?php _e('Parent Folder', 'add-from-server') ?></a></td>
+				<!-- <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> -->
+				<td><a href="<?php echo add_query_arg(array('directory' => '../'), $url) ?>" title="<?php echo esc_attr(dirname($cwd)) ?>"><?php _e('Parent Folder', 'add-from-server') ?></a></td>
 			</tr>
 		<?php
 			$directories = array();
@@ -360,7 +353,7 @@ class add_from_server {
 		?>
 			<tr>
 				<td>&nbsp;</td>
-				<!-- <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo attribute_escape($file) ?>' /></td> -->
+				<!-- <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> -->
 				<td><a href="<?php echo $folder_url ?>"><?php echo $filename ?></a></td>
 			</tr>
 		<?php
@@ -371,7 +364,7 @@ class add_from_server {
 				$sanname = preg_replace('![^a-zA-Z0-9]!', '', $filename);
 		?>
 			<tr>
-				<td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo attribute_escape($filename) ?>' /></td>
+				<td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($filename) ?>' /></td>
 				<td><label for='file-<?php echo $sanname; ?>'><?php echo $filename ?></label></td>
 			</tr>
 			<?php endforeach; ?>
@@ -384,15 +377,63 @@ class add_from_server {
 		</tfoot>
 		</table>
 		<p class="ml-submit">
-		<input type="hidden" name="cwd" value="<?php echo attribute_escape( $cwd ); ?>" />
+		<input type="hidden" name="cwd" value="<?php echo esc_attr( $cwd ); ?>" />
 		<?php if ( $post_id != 0 ) : ?>
 		<input type="checkbox" name="no-gallery" id="no-gallery" <?php if ( !$import_to_gallery ) echo 'checked="checked"' ?> /> <label for="no-gallery"><?php _e('Do not add selected files to current post Gallery', 'add-from-server')?></label><br />
 		<?php endif; ?>
-		<input type="submit" class="button savebutton" name="import" value="<?php echo attribute_escape( __('Import', 'add-from-server') ); ?>" /> 
+		<input type="submit" class="button savebutton" name="import" value="<?php echo esc_attr( __('Import', 'add-from-server') ); ?>" /> 
 		</p>
 		</form>
 		</div>
 	<?php
+	}
+
+	//HELPER
+	function find_files( $folder, $args = array() ) {
+	
+		$folder = untrailingslashit($folder);
+	
+		$defaults = array( 'pattern' => '', 'levels' => 100, 'relative' => '' );
+		$r = wp_parse_args($args, $defaults);
+	
+		extract($r, EXTR_SKIP);
+		
+		//Now for recursive calls, clear relative, we'll handle it, and decrease the levels.
+		unset($r['relative']);
+		--$r['levels'];
+	
+		if ( ! $levels )
+			return array();
+		
+		if ( ! is_readable($folder) )
+			return false;
+	
+		$files = array();
+		if ( $dir = @opendir( $folder ) ) {
+			while ( ( $file = readdir($dir) ) !== false ) {
+				if ( in_array($file, array('.', '..') ) )
+					continue;
+				if ( is_dir( $folder . '/' . $file ) ) {
+					$files2 = $this->find_files( $folder . '/' . $file, $r );
+					if( $files2 )
+						$files = array_merge($files, $files2 );
+					else if ( empty($pattern) || preg_match('|^' . str_replace('\*', '\w+', preg_quote($pattern)) . '$|i', $file) )
+						$files[] = $folder . '/' . $file . '/';
+				} else {
+					if ( empty($pattern) || preg_match('|^' . str_replace('\*', '\w+', preg_quote($pattern)) . '$|i', $file) )
+						$files[] = $folder . '/' . $file;
+				}
+			}
+		}
+		@closedir( $dir );
+	
+		if ( ! empty($relative) ) {
+			$relative = trailingslashit($relative);
+			foreach ( $files as $key => $file )
+				$files[$key] = preg_replace('!^' . preg_quote($relative) . '!', '', $file);
+		}
+	
+		return $files;
 	}
 }//end class
 
