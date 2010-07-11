@@ -23,6 +23,7 @@ class add_from_server {
 		//Register general hooks.
 		add_action('admin_init', array(&$this, 'admin_init'));
 		add_action('admin_menu', array(&$this, 'admin_menu'));
+		register_activation_hook(__FILE__, array(&$this, 'activate'));
 		register_deactivation_hook(__FILE__, array(&$this, 'deactivate'));
 	}
 	
@@ -43,6 +44,14 @@ class add_from_server {
 		//Add actions/filters
 		add_filter('media_upload_tabs', array(&$this, 'tabs'));
 		add_action('media_upload_server', array(&$this, 'tab_handler'));
+	}
+	function activate() { // :) Honestly, I dont think this plugin -requires- 3.0, I think it probably requires 2.9 at this stage, But to hell with you if you want to use out of date releases
+		global $wp_version;
+		if ( ! version_compare( $wp_version, '3.0', '>=') ) {
+			if ( function_exists('deactivate_plugins') )
+				deactivate_plugins(__FILE__);
+			die(__('<strong>Add From Server:</strong> Sorry, This plugin requires WordPress 3.0+', 'add-from-server'));
+		}
 	}
 
 	function admin_menu() {
@@ -139,7 +148,7 @@ class add_from_server {
 
 	//Handle an individual file import.
 	function handle_import_file($file, $post_id = 0) {
-
+		set_time_limit(120);
 		$time = current_time('mysql');
 		if ( $post = get_post($post_id) ) {
 			if ( substr( $post->post_date, 0, 4 ) > 0 )
@@ -171,19 +180,21 @@ class add_from_server {
 
 			//Ok, Its in the uploads folder, But NOT in WordPress's media library.
 			if ( preg_match("|(\d+)/(\d+)|", $mat[1], $datemat) ) //So lets set the date of the import to the date folder its in, IF its in a date folder.
-				$time = mktime(0,0,0,$datemat[2], 1, $datemat[1]);
+				$time = mktime(0, 0, 0, $datemat[2], 1, $datemat[1]);
 			else //Else, set the date based on the date of the files time.
-				$time = filemtime($file);
+				$time = @filemtime($file);
 
-			$post_date = date( 'Y-m-d H:i:s', $time);
-			$post_date_gmt = gmdate( 'Y-m-d H:i:s', $time);
+			if ( $time ) {
+				$post_date = date( 'Y-m-d H:i:s', $time);
+				$post_date_gmt = gmdate( 'Y-m-d H:i:s', $time);
+			}
 		} else {	
 			$filename = wp_unique_filename( $uploads['path'], basename($file));
 
 			// copy the file to the uploads dir
 			$new_file = $uploads['path'] . '/' . $filename;
 			if ( false === @copy( $file, $new_file ) )
-				wp_die(sprintf( __('The selected file could not be moved to %s.', 'add-from-server'), $uploads['path']));
+				wp_die(sprintf( __('The selected file could not be copied to %s.', 'add-from-server'), $uploads['path']));
 
 			// Set correct file permissions
 			$stat = stat( dirname( $new_file ));
@@ -194,7 +205,7 @@ class add_from_server {
 		}
 
 		// Compute the URL
-		$url = $uploads['url'] . '/' . $filename;
+		$url = $uploads['url'] . '/' . rawurlencode($filename);
 
 		//Apply upload filters
 		$return = apply_filters( 'wp_handle_upload', array( 'file' => $new_file, 'url' => $url, 'type' => $type ) );
@@ -331,7 +342,7 @@ class add_from_server {
 		<tbody>
 			<tr>
 				<td>&nbsp;</td>
-				<!-- <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> -->
+				<?php /*  <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> */ ?>
 				<td><a href="<?php echo add_query_arg(array('directory' => '../'), $url) ?>" title="<?php echo esc_attr(dirname($cwd)) ?>"><?php _e('Parent Folder', 'add-from-server') ?></a></td>
 			</tr>
 		<?php
@@ -353,15 +364,20 @@ class add_from_server {
 		?>
 			<tr>
 				<td>&nbsp;</td>
-				<!-- <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> -->
+				<?php /* <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> */ ?>
 				<td><a href="<?php echo $folder_url ?>"><?php echo $filename ?></a></td>
 			</tr>
 		<?php
 			endforeach;
+			$names = array();
 			foreach( (array)$files as $file  ) :
 				$filename = preg_replace('!^' . preg_quote($cwd) . '!', '', $file);
 				$filename = ltrim($filename, '/');
 				$sanname = preg_replace('![^a-zA-Z0-9]!', '', $filename);
+				$i = 0;
+				while ( in_array($sanname, $names) )
+					$sanname = preg_replace('![^a-zA-Z0-9]!', '', $filename) . '-' . ++$i;
+				$names[] = $sanname;
 		?>
 			<tr>
 				<td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($filename) ?>' /></td>
