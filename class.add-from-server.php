@@ -2,6 +2,7 @@
 class add_from_server {
 
 	var $version = '2.4';
+	var $basename = '';
 	
 	var $meets_guidelines = array(); // Internal use only.
 	
@@ -14,7 +15,8 @@ class add_from_server {
 		return current_user_can('upload_files');
 	}
 	
-	function add_from_server() {
+	function __construct($basename) {
+		$this->basename = $basename;
 		//Register general hooks.
 		add_action('admin_init', array(&$this, 'admin_init'));
 		add_action('admin_menu', array(&$this, 'admin_menu'));
@@ -22,7 +24,7 @@ class add_from_server {
 	
 	function admin_init() {
 		//Load any translation files needed:
-		load_plugin_textdomain('add-from-server', '', dirname(plugin_basename(__FILE__)) . '/langs/');
+		load_plugin_textdomain('add-from-server', '', dirname($this->basename) . '/langs/');
 
 		//Register our JS & CSS
 		wp_register_style ('add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), $this->version);
@@ -31,7 +33,7 @@ class add_from_server {
 		add_action('load-media_page_add-from-server', array(&$this, 'add_styles') );
 		add_action('media_upload_server', array(&$this, 'add_styles') );
 
-		add_filter('plugin_action_links_' . plugin_basename(__FILE__), array(&$this, 'add_configure_link'));
+		add_filter('plugin_action_links_' . $this->basename, array(&$this, 'add_configure_link'));
 
 		if ( $this->user_allowed() ) {
 			//Add actions/filters
