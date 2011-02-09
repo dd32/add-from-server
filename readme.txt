@@ -8,29 +8,10 @@ Stable tag: 2.3
 
 == Description ==
 
-Please Note, This plugin's compatibility is only limited to the latest stable release, 2.8.5 at the time of this writing.
-
-WordPress 2.5+ includes a new Media manager, However, It only knows about files which have been uploaded via the WordPress interface, Not files which have been uploaded via other means(eg, FTP).
-
-So i present, "Add From Server" a WordPress plugin which allows you to browse the filesystem on the webserver and copy any files into the WordPress uploads system, Once "imported" it'll be treated as any other uploaded file, and you can access it via the Media 
-
-Note: French, Spanish, German, Persion, Italian and Russian translations are included. I cannot nativly speak these languages, If you find an error, or would like me to add your translation, You can contact me via: http://dd32.id.au/contact-me/
-
-== Frequently Asked Questions ==
-
- Q. Where is the page for this plugins?
- A. You can find the page for this plugin in the Add-Media dialogue. The Add Media dialogue is accessable via the New Post/New Page screen, They're the Icons beside the Visual/HTML tab option. Under 2.7, There is also a tab under Media.
-
- Q. What happens when I import a file?
- A. When a file is imported, It is first Copied to the /wp-content/uploads/ folder and placed in the current months folder. The date will be set to today.
-
- Q. What happens when I import a file which is allready in the uploads folder?
- A. If a file is allready in the uploads folder, Then it is not copied anywhere, Instead, the file will stay in its current location, and the date for the media manager will be taken from the URL (ie. import a file in /uploads/2008/01/ and it will be stored in the media library as January 2008)
-
- Q. I recieve the error: <strong>File type does not meet security guidelines. Try another.</strong>
- A. This will occur in when using 2.2+, This is due to WordPress requiring Whitelisting(of the file extension..) for ALL file uploads now (WordPress 2.8.5+). The solution is to use a plugin which adds the mime types you wish to upload to the whistlist.. This makes things much more secure. If you'd prefer to restore the old behaviour, You may add the following define to your wp-config.php file: define(‘ALLOW_UNFILTERED_UPLOADS’, true);
-
 == Changelog ==
+
+= 3.0 =
+ * 
 
 = 2.3 =
  * Quick 3.0 compatibility release
