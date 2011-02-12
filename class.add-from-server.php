@@ -496,7 +496,7 @@ die(); */
 		<tbody>
 		<?php
 		$parent = dirname($cwd);
-		if ( (strpos($parent, $this->get_root() === 0) && is_readable($parent) ) :
+		if ( (strpos($parent, $this->get_root()) === 0) && is_readable($parent) ) :
 			$parent = preg_replace('!^' . preg_quote($this->get_root(), '!') . '!i', '', $parent);
 		?>
 			<tr>
