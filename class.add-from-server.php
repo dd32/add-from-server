@@ -149,13 +149,13 @@ class add_from_server {
 		if ( ! current_user_can('upload_files') )
 			return false;
 
-		switch ( get_option('frmsvr_uac') ) {
+		switch ( get_option('frmsvr_uac', 'allusers') ) {
 			case 'allusers':
 				return true;
 			case 'role':
 				$user = wp_get_current_user();
 				$roles = $user->roles;
-				$allowed_roles = get_option('frmsvr_uac_role');
+				$allowed_roles = get_option('frmsvr_uac_role', array());
 				foreach ( $roles as $r ) {
 					if ( in_array($r, $allowed_roles) )
 						return true;
@@ -163,7 +163,7 @@ class add_from_server {
 				return false;
 			case 'listusers':
 				$user = wp_get_current_user();
-				$allowed_users = explode("\n", get_option('frmsvr_uac_users'));
+				$allowed_users = explode("\n", get_option('frmsvr_uac_users', ''));
 				$allowed_users = array_map('trim', $allowed_users);
 				$allowed_users = array_filter($allowed_users);
 				return in_array($user->user_login, $allowed_users);
@@ -173,9 +173,8 @@ class add_from_server {
 	
 	function sanitize_option_root($input) {
 		$_input = $input;
-		if ( 'specific' == $input ) {
+		if ( 'specific' == $input )
 			$input = stripslashes($_POST['frmsvr_root-specified']);
-		}
 		if ( !$this->validate_option_root( $input ) )
 			$input = get_option('frmsvr_root');
 		
