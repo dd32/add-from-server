@@ -400,7 +400,7 @@ die(); */
 		if ( isset($_REQUEST['adirectory']) )
 			$cwd = stripslashes(urldecode($_REQUEST['adirectory']));
 
-		$cwd = preg_replace('![^/]+/\.\./!', '', $cwd);
+		$cwd = preg_replace('![^/]*/\.\./!', '', $cwd);
 		$cwd = preg_replace('!//!', '/', $cwd);
 
 		if ( ! is_readable($cwd) && is_readable( $this->get_root() . '/' . ltrim($cwd, '/') ) )
@@ -488,11 +488,13 @@ die(); */
 			</tr>
 		</thead>
 		<tbody>
+		<?php if ( is_readable(dirname($cwd)) ) : ?>
 			<tr>
 				<td>&nbsp;</td>
 				<?php /*  <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> */ ?>
-				<td><a href="<?php echo add_query_arg(array('directory' => '../'), $url) ?>" title="<?php echo esc_attr(dirname($cwd)) ?>"><?php _e('Parent Folder', 'add-from-server') ?></a></td>
+				<td><a href="<?php echo add_query_arg(array('adirectory' => dirname($cwd)), $url) ?>" title="<?php echo esc_attr(dirname($cwd)) ?>"><?php _e('Parent Folder', 'add-from-server') ?></a></td>
 			</tr>
+		<?php endif; ?>
 		<?php
 			$directories = array();
 			foreach( (array)$files as $key => $file ) {
