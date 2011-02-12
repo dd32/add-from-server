@@ -494,11 +494,15 @@ die(); */
 			</tr>
 		</thead>
 		<tbody>
-		<?php if ( is_readable(dirname($cwd)) ) : ?>
+		<?php
+		$parent = dirname($cwd);
+		if ( (strpos($parent, $this->get_root() === 0) && is_readable($parent) ) :
+			$parent = preg_replace('!^' . preg_quote($this->get_root(), '!') . '!i', '', $parent);
+		?>
 			<tr>
 				<td>&nbsp;</td>
 				<?php /*  <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> */ ?>
-				<td><a href="<?php echo add_query_arg(array('adirectory' => dirname($cwd)), $url) ?>" title="<?php echo esc_attr(dirname($cwd)) ?>"><?php _e('Parent Folder', 'add-from-server') ?></a></td>
+				<td><a href="<?php echo add_query_arg(array('adirectory' => $parent), $url) ?>" title="<?php echo esc_attr(dirname($cwd)) ?>"><?php _e('Parent Folder', 'add-from-server') ?></a></td>
 			</tr>
 		<?php endif; ?>
 		<?php
