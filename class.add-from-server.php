@@ -440,7 +440,7 @@ die(); */
 			$piece = $parts[$i];
 			$adir = implode('/', array_slice($parts, 0, $i+1));
 			$durl = esc_url(add_query_arg(array('adirectory' => ltrim($adir, '/') ), $url));
-			$dirparts = '<a href="' . $durl . '">' . $piece . DIRECTORY_SEPARATOR . '</a>' . $dirparts; //( ($i == 0 && PHP_SHLIB_SUFFIX == 'dll') ? '' : DIRECTORY_SEPARATOR )
+			$dirparts = '<a href="' . $durl . '">' . $piece . DIRECTORY_SEPARATOR . '</a>' . $dirparts; 
 			$dir = dirname($dir);
 		}
 		unset($dir, $piece, $adir, $durl);
@@ -464,7 +464,7 @@ die(); */
 					$adir = str_replace('\\', '/', strtolower($adir));
 					if ( strpos($adir, $this->get_root()) === false )
 						continue;
-					$adir = str_replace($this->get_root(), '', $adir);
+					$adir = preg_replace('!^' . preg_quote($this->get_root(), '!') . '!i', '', $adir);
 					$adir = ltrim($adir, '/');
 					$durl = add_query_arg(array('adirectory' => addslashes($adir)), $url);
 					$pieces[] = "<a href='$durl'>$text</a>";
