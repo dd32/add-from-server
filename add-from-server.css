@@ -7,7 +7,8 @@
 .frmsvr_wrap .widefat tbody th.check-column {
 	padding-bottom: 0px;
 }
-.frmsvr_wrap .widefat tbody tr.doesnt-meet-guidelines {
+.frmsvr_wrap .widefat tbody tr.doesnt-meet-guidelines,
+.frmsvr_wrap .widefat tbody tr.unreadable {
 	background-color: #FFE8EE;
 }
 .frmsvr_wrap fieldset {

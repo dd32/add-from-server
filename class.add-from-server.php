@@ -529,26 +529,34 @@ die(); */
 			</tr>
 		<?php
 			endforeach;
-			$names = array();
-			$rejected_files = array();
+			$names = $rejected_files = $unreadable_riles = array();
 			$unfiltered_upload = current_user_can( 'unfiltered_upload' );
-			if ( ! $unfiltered_upload ) {
-				foreach ( (array)$files as $key => $file ) {
+			foreach ( (array)$files as $key => $file ) {
+				if ( ! $unfiltered_upload ) {
 					$wp_filetype = wp_check_filetype( $file );
 					if ( false === $wp_filetype['type'] ) {
 						$rejected_files[] = $file;
 						unset($files[$key]);
+						continue;
 					}
+				}
+				if ( ! is_readable($file) ) {
+					$unreadable_files[] = $file;
+					unset($files[$key]);
+					continue;
 				}
 			}
 			
-			foreach ( array( 'meets_guidelines' => $files, 'doesnt_meets_guidelines' => $rejected_files) as $key => $_files ) :
-			$file_meets_guidelines = $unfiltered_upload || ($key == 'meets_guidelines');
+			foreach ( array( 'meets_guidelines' => $files, 'unreadable' => $unreadable_files, 'doesnt_meets_guidelines' => $rejected_files) as $key => $_files ) :
+			$file_meets_guidelines = $unfiltered_upload || ('meets_guidelines' == $key);
+			$unreadable = 'unreadable' == $key;
 			foreach ( $_files as $file  ) :
 				$classes = array();
 
 				if ( ! $file_meets_guidelines )
 					$classes[] = 'doesnt-meet-guidelines';
+				if ( $unreadable )
+					$classes[] = 'unreadable';
 
 				if ( preg_match('/\.(.+)$/i', $file, $ext_match) ) 
 					$classes[] = 'filetype-' . $ext_match[1];
@@ -562,8 +570,8 @@ die(); */
 					$sanname = preg_replace('![^a-zA-Z0-9]!', '', $filename) . '-' . ++$i;
 				$names[] = $sanname;
 		?>
-			<tr class="<?php echo esc_attr(implode(' ', $classes)); ?>" title="<?php if ( ! $file_meets_guidelines ) { _e('Sorry, this file type is not permitted for security reasons. Please see the FAQ.', 'add-from-server'); } ?>">
-				<th class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($filename) ?>' <?php disabled(!$file_meets_guidelines); ?> /></th>
+			<tr class="<?php echo esc_attr(implode(' ', $classes)); ?>" title="<?php if ( ! $file_meets_guidelines ) { _e('Sorry, this file type is not permitted for security reasons. Please see the FAQ.', 'add-from-server'); } elseif ($unreadable) { _e('Sorry, but this file is unreadable by your Webserver. Perhaps check your File Permissions?', 'add-from-server'); } ?>">
+				<th class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($filename) ?>' <?php disabled(!$file_meets_guidelines || $unreadable); ?> /></th>
 				<td><label for='file-<?php echo $sanname; ?>'><?php echo $filename ?></label></td>
 			</tr>
 			<?php endforeach; endforeach;?>
