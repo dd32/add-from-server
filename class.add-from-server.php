@@ -405,7 +405,7 @@ die(); */
 
 		if ( ! is_readable($cwd) && is_readable( $this->get_root() . '/' . ltrim($cwd, '/') ) )
 			$cwd = $this->get_root() . '/' . ltrim($cwd, '/');
-var_Dump($cwd, is_readable($cwd) );
+
 		if ( ! is_readable($cwd) && get_option('frmsvr_last_folder') )
 			$cwd = get_option('frmsvr_last_folder');
 
@@ -414,10 +414,11 @@ var_Dump($cwd, is_readable($cwd) );
 
 		if ( strpos($cwd, $this->get_root()) === false )
 			$cwd = $this->get_root();
-var_dump($cwd, $this->get_root(), strpos($cwd, $this->get_root()));
+
 		$cwd = str_replace('\\', '/', $cwd);
 
-		$cwd = untrailingslashit($cwd);
+		if ( strlen($cwd) > 1 )
+			$cwd = untrailingslashit($cwd);
 
 		if ( ! is_readable($cwd) ) {
 			echo '<div class="error"><p>';
