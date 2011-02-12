@@ -50,7 +50,7 @@ class add_from_server {
 	function add_configure_link($_links) {
 		$links = array();
 		if ( $this->user_allowed() )
-			$links[] = '<a href="' . admin_url('upload.php?page=add-from-server') . '">' . __('Add Files', 'add-from-server') . '</a>';
+			$links[] = '<a href="' . admin_url('upload.php?page=add-from-server') . '">' . __('Import Files', 'add-from-server') . '</a>';
 		if ( current_user_can('manage_options') )
 			$links[] = '<a href="' . admin_url('options-general.php?page=add-from-server-settings') . '">' . __('Options', 'add-from-server') . '</a>';
 
@@ -142,6 +142,7 @@ class add_from_server {
 		}
 
 		$static_root = $root = strtolower( untrailingslashit($root) );
+		var_Dump($root);
 		return $root;
 	}
 
