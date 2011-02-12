@@ -444,7 +444,6 @@ die(); */
 			$adir = implode('/', array_slice($parts, 0, $i+1));
 			if ( strlen($adir) > 1 )
 				$adir = ltrim($adir, '/');
-
 			$durl = esc_url(add_query_arg(array('adirectory' => $adir ), $url));
 			$dirparts = '<a href="' . $durl . '">' . $piece . DIRECTORY_SEPARATOR . '</a>' . $dirparts; 
 			$dir = dirname($dir);
