@@ -1,6 +1,9 @@
 .frmsvr_wrap {
 	margin: 1em;
 }
+.wrap .frmsvr_wrap {
+	margin: 0;
+}
 .frmsvr_wrap .widefat tbody th.check-column {
 	padding-bottom: 0px;
 }

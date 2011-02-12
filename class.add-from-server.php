@@ -6,15 +6,6 @@ class add_from_server {
 	
 	var $meets_guidelines = array(); // Internal use only.
 	
-	function get_root() {
-		if ( defined('AFS_ROOT') )
-			return untrailingslashit(AFS_ROOT);
-		return untrailingslashit(str_replace('\\', '/', ABSPATH));
-	}
-	function user_allowed() {
-		return current_user_can('upload_files');
-	}
-	
 	function __construct($basename) {
 		$this->basename = $basename;
 		//Register general hooks.
@@ -40,11 +31,20 @@ class add_from_server {
 			add_filter('media_upload_tabs', array(&$this, 'tabs'));
 			add_action('media_upload_server', array(&$this, 'tab_handler'));
 		}
+		
+		//Register our settings:
+		register_setting('add_from_server', 'frmsvr_root', array(&$this, 'sanitize_option_root') );
+		//register_setting('add-from-server', 'frmsvr_last_folder');
+		register_setting('add_from_server', 'frmsvr_uac');
+		register_setting('add_from_server', 'frmsvr_uac_users');
+		register_setting('add_from_server', 'frmsvr_uac_role');
+		
 	}
-
+	
 	function admin_menu() {
 		if ( $this->user_allowed() )
-			add_media_page( __('Add From Server', 'add-from-server'), __('Add From Server', 'add-from-server'), 'upload_files', 'add-from-server', array(&$this, 'menu_page') );
+			add_media_page( __('Add From Server', 'add-from-server'), __('Add From Server', 'add-from-server'), 'read', 'add-from-server', array(&$this, 'menu_page') );
+		add_options_page( __('Add From Server Settings', 'add-from-server'), __('Add From Server', 'add-from-server'), 'manage_options', 'add-from-server-settings', array(&$this, 'options_page') );
 	}
 
 	function add_configure_link($_links) {
@@ -102,9 +102,109 @@ class add_from_server {
 		//Handle any imports:
 		$this->handle_imports();
 
+		echo '<div class="wrap">';
+		screen_icon('upload');
+		echo '<h2>' . __('Add From Server', 'add-from-server') . '</h2>';
+
 		//Do the content
 		$this->main_content();
+		
+		echo '</div>';
+	}
 
+	function options_page() {
+		if ( ! current_user_can('manage_options') )
+			return;
+
+		include 'class.add-from-server-settings.php';
+		$this->settings = new add_from_server_settings(&$this);
+		$this->settings->render();
+	}
+
+	function get_root( $context = 'use' ) {
+		static $static_root = null;
+		if ( $static_root )
+			return $static_root;
+
+		$root = get_option('frmsvr_root', null);
+		if ( strpos($root, '%') !== false && 'raw' != $context ) {
+			$user = wp_get_current_user();
+
+			$root = str_replace('%username%', $user->user_login, $root);
+			$root = str_replace('%role%', $user->roles[0], $root);
+		}
+		if ( is_null($root) ) {
+			$file = __FILE__;
+			if ( '/' == $file[0] )
+				$root = '/';
+			elseif ( preg_match('/(\w:)/i', __FILE__, $root_win_match) )
+				$root = $root_win_match[1];
+		}
+
+		$static_root = $root = strtolower( untrailingslashit($root) );
+		return $root;
+	}
+
+	function user_allowed() {
+		if ( ! current_user_can('upload_files') )
+			return false;
+
+		switch ( get_option('frmsvr_uac') ) {
+			case 'allusers':
+				return true;
+			case 'role':
+				$user = wp_get_current_user();
+				$roles = $user->roles;
+				$allowed_roles = get_option('frmsvr_uac_role');
+				foreach ( $roles as $r ) {
+					if ( in_array($r, $allowed_roles) )
+						return true;
+				}
+				return false;
+			case 'listusers':
+				$user = wp_get_current_user();
+				$allowed_users = explode("\n", get_option('frmsvr_uac_users'));
+				$allowed_users = array_map('trim', $allowed_users);
+				$allowed_users = array_filter($allowed_users);
+				return in_array($user->user_login, $allowed_users);
+		}
+		return false;
+	}
+	
+	function sanitize_option_root($input) {
+		$_input = $input;
+		if ( 'specific' == $input ) {
+			$input = stripslashes($_POST['frmsvr_root-specified']);
+		}
+		if ( !$this->validate_option_root( $input ) )
+			$input = get_option('frmsvr_root');
+		
+		$input = strtolower($input);
+		$input = str_replace('\\', '/', $input);
+/* var_Dump($_POST, $input, $_input);
+wp_redirect('');
+die(); */
+		return $input;
+	}
+	function validate_option_root($o) {
+		if ( strpos($o, '%') !== false ) {
+			// Ensure only valid placeholders are used:
+			if ( preg_match_all('!%(.*?)%!', $o, $placeholders) ) {
+				$valid_ph = array('username', 'role');
+				foreach ( $placeholders[1] as $ph ) {
+					if ( !in_array($ph, $valid_ph) ) {
+						add_settings_error('general', 'update_failed', sprintf(__('The placeholder %s is not valid in the root path.', 'add-from-server'),  '%' . $ph . '%'), 'error');
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		if ( !is_dir($o) || !is_readable($o) ) {
+			add_settings_error('general', 'update_failed', __('The root path specified could not be read.', 'add-from-server'), 'error');
+			return false;
+		}
+		return true;
 	}
 
 	//Handle the imports
@@ -116,6 +216,7 @@ class add_from_server {
 
 			$cwd = trailingslashit(stripslashes($_POST['cwd']));
 			$post_id = isset($_REQUEST['post_id']) ? intval($_REQUEST['post_id']) : 0;
+			$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'file';
 
 			$import_to_gallery = isset($_POST['gallery']) && 'on' == $_POST['gallery'];
 			if ( ! $import_to_gallery && !isset($_REQUEST['cwd']) )
@@ -126,7 +227,7 @@ class add_from_server {
 
 			foreach ( (array)$files as $file ) {
 				$filename = $cwd . $file;
-				$id = $this->handle_import_file($filename, $post_id);
+				$id = $this->handle_import_file($filename, $post_id, $import_date);
 				if ( is_wp_error($id) ) {
 					echo '<div class="updated error"><p>' . sprintf(__('<em>%s</em> was <strong>not</strong> imported due to an error: %s', 'add-from-server'), $file, $id->get_error_message() ) . '</p></div>';
 				} else {
@@ -140,12 +241,18 @@ class add_from_server {
 	}
 
 	//Handle an individual file import.
-	function handle_import_file($file, $post_id = 0) {
+	function handle_import_file($file, $post_id = 0, $import_date = 'file') {
 		set_time_limit(120);
-		$time = current_time('mysql');
-		if ( $post_id && ($post = get_post($post_id)) ) {
-			if ( substr( $post->post_date, 0, 4 ) > 0 )
-				$time = $post->post_date;
+		
+		// Initially, Base it on the -current- time.
+		$time = current_time('mysql', 1);
+		// Next, If it's post to base the upload off:
+		if ( 'post' == $import_date && $post_id > 0 ) {
+			$post = get_post($post_id);
+			if ( $post && substr( $post->post_date_gmt, 0, 4 ) > 0 )
+				$time = $post->post_date_gmt;
+		} elseif ( 'file' == $import_date ) {
+			$time = gmdate( 'Y-m-d H:i:s', @filemtime($file) );
 		}
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
@@ -167,28 +274,32 @@ class add_from_server {
 
 			$url = $uploads['baseurl'] . $mat[1];
 
-			$attachment = get_posts(array( 'post_type' => 'attachment', 'meta_key' => '_wp_attached_file', 'meta_value' => $uploads['subdir'] . '/' . $filename ));
+			$attachment = get_posts(array( 'post_type' => 'attachment', 'meta_key' => '_wp_attached_file', 'meta_value' => ltrim($uploads['subdir'], '/') . '/' . $filename ));
 			if ( !empty($attachment) )
 				return new WP_Error('file_exists', __( 'Sorry, That file already exists in the WordPress media library.' ) );
 
 			//Ok, Its in the uploads folder, But NOT in WordPress's media library.
-			$time = @filemtime($file);
-			if ( preg_match("|(\d+)/(\d+)|", $mat[1], $datemat) ) { //So lets set the date of the import to the date folder its in, IF its in a date folder.
-				$hour = $min = $sec = 0;
-				$day = 1;
-				$year = $datemat[1];
-				$month = $datemat[2];
-
-				// If the files datetime is set, and it's in the same region of upload directory, set the minute details to that too, else, override it.
-				if ( $time && date('Y-m', $time) == "$year-$month" )
-					list($hour, $min, $sec, $day) = explode(';', date('H;i;s;j', $time) );
-
-				$time = mktime($hour, $min, $sec, $month, $day, $year);
-			}
-
-			if ( $time ) {
-				$post_date = date( 'Y-m-d H:i:s', $time);
-				$post_date_gmt = gmdate( 'Y-m-d H:i:s', $time);
+			if ( 'file' == $import_date ) {
+				$time = @filemtime($file);
+				if ( preg_match("|(\d+)/(\d+)|", $mat[1], $datemat) ) { //So lets set the date of the import to the date folder its in, IF its in a date folder.
+					$hour = $min = $sec = 0;
+					$day = 1;
+					$year = $datemat[1];
+					$month = $datemat[2];
+	
+					// If the files datetime is set, and it's in the same region of upload directory, set the minute details to that too, else, override it.
+					if ( $time && date('Y-m', $time) == "$year-$month" )
+						list($hour, $min, $sec, $day) = explode(';', date('H;i;s;j', $time) );
+	
+					$time = mktime($hour, $min, $sec, $month, $day, $year);
+				}
+				$time = gmdate( 'Y-m-d H:i:s', $time);
+				
+				// A new time has been found! Get the new uploads folder:
+				// A writable uploads dir will pass this test. Again, there's no point overriding this one.
+				if ( ! ( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] ) )
+					return new WP_Error( 'upload_error', $uploads['error']);
+				$url = $uploads['baseurl'] . $mat[1];
 			}
 		} else {
 			$filename = wp_unique_filename( $uploads['path'], basename($file));
@@ -204,6 +315,9 @@ class add_from_server {
 			@ chmod( $new_file, $perms );
 			// Compute the URL
 			$url = $uploads['url'] . '/' . $filename;
+			
+			if ( 'file' == $import_date )
+				$time = gmdate( 'Y-m-d H:i:s', @filemtime($file));
 		}
 
 		// Compute the URL
@@ -226,10 +340,13 @@ class add_from_server {
 				$content = trim($image_meta['caption']);
 		}
 
-		if ( empty($post_date) )
+		if ( $time ) {
+			$post_date_gmt = $time;
+			$post_date = $time;
+		} else {
 			$post_date = current_time('mysql');
-		if ( empty($post_date_gmt) )
 			$post_date_gmt = current_time('mysql', 1);
+		}
 
 		// Construct the attachment array
 		$attachment = array(
@@ -243,12 +360,16 @@ class add_from_server {
 			'post_date_gmt' => $post_date_gmt
 		);
 
+		//Win32 fix:
+		$new_file = str_replace( strtolower(str_replace('\\', '/', $uploads['basedir'])), $uploads['basedir'], $new_file);
+
 		// Save the data
 		$id = wp_insert_attachment($attachment, $new_file, $post_id);
 		if ( !is_wp_error($id) ) {
 			$data = wp_generate_attachment_metadata( $id, $new_file );
 			wp_update_attachment_metadata( $id, $data );
 		}
+		//update_post_meta( $id, '_wp_attached_file', $uploads['subdir'] . '/' . $filename );
 
 		return $id;
 	}
@@ -260,7 +381,7 @@ class add_from_server {
 		$import_to_gallery = isset($_POST['gallery']) && 'on' == $_POST['gallery'];
 		if ( ! $import_to_gallery && !isset($_REQUEST['cwd']) )
 			$import_to_gallery = true; // cwd should always be set, if it's not, and neither is gallery, this must be the first page load.
-		$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'current';
+		$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'file';
 
 		if ( 'upload.php' == $pagenow )
 			$url = admin_url('upload.php?page=add-from-server');
@@ -297,18 +418,27 @@ class add_from_server {
 
 		$cwd = untrailingslashit($cwd);
 
+		if ( ! is_readable($cwd) ) {
+			echo '<div class="error"><p>';
+			_e('<strong>Error:</strong> This users root directory is not readable. Please have your site administrator correct the <em>Add From Server</em> root directory settings.', 'add-from-server');
+			echo '</p></div>';
+			return;
+		}
+
 		update_option('frmsvr_last_folder', $cwd);
 
 		$files = $this->find_files($cwd, array('levels' => 1));
 
-		$parts = explode('/', ltrim(str_replace($this->get_root(), '', $cwd), '/'));
+		$parts = explode('/', ltrim(str_replace($this->get_root(), '/', $cwd), '/'));
+		if ( $parts[0] != '' )
+			$parts = array_merge(array(''), $parts);
 		$dir = $cwd;
 		$dirparts = '';
-		for ( $i = count($parts) - 1; $i >= 0; $i-- ) {
+		for ( $i = count($parts)-1; $i >= 0; $i-- ) {
 			$piece = $parts[$i];
 			$adir = implode('/', array_slice($parts, 0, $i+1));
-			$durl = esc_url(add_query_arg(array('adirectory' => $adir), $url));
-			$dirparts = '<a href="' . $durl . '">' . DIRECTORY_SEPARATOR . $piece . '</a>' . $dirparts;
+			$durl = esc_url(add_query_arg(array('adirectory' => ltrim($adir, '/') ), $url));
+			$dirparts = '<a href="' . $durl . '">' . $piece . DIRECTORY_SEPARATOR . '</a>' . $dirparts; //( ($i == 0 && PHP_SHLIB_SUFFIX == 'dll') ? '' : DIRECTORY_SEPARATOR )
 			$dir = dirname($dir);
 		}
 		unset($dir, $piece, $adir, $durl);
@@ -329,10 +459,11 @@ class add_from_server {
 				$pieces = array();
 				foreach( $quickjumps as $jump ) {
 					list( $text, $adir ) = $jump;
-					$adir = str_replace('\\', '/', $adir);
+					$adir = str_replace('\\', '/', strtolower($adir));
 					if ( strpos($adir, $this->get_root()) === false )
 						continue;
 					$adir = str_replace($this->get_root(), '', $adir);
+					$adir = ltrim($adir, '/');
 					$durl = add_query_arg(array('adirectory' => addslashes($adir)), $url);
 					$pieces[] = "<a href='$durl'>$text</a>";
 				}
@@ -368,19 +499,19 @@ class add_from_server {
 					unset($files[$key]);
 				}
 			}
-			
+
 			sort($directories);
 			sort($files);
 			
 			foreach( (array)$directories as $file  ) :
-				$filename = preg_replace('!^' . preg_quote($cwd) . '!', '', $file);
+				$filename = preg_replace('!^' . preg_quote($cwd) . '!i', '', $file);
 				$filename = ltrim($filename, '/');
 				$folder_url = add_query_arg(array('directory' => $filename, 'import-date' => $import_date, 'gallery' => $import_to_gallery ), $url);
 		?>
 			<tr>
 				<td>&nbsp;</td>
 				<?php /* <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> */ ?>
-				<td><a href="<?php echo $folder_url ?>"><?php echo $filename ?></a></td>
+				<td><a href="<?php echo $folder_url ?>"><?php echo rtrim($filename, '/') . DIRECTORY_SEPARATOR ?></a></td>
 			</tr>
 		<?php
 			endforeach;
@@ -441,7 +572,9 @@ class add_from_server {
 			<?php _e('Set the imported date to the', 'add-from-server'); ?>
 			<input type="radio" name="import-date" id="import-time-currenttime" value="current" <?php checked('current', $import_date); ?> /> <label for="import-time-currenttime"><?php _e('Current Time', 'add-from-server'); ?></label>
 			<input type="radio" name="import-date" id="import-time-filetime" value="file" <?php checked('file', $import_date); ?> /> <label for="import-time-filetime"><?php _e('File Time', 'add-from-server'); ?></label>
+			<?php if ( $post_id != 0 ) : ?>
 			<input type="radio" name="import-date" id="import-time-posttime" value="post" <?php checked('post', $import_date); ?> /> <label for="import-time-posttime"><?php _e('Post Time', 'add-from-server'); ?></label>
+			<?php endif; ?>
 		</fieldset>
 		<br class="clear" />
 		<input type="hidden" name="cwd" value="<?php echo esc_attr( $cwd ); ?>" />
@@ -470,7 +603,7 @@ class add_from_server {
 			return array();
 		
 		if ( ! is_readable($folder) )
-			return false;
+			return array();
 	
 		$files = array();
 		if ( $dir = @opendir( $folder ) ) {
