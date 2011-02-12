@@ -397,6 +397,9 @@ die(); */
 		if ( isset($_REQUEST['directory']) ) 
 			$cwd .= stripslashes(urldecode($_REQUEST['directory']));
 
+		if ( isset($_REQUEST['adirectory']) && empty($_REQUEST['adirectory']) )
+			$_REQUEST['adirectory'] = '/'; //For good measure.
+
 		if ( isset($_REQUEST['adirectory']) )
 			$cwd = stripslashes(urldecode($_REQUEST['adirectory']));
 
@@ -439,7 +442,10 @@ die(); */
 		for ( $i = count($parts)-1; $i >= 0; $i-- ) {
 			$piece = $parts[$i];
 			$adir = implode('/', array_slice($parts, 0, $i+1));
-			$durl = esc_url(add_query_arg(array('adirectory' => ltrim($adir, '/') ), $url));
+			if ( strlen($adir) > 1 )
+				$adir = ltrim($adir, '/');
+
+			$durl = esc_url(add_query_arg(array('adirectory' => $adir ), $url));
 			$dirparts = '<a href="' . $durl . '">' . $piece . DIRECTORY_SEPARATOR . '</a>' . $dirparts; 
 			$dir = dirname($dir);
 		}
