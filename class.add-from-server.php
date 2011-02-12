@@ -126,14 +126,14 @@ class add_from_server {
 		if ( $static_root )
 			return $static_root;
 
-		$root = get_option('frmsvr_root', null);
+		$root = get_option('frmsvr_root', false);
 		if ( strpos($root, '%') !== false && 'raw' != $context ) {
 			$user = wp_get_current_user();
 
 			$root = str_replace('%username%', $user->user_login, $root);
 			$root = str_replace('%role%', $user->roles[0], $root);
 		}
-		if ( is_null($root) ) {
+		if ( false === $root ) {
 			$file = __FILE__;
 			if ( '/' == $file[0] )
 				$root = '/';
