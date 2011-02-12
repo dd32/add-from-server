@@ -127,6 +127,7 @@ class add_from_server {
 			return $static_root;
 
 		$root = get_option('frmsvr_root', false);
+		var_dump($root);
 		if ( strpos($root, '%') !== false && 'raw' != $context ) {
 			$user = wp_get_current_user();
 
@@ -139,9 +140,12 @@ class add_from_server {
 				$root = '/';
 			elseif ( preg_match('/(\w:)/i', __FILE__, $root_win_match) )
 				$root = $root_win_match[1];
+			var_Dump($file[0], $root, $root_win_match);
 		}
 
-		$static_root = $root = strtolower( untrailingslashit($root) );
+		if ( strlen($root) > 1 )
+			$root =  untrailingslashit($root);
+		$static_root = $root = strtolower( $root );
 		var_Dump($root);
 		return $root;
 	}
