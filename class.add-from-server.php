@@ -127,7 +127,6 @@ class add_from_server {
 			return $static_root;
 
 		$root = get_option('frmsvr_root', false);
-		var_dump($root);
 		if ( strpos($root, '%') !== false && 'raw' != $context ) {
 			$user = wp_get_current_user();
 
@@ -140,13 +139,11 @@ class add_from_server {
 				$root = '/';
 			elseif ( preg_match('/(\w:)/i', __FILE__, $root_win_match) )
 				$root = $root_win_match[1];
-			var_Dump($file[0], $root, $root_win_match);
 		}
 
 		if ( strlen($root) > 1 )
 			$root =  untrailingslashit($root);
 		$static_root = $root = strtolower( $root );
-		var_Dump($root);
 		return $root;
 	}
 
@@ -408,7 +405,7 @@ die(); */
 
 		if ( ! is_readable($cwd) && is_readable( $this->get_root() . '/' . ltrim($cwd, '/') ) )
 			$cwd = $this->get_root() . '/' . ltrim($cwd, '/');
-
+var_Dump($cwd, is_readable($cwd) );
 		if ( ! is_readable($cwd) && get_option('frmsvr_last_folder') )
 			$cwd = get_option('frmsvr_last_folder');
 
@@ -417,7 +414,7 @@ die(); */
 
 		if ( strpos($cwd, $this->get_root()) === false )
 			$cwd = $this->get_root();
-
+var_dump($cwd, $this->get_root(), strpos($cwd, $this->get_root()));
 		$cwd = str_replace('\\', '/', $cwd);
 
 		$cwd = untrailingslashit($cwd);
