@@ -308,7 +308,7 @@ die(); */
 			// copy the file to the uploads dir
 			$new_file = $uploads['path'] . '/' . $filename;
 			if ( false === @copy( $file, $new_file ) )
-				wp_die(sprintf( __('The selected file could not be copied to %s.', 'add-from-server'), $uploads['path']));
+				return new WP_Error('upload_error', sprintf( __('The selected file could not be copied to %s.', 'add-from-server'), $uploads['path']) );
 
 			// Set correct file permissions
 			$stat = stat( dirname( $new_file ));
