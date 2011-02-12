@@ -465,7 +465,8 @@ die(); */
 					if ( strpos($adir, $this->get_root()) === false )
 						continue;
 					$adir = preg_replace('!^' . preg_quote($this->get_root(), '!') . '!i', '', $adir);
-					$adir = ltrim($adir, '/');
+					if ( strlen($adir) > 1 )
+						$adir = ltrim($adir, '/');
 					$durl = add_query_arg(array('adirectory' => addslashes($adir)), $url);
 					$pieces[] = "<a href='$durl'>$text</a>";
 				}
@@ -591,8 +592,9 @@ die(); */
 
 	//HELPERS	
 	function find_files( $folder, $args = array() ) {
-	
-		$folder = untrailingslashit($folder);
+
+		if ( strlen($folder) > 1 )
+			$folder = untrailingslashit($folder);
 	
 		$defaults = array( 'pattern' => '', 'levels' => 100, 'relative' => '' );
 		$r = wp_parse_args($args, $defaults);
