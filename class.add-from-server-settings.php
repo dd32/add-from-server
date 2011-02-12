@@ -83,6 +83,7 @@ class add_from_server_settings {
 					printf( __('You may use placeholders such as %s and %s in the path.', 'add-from-server'), '%username%', '%role%'); 
 					echo '&nbsp;&nbsp;';
 					printf( __('For reference, Your WordPress Root path is: <code>%s</code>', 'add-from-server'), ABSPATH);
+					?>
 				</em></small>
 				</fieldset>
 				</td>
