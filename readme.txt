@@ -1,89 +1,39 @@
 === Add From Server ===
 Contributors: dd32
-Tags: 2.5, admin, media, uploads, post
-Requires at least: 3.0
+Tags: admin, media, uploads, post, import, files
+Requires at least: 3.1
 Stable tag: 2.3
 
 "Add From Server" is a quick plugin which allows you to import media & files into the WordPress uploads manager from the Webservers filesystem
 
 == Description ==
 
+The heart of a CMS is the ability to upload and insert content, WordPress does a fantastic job at this, unfortunately, some web hosts have limited servers, or users simply do not have the ability to upload large files through their web browser.
+Add From Server is designed to help ease this pain, You can upload a bunch of files via FTP (Or your favourite transmission method) and simply import those files from the webserver directly into WordPress.
+
 == Changelog ==
 
 = 3.0 =
- * 
-
-= 2.3 =
- * Quick 3.0 compatibility release
- * Removed Deprecated notices, Fixed a few other warnings occasionally
- * GUID now a valid url when % is included in the filename
- * Requires WordPress 3.0 now.
-
-= 2.x =
- * French update from Denis Rebaud
-
-= 2.2.1 =
- * Remove svn:externals, The WordPress .zip packager does NOT like making peoples life easier when you've got multiple plugins.
-
-= 2.2 =
- * Slight error warning changes
- * WARNING: 2.8.5/2.9 compatibility: ALL users who can upload files will now have access to the Add From Server functionality, This is due to security changes in wordpress removing the unfiltered uploads functionality. This has the side effect that you cannot upload ALL types of files too, See the FAQ for some more info.
- * Re-ordered changelog for 2.8 changelog compatibility.
-
-= 2.1 =
- * Introduce QuickJump
- * Fix bugs related to the Admin navigation disapearing
- * Fix bugs related to hints showing up linking to the wrong page
- * Do not show the Inline uploaders tabs in the normal uploader :)
- * Fix 2.8.1's plugin security mashes..
-
-= 2.0.1 =
- * Russian Translation from Lecactus
-
-= 2.0 =
- * Requires WordPress 2.7+ (From now on, My Plugins will only be supported for the current stable branch)
- * WP2.7 SSL Support
- * WP2.7 checkbox support
- * WP2.7 upload modifications
- * WP2.7 Styling
- * Files/folders are sorted by name
- * Update Notification changelogs (On the plugins page)
- * Completely rewritten, Hopefully this'll fix some long-time bugs which have affected some.
- * Persion translation from sourena
- * Italian translation from Stafano
-
-= 1.4 =
- * German Translation
- * More stuffing around with the checkbox that doesnt work for anyone, yet works on every test system i've tried
- * Set the date on imported files to that of their uploads folder
-
-= 1.3.2 =
- * French translation changes from Ozh & Olivier
- * Fixed the checkbox list for certain unknown browsers.
-
-= 1.3 =
- * Internationalisation; French translation
- * Internationalisation; Spanish translation
- * Checkbox select all
- * Import into non-post attachment
-
-= 1.2 =
- * Fixed filename oddness including old directory names
- * Added a check to see if the file exists in the Media library allready
- * Added a check to see if the file is allready in the uploads folder before importing, and if so, simply add it to the database, do not mash the filesystem
-
-= 1.1 =
- * Fixed a bug which causes the original import file to be deleted upon removing from the media library, The file in /uploads/2008/03/ remains however. Will now delete the file in the uploads folder instead of the original imported file, However, Be warned, files previously imported WILL remain as they are, and the original import file will be deleted(if you delete from the media library)
-
-= 1.0 =
- * Initial Release
+ * For Pre-3.0 changelog, Please see http://plugins.svn.wordpress.org/add-from-server/tags/2.3/readme.txt
+ * Cleanup, Now requires WordPress 3.1+
+ * Now has an options panel to control who is allowed to import files
+ * Now has the option to specify what the base directory is for file imports (ie. allows you to prevent users access to non-public directories)
 
 
-== Future Features ==
-Please note that these are simply features i'd like to do, There is no timeframe, or guarantee that it will be in the next version.
-1. Watch folder, New files detected in the watch manager automatically get imported
-1. The ability to select a file and switch directly to adding it to the post
+== FAQ ==
+ Q: What placeholders can I use in the Root path option?
+ You can use %role% and %username% only. In the case of Role, The first role which the user has is used, This can mean that in complex installs, that using %role% is unreliable.
+
+ Q: Why does the file I want to import have a red background?
+ WordPress only allows the importing/uploading of certain file types to improve your security. If you wish to add extra file types, you can use a plugin such as: http://wordpress.org/extend/plugins/pjw-mime-config/ You can also enable "Unfiltered uploads" globally for WordPress if you'd like to override this security function. Please see the WordPress support forum for details.
+
+ Q: Where are the files saved?
+ If you import a file which is outside your standard upload directory (usually wp-content/uploads/) then it will be copied to your current upload directory setting as normal. If you however import a file which -is already within the uploads directory- (for example, wp-content/uploads/2011/02/superplugin.zip) then the file will not be copied, and will be used as-is.
+
+ Q: I have a a bug report
+ Then please email me! wordpress at dd32.id.au is best.
 
 == Screenshots ==
 
-1. The import manager
+1. The import manager, This allows you to select which files to import. Note that files which cannot be imported are Red.
+2. The Options panel, This allows you to specify what users can access Add From Server, and which folders users can import files from.

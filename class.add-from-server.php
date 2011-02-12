@@ -264,7 +264,7 @@ die(); */
 		extract( $wp_filetype );
 		
 		if ( ( !$type || !$ext ) && !current_user_can( 'unfiltered_upload' ) )
-			return new WP_Error('wrong_file_type', __( 'File type does not meet security guidelines. Try another.' ) ); //A WP-core string..
+			return new WP_Error('wrong_file_type', __( 'Sorry, this file type is not permitted for security reasons.' ) ); //A WP-core string..
 
 		//Is the file allready in the uploads folder?
 		if ( preg_match('|^' . preg_quote(str_replace('\\', '/', $uploads['basedir'])) . '(.*)$|i', $file, $mat) ) {
@@ -548,7 +548,7 @@ die(); */
 					$sanname = preg_replace('![^a-zA-Z0-9]!', '', $filename) . '-' . ++$i;
 				$names[] = $sanname;
 		?>
-			<tr class="<?php echo esc_attr(implode(' ', $classes)); ?>" title="<?php if ( ! $file_meets_guidelines ) { _e('This filetype does not meet the Security guidelines, Please see the FAQ.', 'add-from-server'); } ?>">
+			<tr class="<?php echo esc_attr(implode(' ', $classes)); ?>" title="<?php if ( ! $file_meets_guidelines ) { _e('Sorry, this file type is not permitted for security reasons. Please see the FAQ.', 'add-from-server'); } ?>">
 				<th class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($filename) ?>' <?php disabled(!$file_meets_guidelines); ?> /></th>
 				<td><label for='file-<?php echo $sanname; ?>'><?php echo $filename ?></label></td>
 			</tr>
