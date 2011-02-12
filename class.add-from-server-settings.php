@@ -79,7 +79,11 @@ class add_from_server_settings {
 				<br />
 				<input type="text" name="frmsvr_root-specified" id="frmsvr_root-specify-specified" class="large-text code" value="<?php echo esc_attr( str_replace('/', DIRECTORY_SEPARATOR, $root) . (strlen($root) > 1 ? DIRECTORY_SEPARATOR : '')); ?>" />
 				<br />
-				<small><em><?php printf( __('You may use placeholders such as %s and %s in the path.', 'add-from-server'), '%username%', '%role%'); ?></em></small>
+				<small><em><?php
+					printf( __('You may use placeholders such as %s and %s in the path.', 'add-from-server'), '%username%', '%role%'); 
+					echo '&nbsp;&nbsp;';
+					printf( __('For reference, Your WordPress Root path is: <code>%s</code>', 'add-from-server'), ABSPATH);
+				</em></small>
 				</fieldset>
 				</td>
 			</tr>
