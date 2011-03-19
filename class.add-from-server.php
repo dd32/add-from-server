@@ -529,7 +529,7 @@ die(); */
 			</tr>
 		<?php
 			endforeach;
-			$names = $rejected_files = $unreadable_riles = array();
+			$names = $rejected_files = $unreadable_files = array();
 			$unfiltered_upload = current_user_can( 'unfiltered_upload' );
 			foreach ( (array)$files as $key => $file ) {
 				if ( ! $unfiltered_upload ) {
