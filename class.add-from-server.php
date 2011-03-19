@@ -1,7 +1,7 @@
 <?php
 class add_from_server {
 
-	var $version = '2.4';
+	var $version = '3.0-alpha';
 	var $basename = '';
 	
 	var $meets_guidelines = array(); // Internal use only.
