@@ -2,7 +2,7 @@
 Contributors: dd32
 Tags: admin, media, uploads, post, import, files
 Requires at least: 3.2
-Stable tag: 3.2.0
+Stable tag: 3.2.0.1
 
 "Add From Server" is a quick plugin which allows you to import media & files into the WordPress uploads manager from the Webservers filesystem
 
@@ -13,6 +13,11 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 
 == Changelog ==
 
+= 3.2.0.1 =
+ * Fix: Incorrect GUID on imported items in subdir of uploads folder
+ * Fix: Not all items would correctly trigger the already-imported error
+
+
 = 3.2.0 =
  * For Pre-3.2 changelog, Please see http://plugins.svn.wordpress.org/add-from-server/tags/2.3/readme.txt
  * Cleanup, Now requires WordPress 3.2+
@@ -22,7 +27,7 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 
 == Upgrade Notice ==
 
-= 3.2.0 =
+= 3.2.0.1 =
 This update of Add From Server has been months in the making, Many things rewritten from scratch, Requires WordPress 3.2+, be sure to check out the options page!
 
 == FAQ ==

@@ -1,7 +1,7 @@
 <?php
 class add_from_server {
 
-	var $version = '3.2.0';
+	var $version = '3.2.0.1';
 	var $basename = '';
 	
 	var $meets_guidelines = array(); // Internal use only.
@@ -289,7 +289,7 @@ class add_from_server {
 
 			$url = $uploads['baseurl'] . $mat[1];
 
-			$attachment = get_posts(array( 'post_type' => 'attachment', 'meta_key' => '_wp_attached_file', 'meta_value' => ltrim($uploads['subdir'], '/') . '/' . $filename ));
+			$attachment = get_posts(array( 'post_type' => 'attachment', 'meta_key' => '_wp_attached_file', 'meta_value' => ltrim($mat[1], '/') ));
 			if ( !empty($attachment) )
 				return new WP_Error('file_exists', __( 'Sorry, That file already exists in the WordPress media library.' ) );
 
@@ -334,9 +334,6 @@ class add_from_server {
 			if ( 'file' == $import_date )
 				$time = gmdate( 'Y-m-d H:i:s', @filemtime($file));
 		}
-
-		// Compute the URL
-		$url = $uploads['url'] . '/' . rawurlencode($filename);
 
 		//Apply upload filters
 		$return = apply_filters( 'wp_handle_upload', array( 'file' => $new_file, 'url' => $url, 'type' => $type ) );
