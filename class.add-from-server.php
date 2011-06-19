@@ -1,7 +1,7 @@
 <?php
 class add_from_server {
 
-	var $version = '3.0-alpha';
+	var $version = '3.2.0';
 	var $basename = '';
 	
 	var $meets_guidelines = array(); // Internal use only.
@@ -13,12 +13,21 @@ class add_from_server {
 		add_action('admin_menu', array(&$this, 'admin_menu'));
 	}
 	
+	function requires_32() {
+		echo '<div class="error"><p>' . __('<strong>Add From Server:</strong> Sorry, This plugin requires WordPress 3.2+. Please upgrade your WordPress installation or deactivate this plugin.', 'add-from-server') . '</p></div>';
+	}
+	
 	function admin_init() {
 		//Load any translation files needed:
 		load_plugin_textdomain('add-from-server', '', dirname($this->basename) . '/langs/');
 
 		//Register our JS & CSS
 		wp_register_style ('add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), $this->version);
+
+		if ( ! function_exists('submit_button') ) {
+			add_action('admin_notices', array(&$this, 'requires_32') );
+			return;
+		}
 
 		//Enqueue JS & CSS
 		add_action('load-media_page_add-from-server', array(&$this, 'add_styles') );
@@ -42,6 +51,8 @@ class add_from_server {
 	}
 	
 	function admin_menu() {
+		if ( ! function_exists('submit_button') )
+			return;
 		if ( $this->user_allowed() )
 			add_media_page( __('Add From Server', 'add-from-server'), __('Add From Server', 'add-from-server'), 'read', 'add-from-server', array(&$this, 'menu_page') );
 		add_options_page( __('Add From Server Settings', 'add-from-server'), __('Add From Server', 'add-from-server'), 'manage_options', 'add-from-server-settings', array(&$this, 'options_page') );
