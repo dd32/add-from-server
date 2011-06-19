@@ -29,9 +29,6 @@ class add_from_server_settings {
 				<input name="frmsvr_uac" type="radio" id="frmsvr_uac-role" value="role" <?php checked($uac, 'role'); ?> />
 				<?php _e('Any user with the ability to upload files in the following roles', 'add-from-server'); ?>
 				</label>
-				<!-- <select name="frmsvr_uac_role" id="frmsvr_uac-role-selector">
-				<?php wp_dropdown_roles( get_option('frmsvr_uac_role') ); ?>
-				</select> -->
 				<?php 
 					$current_roles = (array)get_option('frmsvr_uac_role', array());
 					foreach ( get_editable_roles() as $role => $details ) {
@@ -89,10 +86,11 @@ class add_from_server_settings {
 				</td>
 			</tr>
 		</table>
-		<p class="submit">
-			<input type="submit" class="button-primary" value="<?php _e('Save Changes'); // WP String ?>" />
-		</p>
+		<script type="text/javascript">
+			jQuery('#frmsvr_root-specify-specified').change( function() { jQuery('#frmsvr_root-specify').attr('checked', 'checked'); });
+		</script>
 		<?php
+		submit_button( __('Save Changes', 'add-from-server'), 'primary', 'submit');
 		echo '</form>';
 		echo '</div>';
 	}

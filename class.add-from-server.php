@@ -182,9 +182,7 @@ class add_from_server {
 		
 		$input = strtolower($input);
 		$input = str_replace('\\', '/', $input);
-/* var_Dump($_POST, $input, $_input);
-wp_redirect('');
-die(); */
+
 		return $input;
 	}
 	function validate_option_root($o) {
@@ -226,6 +224,9 @@ die(); */
 			if ( ! $import_to_gallery )
 				$post_id = 0;
 
+			flush();
+			wp_ob_end_flush_all();
+
 			foreach ( (array)$files as $file ) {
 				$filename = $cwd . $file;
 				$id = $this->handle_import_file($filename, $post_id, $import_date);
@@ -237,6 +238,8 @@ die(); */
 						echo "<script type='text/javascript'>jQuery('#attachments-count').text(1 * jQuery('#attachments-count').text() + 1);</script>";
 					echo '<div class="updated"><p>' . sprintf(__('<em>%s</em> has been added to Media library', 'add-from-server'), $file) . '</p></div>';
 				}
+				flush();
+				wp_ob_end_flush_all();
 			}
 		}
 	}
@@ -360,6 +363,8 @@ die(); */
 			'post_date' => $post_date,
 			'post_date_gmt' => $post_date_gmt
 		);
+
+		$attachment = apply_filters('afs-import_details', $attachment, $file, $post_id, $import_date);
 
 		//Win32 fix:
 		$new_file = str_replace( strtolower(str_replace('\\', '/', $uploads['basedir'])), $uploads['basedir'], $new_file);
@@ -585,7 +590,7 @@ die(); */
 		</table>
 
 		<fieldset>
-			<legend>Import Options</legend>
+			<legend><?php _e('Import Options', 'add-from-server'); ?></legend>
 	
 		<?php if ( $post_id != 0 ) : ?>
 			<input type="checkbox" name="gallery" id="gallery-import" <?php checked( $import_to_gallery ); ?> /> <label for="gallery-import"><?php _e('Attach imported files to this post', 'add-from-server')?></label>
@@ -600,8 +605,7 @@ die(); */
 		</fieldset>
 		<br class="clear" />
 		<input type="hidden" name="cwd" value="<?php echo esc_attr( $cwd ); ?>" />
-		<input type="submit" class="button savebutton" name="import" value="<?php echo esc_attr( __('Import', 'add-from-server') ); ?>" /> 
-
+		<?php submit_button( __('Import', 'add-from-server'), 'primary', 'import', false); ?>
 		</form>
 		</div>
 	<?php
