@@ -13,10 +13,12 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 
 == Changelog ==
 
+= 3.2.0.2 =
+ * Fix: Translations not loaded early enough for menu items.
+
 = 3.2.0.1 =
  * Fix: Incorrect GUID on imported items in subdir of uploads folder
  * Fix: Not all items would correctly trigger the already-imported error
-
 
 = 3.2.0 =
  * For Pre-3.2 changelog, Please see http://plugins.svn.wordpress.org/add-from-server/tags/2.3/readme.txt
@@ -27,7 +29,7 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 
 == Upgrade Notice ==
 
-= 3.2.0.1 =
+= 3.2.0.2 =
 This update of Add From Server has been months in the making, Many things rewritten from scratch, Requires WordPress 3.2+, be sure to check out the options page!
 
 == FAQ ==

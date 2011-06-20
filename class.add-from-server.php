@@ -3,12 +3,15 @@ class add_from_server {
 
 	var $version = '3.2.0.1';
 	var $basename = '';
+	var $folder = '';
 	
 	var $meets_guidelines = array(); // Internal use only.
 	
-	function __construct($basename) {
-		$this->basename = $basename;
+	function __construct($plugin) {
+		$this->basename = $plugin;
+		$this->folder = dirname($plugin);
 		//Register general hooks.
+		add_action('init', array(&$this, 'load_translations')); // must run before admin_menu
 		add_action('admin_init', array(&$this, 'admin_init'));
 		add_action('admin_menu', array(&$this, 'admin_menu'));
 	}
@@ -17,9 +20,12 @@ class add_from_server {
 		echo '<div class="error"><p>' . __('<strong>Add From Server:</strong> Sorry, This plugin requires WordPress 3.2+. Please upgrade your WordPress installation or deactivate this plugin.', 'add-from-server') . '</p></div>';
 	}
 	
-	function admin_init() {
+	function load_translations() {
 		//Load any translation files needed:
-		load_plugin_textdomain('add-from-server', '', dirname($this->basename) . '/langs/');
+		load_plugin_textdomain('add-from-server', '', $this->folder . '/langs/');
+	}
+	
+	function admin_init() {
 
 		//Register our JS & CSS
 		wp_register_style ('add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), $this->version);
