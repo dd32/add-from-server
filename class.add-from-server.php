@@ -134,7 +134,7 @@ class add_from_server {
 			return;
 
 		include 'class.add-from-server-settings.php';
-		$this->settings = new add_from_server_settings(&$this);
+		$this->settings = new add_from_server_settings($this);
 		$this->settings->render();
 	}
 
