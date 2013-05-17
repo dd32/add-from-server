@@ -297,7 +297,7 @@ class add_from_server {
 
 			$attachment = get_posts(array( 'post_type' => 'attachment', 'meta_key' => '_wp_attached_file', 'meta_value' => ltrim($mat[1], '/') ));
 			if ( !empty($attachment) )
-				return new WP_Error('file_exists', __( 'Sorry, That file already exists in the WordPress media library.' ) );
+				return new WP_Error('file_exists', __( 'Sorry, That file already exists in the WordPress media library.', 'add-from-server' ) );
 
 			//Ok, Its in the uploads folder, But NOT in WordPress's media library.
 			if ( 'file' == $import_date ) {
