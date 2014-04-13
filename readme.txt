@@ -13,6 +13,9 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 
 == Changelog ==
 
+= 3.2.0.4 =
+ * Fix for a PHP Warning shown under certain hosting configurations, "headers already sent by (output started at /home/foxecoma/public_html/<subdir>/wp-content/plugins/add-from-server/class.add-from-server.php:1357)"
+
 = 3.2.0.3 =
  * PHP 5.4 compatibility
  * Special characters in URL fixes
@@ -33,6 +36,9 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
  * Versioning changes - This plugin will from now use the earliest version of WordPress it supports. 3.2 requires 3.2, 3.2.0.1 is a point release which requires 3.2. 3.3.4 will require WP 3.3.4 etc. May seem a little weird, but you'll get used to it, bigger numbers are still better :)
 
 == Upgrade Notice ==
+
+= 3.2.0.4 =
+Compatibility update for certain users experiencing "headers already sent" warnings.
 
 = 3.2.0.3 =
 Japanese Translations, PHP 5.4 compatibility, and a fix to special characters in urls.
