@@ -14,7 +14,7 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 == Changelog ==
 
 = 3.2.0.4 =
- * Fix for a PHP Warning shown under certain hosting configurations, "headers already sent by (output started at /home/foxecoma/public_html/<subdir>/wp-content/plugins/add-from-server/class.add-from-server.php:1357)"
+ * Fix for a PHP Warning shown under certain hosting configurations, "headers already sent by (output started at .../add-from-server/class.add-from-server.php:1357)"
 
 = 3.2.0.3 =
  * PHP 5.4 compatibility
