@@ -11,6 +11,7 @@ Stable tag: 3.2.0.3
 The heart of a CMS is the ability to upload and insert content, WordPress does a fantastic job at this, unfortunately, some web hosts have limited servers, or users simply do not have the ability to upload large files through their web browser.
 Add From Server is designed to help ease this pain, You can upload a bunch of files via FTP (Or your favourite transmission method) and simply import those files from the webserver directly into WordPress.
 
+
 == Changelog ==
 
 = 3.2.0.4 =
