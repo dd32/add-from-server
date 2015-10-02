@@ -9,10 +9,10 @@
  * Text Domain: add-from-server
  */
 
-add_action('plugins_loaded', 'afs_load');
+add_action( 'plugins_loaded', 'afs_load' );
 function afs_load() {
-	if ( ! is_admin() )
+	if ( !is_admin() )
 		return;
 	include 'class.add-from-server.php';
-	$GLOBALS['add-from-server'] = new add_from_server( plugin_basename(__FILE__) );
+	$GLOBALS['add-from-server'] = new add_from_server( plugin_basename( __FILE__ ) );
 }
