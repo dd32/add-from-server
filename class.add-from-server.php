@@ -1,20 +1,16 @@
 <?php
 
-class add_from_server {
+class Add_From_Server {
 
-	var $version = '3.2.0.4';
+	var $version = '3.3';
 	var $basename = '';
-	var $folder = '';
 
-	var $meets_guidelines = array(); // Internal use only.
-
-	function __construct($plugin) {
+	function __construct( $plugin ) {
 		$this->basename = $plugin;
-		$this->folder = dirname( $plugin );
 		//Register general hooks.
-		add_action( 'init', array( &$this, 'load_translations' ) ); // must run before admin_menu
-		add_action( 'admin_init', array( &$this, 'admin_init' ) );
-		add_action( 'admin_menu', array( &$this, 'admin_menu' ) );
+		add_action( 'init', array( $this, 'load_translations' ) ); // must run before admin_menu
+		add_action( 'admin_init', array( $this, 'admin_init' ) );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 	}
 
 	function load_translations() {
@@ -28,19 +24,19 @@ class add_from_server {
 		wp_register_style( 'add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), $this->version );
 
 		//Enqueue JS & CSS
-		add_action( 'load-media_page_add-from-server', array( &$this, 'add_styles' ) );
-		add_action( 'media_upload_server', array( &$this, 'add_styles' ) );
+		add_action( 'load-media_page_add-from-server', array( $this, 'add_styles' ) );
+		add_action( 'media_upload_server', array( $this, 'add_styles' ) );
 
-		add_filter( 'plugin_action_links_' . $this->basename, array( &$this, 'add_configure_link' ) );
+		add_filter( 'plugin_action_links_' . $this->basename, array( $this, 'add_configure_link' ) );
 
 		if ( $this->user_allowed() ) {
 			//Add actions/filters
-			add_filter( 'media_upload_tabs', array( &$this, 'tabs' ) );
-			add_action( 'media_upload_server', array( &$this, 'tab_handler' ) );
+			add_filter( 'media_upload_tabs', array( $this, 'tabs' ) );
+			add_action( 'media_upload_server', array( $this, 'tab_handler' ) );
 		}
 
 		//Register our settings:
-		register_setting( 'add_from_server', 'frmsvr_root', array( &$this, 'sanitize_option_root' ) );
+		register_setting( 'add_from_server', 'frmsvr_root', array( $this, 'sanitize_option_root' ) );
 		//register_setting('add-from-server', 'frmsvr_last_folder');
 		register_setting( 'add_from_server', 'frmsvr_uac' );
 		register_setting( 'add_from_server', 'frmsvr_uac_users' );
@@ -50,8 +46,8 @@ class add_from_server {
 
 	function admin_menu() {
 		if ( $this->user_allowed() )
-			add_media_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'read', 'add-from-server', array( &$this, 'menu_page' ) );
-		add_options_page( __( 'Add From Server Settings', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'manage_options', 'add-from-server-settings', array( &$this, 'options_page' ) );
+			add_media_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'read', 'add-from-server', array( $this, 'menu_page' ) );
+		add_options_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'manage_options', 'add-from-server-settings', array( $this, 'options_page' ) );
 	}
 
 	function add_configure_link($_links) {
@@ -123,8 +119,8 @@ class add_from_server {
 		if ( !current_user_can( 'manage_options' ) )
 			return;
 
-		include 'class.add-from-server-settings.php';
-		$this->settings = new add_from_server_settings( $this );
+		include __DIR__ . '/class.add-from-server-settings.php';
+		$this->settings = new Add_From_Server_Settings( $this );
 		$this->settings->render();
 	}
 

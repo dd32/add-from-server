@@ -1,9 +1,9 @@
 <?php
 
-class add_from_server_settings {
+class Add_From_Server_Settings {
 	var $main; // main Add From Server instance.
 
-	function __construct(&$afs) {
+	function __construct($afs) {
 		$this->main = $afs;
 	}
 
