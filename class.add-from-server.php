@@ -48,8 +48,6 @@ class add_from_server {
 	}
 	
 	function admin_menu() {
-		if ( ! function_exists('submit_button') )
-			return;
 		if ( $this->user_allowed() )
 			add_media_page( __('Add From Server', 'add-from-server'), __('Add From Server', 'add-from-server'), 'read', 'add-from-server', array(&$this, 'menu_page') );
 		add_options_page( __('Add From Server Settings', 'add-from-server'), __('Add From Server', 'add-from-server'), 'manage_options', 'add-from-server-settings', array(&$this, 'options_page') );
