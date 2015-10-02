@@ -1,7 +1,7 @@
 <?php
 class add_from_server {
 
-	var $version = '3.2.0.1';
+	var $version = '3.2.0.4';
 	var $basename = '';
 	var $folder = '';
 	
@@ -22,7 +22,7 @@ class add_from_server {
 	
 	function load_translations() {
 		//Load any translation files needed:
-		load_plugin_textdomain('add-from-server', '', $this->folder . '/langs/');
+		load_plugin_textdomain( 'add-from-server' );
 	}
 	
 	function admin_init() {
