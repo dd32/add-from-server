@@ -7,37 +7,36 @@ class Add_From_Server {
 
 	function __construct( $plugin ) {
 		$this->basename = $plugin;
-		//Register general hooks.
+		// Register general hooks.
 		add_action( 'init', array( $this, 'load_translations' ) ); // must run before admin_menu
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 	}
 
 	function load_translations() {
-		//Load any translation files needed:
+		// Load any translation files needed:
 		load_plugin_textdomain( 'add-from-server' );
 	}
 
 	function admin_init() {
-
-		//Register our JS & CSS
+		// Register our JS & CSS
 		wp_register_style( 'add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), $this->version );
 
-		//Enqueue JS & CSS
+		// Enqueue JS & CSS
 		add_action( 'load-media_page_add-from-server', array( $this, 'add_styles' ) );
 		add_action( 'media_upload_server', array( $this, 'add_styles' ) );
 
 		add_filter( 'plugin_action_links_' . $this->basename, array( $this, 'add_configure_link' ) );
 
 		if ( $this->user_allowed() ) {
-			//Add actions/filters
+			// Add actions/filters
 			add_filter( 'media_upload_tabs', array( $this, 'tabs' ) );
 			add_action( 'media_upload_server', array( $this, 'tab_handler' ) );
 		}
 
-		//Register our settings:
+		// Register our settings:
 		register_setting( 'add_from_server', 'frmsvr_root', array( $this, 'sanitize_option_root' ) );
-		//register_setting('add-from-server', 'frmsvr_last_folder');
+		// register_setting('add-from-server', 'frmsvr_last_folder');
 		register_setting( 'add_from_server', 'frmsvr_uac' );
 		register_setting( 'add_from_server', 'frmsvr_uac_users' );
 		register_setting( 'add_from_server', 'frmsvr_uac_role' );
@@ -60,7 +59,7 @@ class Add_From_Server {
 		return array_merge( $links, $_links );
 	}
 
-	//Add a tab to the media uploader:
+	// Add a tab to the media uploader:
 	function tabs($tabs) {
 		if ( $this->user_allowed() )
 			$tabs['server'] = __( 'Add From Server', 'add-from-server' );
@@ -68,33 +67,30 @@ class Add_From_Server {
 	}
 
 	function add_styles() {
-		//Enqueue support files.
+		// Enqueue support files.
 		if ( 'media_upload_server' == current_filter() )
 			wp_enqueue_style( 'media' );
 		wp_enqueue_style( 'add-from-server' );
 	}
 
-	//Handle the actual page:
+	// Handle the actual page:
 	function tab_handler() {
 		if ( !$this->user_allowed() )
 			return;
 
-		//Set the body ID
+		// Set the body ID
 		$GLOBALS['body_id'] = 'media-upload';
 
-		//Do an IFrame header
+		// Do an IFrame header
 		iframe_header( __( 'Add From Server', 'add-from-server' ) );
 
-		//Add the Media buttons
-		media_upload_header();
-
-		//Handle any imports:
+		// Handle any imports:
 		$this->handle_imports();
 
-		//Do the content
+		// Do the content
 		$this->main_content();
 
-		//Do a footer
+		// Do a footer
 		iframe_footer();
 	}
 
@@ -102,14 +98,14 @@ class Add_From_Server {
 		if ( !$this->user_allowed() )
 			return;
 
-		//Handle any imports:
+		// Handle any imports:
 		$this->handle_imports();
 
 		echo '<div class="wrap">';
 		screen_icon( 'upload' );
-		echo '<h2>' . __( 'Add From Server', 'add-from-server' ) . '</h2>';
+		echo '<h1>' . __( 'Add From Server', 'add-from-server' ) . '</h1>';
 
-		//Do the content
+		// Do the content
 		$this->main_content();
 
 		echo '</div>';
@@ -210,7 +206,7 @@ class Add_From_Server {
 		return true;
 	}
 
-	//Handle the imports
+	// Handle the imports
 	function handle_imports() {
 
 		if ( !empty($_POST['files']) && !empty($_POST['cwd']) ) {
@@ -237,7 +233,7 @@ class Add_From_Server {
 				if ( is_wp_error( $id ) ) {
 					echo '<div class="updated error"><p>' . sprintf( __( '<em>%s</em> was <strong>not</strong> imported due to an error: %s', 'add-from-server' ), esc_html( $file ), $id->get_error_message() ) . '</p></div>';
 				} else {
-					//increment the gallery count
+					// increment the gallery count
 					if ( $import_to_gallery )
 						echo "<script type='text/javascript'>jQuery('#attachments-count').text(1 * jQuery('#attachments-count').text() + 1);</script>";
 					echo '<div class="updated"><p>' . sprintf( __( '<em>%s</em> has been added to Media library', 'add-from-server' ), esc_html( $file ) ) . '</p></div>';
@@ -248,7 +244,7 @@ class Add_From_Server {
 		}
 	}
 
-	//Handle an individual file import.
+	// Handle an individual file import.
 	function handle_import_file($file, $post_id = 0, $import_date = 'file') {
 		set_time_limit( 120 );
 
@@ -274,7 +270,7 @@ class Add_From_Server {
 		if ( (!$type || !$ext) && !current_user_can( 'unfiltered_upload' ) )
 			return new WP_Error( 'wrong_file_type', __( 'Sorry, this file type is not permitted for security reasons.' ) ); //A WP-core string..
 
-		//Is the file allready in the uploads folder?
+		// Is the file allready in the uploads folder?
 		if ( preg_match( '|^' . preg_quote( str_replace( '\\', '/', $uploads['basedir'] ) ) . '(.*)$|i', $file, $mat ) ) {
 
 			$filename = basename( $file );
@@ -286,10 +282,10 @@ class Add_From_Server {
 			if ( !empty($attachment) )
 				return new WP_Error( 'file_exists', __( 'Sorry, That file already exists in the WordPress media library.', 'add-from-server' ) );
 
-			//Ok, Its in the uploads folder, But NOT in WordPress's media library.
+			// Ok, Its in the uploads folder, But NOT in WordPress's media library.
 			if ( 'file' == $import_date ) {
 				$time = @filemtime( $file );
-				if ( preg_match( "|(\d+)/(\d+)|", $mat[1], $datemat ) ) { //So lets set the date of the import to the date folder its in, IF its in a date folder.
+				if ( preg_match( "|(\d+)/(\d+)|", $mat[1], $datemat ) ) { // So lets set the date of the import to the date folder its in, IF its in a date folder.
 					$hour = $min = $sec = 0;
 					$day = 1;
 					$year = $datemat[1];
@@ -328,7 +324,7 @@ class Add_From_Server {
 				$time = gmdate( 'Y-m-d H:i:s', @filemtime( $file ) );
 		}
 
-		//Apply upload filters
+		// Apply upload filters
 		$return = apply_filters( 'wp_handle_upload', array( 'file' => $new_file, 'url' => $url, 'type' => $type ) );
 		$new_file = $return['file'];
 		$url = $return['url'];
@@ -367,7 +363,7 @@ class Add_From_Server {
 
 		$attachment = apply_filters( 'afs-import_details', $attachment, $file, $post_id, $import_date );
 
-		//Win32 fix:
+		// Win32 fix:
 		$new_file = str_replace( strtolower( str_replace( '\\', '/', $uploads['basedir'] ) ), $uploads['basedir'], $new_file );
 
 		// Save the data
@@ -376,12 +372,12 @@ class Add_From_Server {
 			$data = wp_generate_attachment_metadata( $id, $new_file );
 			wp_update_attachment_metadata( $id, $data );
 		}
-		//update_post_meta( $id, '_wp_attached_file', $uploads['subdir'] . '/' . $filename );
+		// update_post_meta( $id, '_wp_attached_file', $uploads['subdir'] . '/' . $filename );
 
 		return $id;
 	}
 
-	//Create the content for the page
+	// Create the content for the page
 	function main_content() {
 		global $pagenow;
 		$post_id = isset($_REQUEST['post_id']) ? intval( $_REQUEST['post_id'] ) : 0;
@@ -390,59 +386,68 @@ class Add_From_Server {
 			$import_to_gallery = true; // cwd should always be set, if it's not, and neither is gallery, this must be the first page load.
 		$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'file';
 
-		if ( 'upload.php' == $pagenow )
+		if ( 'upload.php' == $pagenow ) {
 			$url = admin_url( 'upload.php?page=add-from-server' );
-		else
+		} else {
 			$url = admin_url( 'media-upload.php?tab=server' );
+		}
 
-		if ( $post_id )
+		if ( $post_id ) {
 			$url = add_query_arg( 'post_id', $post_id, $url );
+		}
 
-		$cwd = trailingslashit( get_option( 'frmsvr_last_folder', WP_CONTENT_DIR ) );
+		$cwd = trailingslashit( get_option( 'frmsvr_last_folder' ) ?: WP_CONTENT_DIR );
 
-		if ( isset($_REQUEST['directory']) )
+		if ( isset($_REQUEST['directory']) ) {
 			$cwd .= stripslashes( urldecode( $_REQUEST['directory'] ) );
+		}
 
-		if ( isset($_REQUEST['adirectory']) && empty($_REQUEST['adirectory']) )
-			$_REQUEST['adirectory'] = '/'; //For good measure.
+		if ( isset($_REQUEST['adirectory']) && empty($_REQUEST['adirectory']) ) {
+			$_REQUEST['adirectory'] = '/'; // For good measure.
+		}
 
-		if ( isset($_REQUEST['adirectory']) )
+		if ( isset($_REQUEST['adirectory']) ) {
 			$cwd = stripslashes( urldecode( $_REQUEST['adirectory'] ) );
+		}
 
 		$cwd = preg_replace( '![^/]*/\.\./!', '', $cwd );
 		$cwd = preg_replace( '!//!', '/', $cwd );
 
-		if ( !is_readable( $cwd ) && is_readable( $this->get_root() . '/' . ltrim( $cwd, '/' ) ) )
+		if ( !is_readable( $cwd ) && is_readable( $this->get_root() . '/' . ltrim( $cwd, '/' ) ) ) {
 			$cwd = $this->get_root() . '/' . ltrim( $cwd, '/' );
+		}
 
-		if ( !is_readable( $cwd ) && get_option( 'frmsvr_last_folder' ) )
+		if ( !is_readable( $cwd ) && get_option( 'frmsvr_last_folder' ) ) {
 			$cwd = get_option( 'frmsvr_last_folder' );
-
-		if ( !is_readable( $cwd ) )
-			$cwd = WP_CONTENT_DIR;
-
-		if ( strpos( $cwd, $this->get_root() ) === false )
-			$cwd = $this->get_root();
-
-		$cwd = str_replace( '\\', '/', $cwd );
-
-		if ( strlen( $cwd ) > 1 )
-			$cwd = untrailingslashit( $cwd );
+		}
 
 		if ( !is_readable( $cwd ) ) {
-			echo '<div class="error"><p>';
-			_e( '<strong>Error:</strong> This users root directory is not readable. Please have your site administrator correct the <em>Add From Server</em> root directory settings.', 'add-from-server' );
-			echo '</p></div>';
+			$cwd = WP_CONTENT_DIR;
+		}
+
+		if ( strpos( $cwd, $this->get_root() ) === false ) {
+			$cwd = $this->get_root();
+		}
+
+		$cwd = wp_normalize_path( $cwd );
+
+		if ( strlen( $cwd ) > 1 ) {
+			$cwd = untrailingslashit( $cwd );
+		}
+
+		if ( !is_readable( $cwd ) ) {
+			echo '<div class="error"><p>' . __( '<strong>Error:</strong> This users root directory is not readable. Please have your site administrator correct the <em>Add From Server</em> root directory settings.', 'add-from-server' ) . '</p></div>';
 			return;
 		}
 
 		update_option( 'frmsvr_last_folder', $cwd );
 
-		$files = $this->find_files( $cwd, array( 'levels' => 1 ) );
+		$files = $this->find_files( $cwd );
 
 		$parts = explode( '/', ltrim( str_replace( $this->get_root(), '/', $cwd ), '/' ) );
-		if ( $parts[0] != '' )
+		if ( $parts[0] != '' ) {
 			$parts = array_merge( array( '' ), $parts );
+		}
 		$dir = $cwd;
 		$dirparts = '';
 		for ( $i = count( $parts ) - 1; $i >= 0; $i-- ) {
@@ -451,52 +456,24 @@ class Add_From_Server {
 			if ( strlen( $adir ) > 1 )
 				$adir = ltrim( $adir, '/' );
 			$durl = esc_url( add_query_arg( array( 'adirectory' => $adir ), $url ) );
-			$dirparts = '<a href="' . $durl . '">' . $piece . DIRECTORY_SEPARATOR . '</a>' . $dirparts;
+			$dirparts = '<a href="' . $durl . '">' . $piece . '/</a>' . $dirparts;
 			$dir = dirname( $dir );
 		}
 		unset($dir, $piece, $adir, $durl);
 
 		?>
 		<div class="frmsvr_wrap">
-			<p><?php printf( __( '<strong>Current Directory:</strong> <span id="cwd">%s</span>', 'add-from-server' ), $dirparts ) ?></p>
-			<?php
-			$quickjumps = array();
-			$quickjumps[] = array( __( 'WordPress Root', 'add-from-server' ), ABSPATH );
-			if ( ($uploads = wp_upload_dir()) && false === $uploads['error'] )
-				$quickjumps[] = array( __( 'Uploads Folder', 'add-from-server' ), $uploads['path'] );
-			$quickjumps[] = array( __( 'Content Folder', 'add-from-server' ), WP_CONTENT_DIR );
-
-			$quickjumps = apply_filters( 'frmsvr_quickjumps', $quickjumps );
-
-			if ( !empty($quickjumps) ) {
-				$pieces = array();
-				foreach ( $quickjumps as $jump ) {
-					list($text, $adir) = $jump;
-					$adir = str_replace( '\\', '/', strtolower( $adir ) );
-					if ( strpos( $adir, $this->get_root() ) === false )
-						continue;
-					$adir = preg_replace( '!^' . preg_quote( $this->get_root(), '!' ) . '!i', '', $adir );
-					if ( strlen( $adir ) > 1 )
-						$adir = ltrim( $adir, '/' );
-					$durl = add_query_arg( array( 'adirectory' => rawurlencode( $adir ) ), $url );
-					$pieces[] = "<a href='$durl'>$text</a>";
-				}
-				if ( !empty($pieces) ) {
-					echo '<p>';
-					printf( __( '<strong>Quick Jump:</strong> %s', 'add-from-server' ), implode( ' | ', $pieces ) );
-					echo '</p>';
-				}
-			}
-			?>
-			<form method="post" action="<?php echo $url ?>">
+			<form method="post" action="<?php echo esc_url( $url ); ?>">
+				<p><?php printf( __( '<strong>Current Directory:</strong> <span id="cwd">%s</span>', 'add-from-server' ), $dirparts ) ?></p>
+				<?php $this->display_quick_jumps( $url ); ?>
 				<?php if ( 'media-upload.php' == $GLOBALS['pagenow'] && $post_id > 0 ) : ?>
-					<p><?php printf( __( 'Once you have selected files to be imported, Head over to the <a href="%s">Media Library tab</a> to add them to your post.', 'add-from-server' ), esc_url( admin_url( 'media-upload.php?type=image&tab=library&post_id=' . $post_id ) ) ); ?></p>
+					<p><?php _e( 'Once you have Imported your files, head over to <strong>Insert Media</strong> to add them to your post.', 'add-from-server' ); ?></p>
 				<?php endif; ?>
 				<table class="widefat">
 					<thead>
 					<tr>
-						<th class="check-column"><input type='checkbox'/></th>
-						<th><?php _e( 'File', 'add-from-server' ); ?></th>
+						<td class="check-column"><input type='checkbox'/></td>
+						<td><?php _e( 'File', 'add-from-server' ); ?></td>
 					</tr>
 					</thead>
 					<tbody>
@@ -599,8 +576,8 @@ class Add_From_Server {
 					</tbody>
 					<tfoot>
 					<tr>
-						<th class="check-column"><input type='checkbox'/></th>
-						<th><?php _e( 'File', 'add-from-server' ); ?></th>
+						<td class="check-column"><input type='checkbox'/></td>
+						<td><?php _e( 'File', 'add-from-server' ); ?></td>
 					</tr>
 					</tfoot>
 				</table>
@@ -631,27 +608,59 @@ class Add_From_Server {
 				<input type="hidden" name="cwd" value="<?php echo esc_attr( $cwd ); ?>"/>
 				<?php submit_button( __( 'Import', 'add-from-server' ), 'primary', 'import', false ); ?>
 			</form>
+			<?php $this->language_notice(); ?>
 		</div>
 	<?php
 	}
 
-	//HELPERS
-	function find_files($folder, $args = array()) {
+	function display_quick_jumps( $url ) {
+		$quickjumps = array();
+		$quickjumps[] = array(	
+			__( 'WordPress Root', 'add-from-server' ),
+			wp_normalize_path( ABSPATH )
+		);
+		if ( ($uploads = wp_upload_dir()) && false === $uploads['error'] ) {
+			$quickjumps[] = array(
+				__( 'Uploads Folder', 'add-from-server' ),
+				wp_normalize_path( $uploads['path'] )
+			);
+		}
+		$quickjumps[] = array(
+			__( 'Content Folder', 'add-from-server' ),
+			wp_normalize_path( WP_CONTENT_DIR )
+		);
 
+		$quickjumps = apply_filters( 'frmsvr_quickjumps', $quickjumps );
+
+		if ( empty( $quickjumps ) ) {
+			return;
+		}
+
+		$pieces = array();
+		foreach ( $quickjumps as $jump ) {
+			list( $text, $adir ) = $jump;
+			$adir = wp_normalize_path( $adir );
+
+			// Validate it's within the locked directory
+			if ( strpos( $adir, $this->get_root() ) === false )
+				continue;
+
+			$adir = preg_replace( '!^' . preg_quote( $this->get_root(), '!' ) . '!i', '', $adir );
+			if ( strlen( $adir ) > 1 ) {
+				$adir = ltrim( $adir, '/' );
+			}
+
+			$durl = add_query_arg( array( 'adirectory' => rawurlencode( $adir ) ), $url );
+			$pieces[] = sprintf( '<a href="%s">%s</a>', esc_url( $durl ), esc_html( $text ) );
+		}
+		if ( !empty( $pieces ) ) {
+			printf( '<p>' .  __( '<strong>Quick Jump:</strong> %s', 'add-from-server' ) . '<p>', implode( ' | ', $pieces ) );
+		}
+	}
+
+	function find_files( $folder ) {
 		if ( strlen( $folder ) > 1 )
 			$folder = untrailingslashit( $folder );
-
-		$defaults = array( 'pattern' => '', 'levels' => 100, 'relative' => '' );
-		$r = wp_parse_args( $args, $defaults );
-
-		extract( $r, EXTR_SKIP );
-
-		//Now for recursive calls, clear relative, we'll handle it, and decrease the levels.
-		unset($r['relative']);
-		--$r['levels'];
-
-		if ( !$levels )
-			return array();
 
 		if ( !is_readable( $folder ) )
 			return array();
@@ -659,30 +668,38 @@ class Add_From_Server {
 		$files = array();
 		if ( $dir = @opendir( $folder ) ) {
 			while ( ($file = readdir( $dir )) !== false ) {
-				if ( in_array( $file, array( '.', '..' ) ) )
+				if ( in_array( $file, array( '.', '..' ) ) ) {
 					continue;
-				if ( is_dir( $folder . '/' . $file ) ) {
-					$files2 = $this->find_files( $folder . '/' . $file, $r );
-					if ( $files2 )
-						$files = array_merge( $files, $files2 );
-					else if ( empty($pattern) || preg_match( '|^' . str_replace( '\*', '\w+', preg_quote( $pattern ) ) . '$|i', $file ) )
-						$files[] = $folder . '/' . $file . '/';
-				} else {
-					if ( empty($pattern) || preg_match( '|^' . str_replace( '\*', '\w+', preg_quote( $pattern ) ) . '$|i', $file ) )
-						$files[] = $folder . '/' . $file;
 				}
+				$files[] = $folder . '/' . $file;
 			}
 		}
 		@closedir( $dir );
 
-		if ( !empty($relative) ) {
-			$relative = trailingslashit( $relative );
-			foreach ( $files as $key => $file )
-				$files[$key] = preg_replace( '!^' . preg_quote( $relative ) . '!', '', $file );
-		}
-
 		return $files;
 	}
-}//end class
 
+	function language_notice( $force = false ) {
+		if ( 'en_us' === get_locale() ) {
+			return false;
+		}
 
+		$message_english = 'Hi there!
+I notice you use WordPress in a Language other than English (US), Did you know you can translate WordPress Plugins into your native language as well?
+If you\'d like to help out with translating this plugin into %1$s you can head over to <a href="%2$s">translate.WordPress.org page</a> and suggest translations for any languages which you know.
+Thanks! Dion.';
+		$message = __( 'Hi there!
+I notice you use WordPress in a Language other than English (US), Did you know you can translate WordPress Plugins into your native language as well?
+If you\'d like to help out with translating this plugin into %1$s you can head over to <a href="%2$s">translate.WordPress.org page</a> and suggest translations for any languages which you know.
+Thanks! Dion.', 'add-from-server' );
+
+		if ( $message == $message_english && ! $force ) {
+			return;
+		}
+
+		$translate_url = 'https://translate.wordpress.org/projects/wp-plugins/add-from-server/stable';
+
+		echo '<div class="notice notice-info"><p>' . sprintf( nl2br( $message ), get_locale(), $translate_url ) . '</p></div>';
+	}
+
+}

@@ -10,9 +10,11 @@ class Add_From_Server_Settings {
 	function render() {
 		echo '<div class="wrap">';
 		screen_icon( 'options-general' );
-		echo '<h2>' . __( 'Add From Server Settings', 'add-from-server' ) . '</h2>';
+		echo '<h1>' . __( 'Add From Server', 'add-from-server' ) . '</h1>';
 		echo '<form method="post" action="options.php">';
+
 		settings_fields( 'add_from_server' );
+
 		$uac = get_option( 'frmsvr_uac', 'allusers' );
 		$root = $this->main->get_root( 'raw' );
 		?>
@@ -110,6 +112,7 @@ class Add_From_Server_Settings {
 		<?php
 		submit_button( __( 'Save Changes', 'add-from-server' ), 'primary', 'submit' );
 		echo '</form>';
+		$this->main->language_notice( true );
 		echo '</div>';
 	}
 }
