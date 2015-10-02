@@ -112,7 +112,7 @@ class Add_From_Server_Settings {
 		<?php
 		submit_button( __( 'Save Changes', 'add-from-server' ), 'primary', 'submit' );
 		echo '</form>';
-		$this->main->language_notice( true );
+		$this->main->language_notice( ( get_locale() !== 'en_US' ) );
 		echo '</div>';
 	}
 }

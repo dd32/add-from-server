@@ -44,83 +44,79 @@ class Add_From_Server {
 	}
 
 	function admin_menu() {
-		if ( $this->user_allowed() )
+		if ( $this->user_allowed() ) {
 			add_media_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'read', 'add-from-server', array( $this, 'menu_page' ) );
+		}
 		add_options_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'manage_options', 'add-from-server-settings', array( $this, 'options_page' ) );
 	}
 
-	function add_configure_link($_links) {
+	function add_configure_link( $_links ) {
 		$links = array();
-		if ( $this->user_allowed() )
+		if ( $this->user_allowed() ) {
 			$links[] = '<a href="' . admin_url( 'upload.php?page=add-from-server' ) . '">' . __( 'Import Files', 'add-from-server' ) . '</a>';
-		if ( current_user_can( 'manage_options' ) )
+		}
+		if ( current_user_can( 'manage_options' ) ) {
 			$links[] = '<a href="' . admin_url( 'options-general.php?page=add-from-server-settings' ) . '">' . __( 'Options', 'add-from-server' ) . '</a>';
+		}
 
 		return array_merge( $links, $_links );
 	}
 
 	// Add a tab to the media uploader:
-	function tabs($tabs) {
-		if ( $this->user_allowed() )
+	function tabs( $tabs ) {
+		if ( $this->user_allowed() ) {
 			$tabs['server'] = __( 'Add From Server', 'add-from-server' );
+		}
 		return $tabs;
 	}
 
 	function add_styles() {
 		// Enqueue support files.
-		if ( 'media_upload_server' == current_filter() )
+		if ( 'media_upload_server' == current_filter() ) {
 			wp_enqueue_style( 'media' );
+		}
 		wp_enqueue_style( 'add-from-server' );
 	}
 
 	// Handle the actual page:
 	function tab_handler() {
-		if ( !$this->user_allowed() )
+		global $body_id;
+		if ( !$this->user_allowed() ) {
 			return;
+		}
 
-		// Set the body ID
-		$GLOBALS['body_id'] = 'media-upload';
-
-		// Do an IFrame header
+		$body_id = 'media-upload';
 		iframe_header( __( 'Add From Server', 'add-from-server' ) );
-
-		// Handle any imports:
 		$this->handle_imports();
-
-		// Do the content
 		$this->main_content();
-
-		// Do a footer
 		iframe_footer();
 	}
 
 	function menu_page() {
-		if ( !$this->user_allowed() )
+		if ( !$this->user_allowed() ) {
 			return;
+		}
 
 		// Handle any imports:
 		$this->handle_imports();
 
 		echo '<div class="wrap">';
-		screen_icon( 'upload' );
 		echo '<h1>' . __( 'Add From Server', 'add-from-server' ) . '</h1>';
-
-		// Do the content
 		$this->main_content();
-
 		echo '</div>';
 	}
 
 	function options_page() {
-		if ( !current_user_can( 'manage_options' ) )
+		if ( !current_user_can( 'manage_options' ) ) {
 			return;
+		}
 
 		include __DIR__ . '/class.add-from-server-settings.php';
-		$this->settings = new Add_From_Server_Settings( $this );
-		$this->settings->render();
+		$settings = new Add_From_Server_Settings( $this );
+		$settings->render();
 	}
 
-	function get_root($context = 'use') {
+	function get_root( $context = 'use' ) {
 		static $static_root = null;
 		if ( $static_root )
 			return $static_root;
@@ -132,27 +128,31 @@ class Add_From_Server {
 			$root = str_replace( '%username%', $user->user_login, $root );
 			$root = str_replace( '%role%', $user->roles[0], $root );
 		}
-		if ( false === $root ) {
-			$file = __FILE__;
-			if ( '/' == $file[0] )
+		if ( ! $root ) {
+			if ( '/' == substr( __FILE__, 0, 1 ) ) {
 				$root = '/';
-			elseif ( preg_match( '/(\w:)/i', __FILE__, $root_win_match ) )
+			} elseif ( preg_match( '!^[a-zA-Z]:!', __FILE__, $root_win_match ) ) {
 				$root = $root_win_match[1];
+			}
 		}
 
-		if ( strlen( $root ) > 1 )
+		if ( strlen( $root ) > 1 ) {
 			$root = untrailingslashit( $root );
-		$static_root = $root = strtolower( $root );
+		}
+
 		return $root;
 	}
 
 	function user_allowed() {
-		if ( !current_user_can( 'upload_files' ) )
+		if ( !current_user_can( 'upload_files' ) ) {
 			return false;
+		}
 
 		switch ( get_option( 'frmsvr_uac', 'allusers' ) ) {
+			default:
 			case 'allusers':
 				return true;
+
 			case 'role':
 				$user = wp_get_current_user();
 				$roles = $user->roles;
@@ -162,6 +162,7 @@ class Add_From_Server {
 						return true;
 				}
 				return false;
+
 			case 'listusers':
 				$user = wp_get_current_user();
 				$allowed_users = explode( "\n", get_option( 'frmsvr_uac_users', '' ) );
@@ -174,13 +175,15 @@ class Add_From_Server {
 
 	function sanitize_option_root($input) {
 		$_input = $input;
-		if ( 'specific' == $input )
-			$input = stripslashes( $_POST['frmsvr_root-specified'] );
-		if ( !$this->validate_option_root( $input ) )
-			$input = get_option( 'frmsvr_root' );
+		if ( 'specific' == $input ) {
+			$input = wp_unslash( $_POST['frmsvr_root-specified'] );
+		}
 
-		$input = strtolower( $input );
-		$input = str_replace( '\\', '/', $input );
+		if ( !$this->validate_option_root( $input ) ) {
+			$input = get_option( 'frmsvr_root' );
+		}
+
+		$input = wp_normalize_path( $input );
 
 		return $input;
 	}
@@ -211,18 +214,20 @@ class Add_From_Server {
 
 		if ( !empty($_POST['files']) && !empty($_POST['cwd']) ) {
 
-			$files = array_map( 'stripslashes', $_POST['files'] );
+			$files = wp_unslash( $_POST['files'] );
 
-			$cwd = trailingslashit( stripslashes( $_POST['cwd'] ) );
+			$cwd = trailingslashit( wp_unslash( $_POST['cwd'] ) );
 			$post_id = isset($_REQUEST['post_id']) ? intval( $_REQUEST['post_id'] ) : 0;
 			$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'file';
 
 			$import_to_gallery = isset($_POST['gallery']) && 'on' == $_POST['gallery'];
-			if ( !$import_to_gallery && !isset($_REQUEST['cwd']) )
+			if ( !$import_to_gallery && !isset($_REQUEST['cwd']) ) {
 				$import_to_gallery = true; // cwd should always be set, if it's not, and neither is gallery, this must be the first page load.
+			}
 
-			if ( !$import_to_gallery )
+			if ( !$import_to_gallery ) {
 				$post_id = 0;
+			}
 
 			flush();
 			wp_ob_end_flush_all();
@@ -233,9 +238,6 @@ class Add_From_Server {
 				if ( is_wp_error( $id ) ) {
 					echo '<div class="updated error"><p>' . sprintf( __( '<em>%s</em> was <strong>not</strong> imported due to an error: %s', 'add-from-server' ), esc_html( $file ), $id->get_error_message() ) . '</p></div>';
 				} else {
-					// increment the gallery count
-					if ( $import_to_gallery )
-						echo "<script type='text/javascript'>jQuery('#attachments-count').text(1 * jQuery('#attachments-count').text() + 1);</script>";
 					echo '<div class="updated"><p>' . sprintf( __( '<em>%s</em> has been added to Media library', 'add-from-server' ), esc_html( $file ) ) . '</p></div>';
 				}
 				flush();
@@ -246,32 +248,35 @@ class Add_From_Server {
 
 	// Handle an individual file import.
 	function handle_import_file($file, $post_id = 0, $import_date = 'file') {
-		set_time_limit( 120 );
+		set_time_limit( 0 );
 
 		// Initially, Base it on the -current- time.
 		$time = current_time( 'mysql', 1 );
 		// Next, If it's post to base the upload off:
 		if ( 'post' == $import_date && $post_id > 0 ) {
 			$post = get_post( $post_id );
-			if ( $post && substr( $post->post_date_gmt, 0, 4 ) > 0 )
+			if ( $post && substr( $post->post_date_gmt, 0, 4 ) > 0 ) {
 				$time = $post->post_date_gmt;
+			}
 		} elseif ( 'file' == $import_date ) {
 			$time = gmdate( 'Y-m-d H:i:s', @filemtime( $file ) );
 		}
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
-		if ( !(($uploads = wp_upload_dir( $time )) && false === $uploads['error']) )
+		if ( !(($uploads = wp_upload_dir( $time )) && false === $uploads['error']) ) {
 			return new WP_Error( 'upload_error', $uploads['error'] );
+		}
 
 		$wp_filetype = wp_check_filetype( $file, null );
 
 		extract( $wp_filetype );
 
-		if ( (!$type || !$ext) && !current_user_can( 'unfiltered_upload' ) )
-			return new WP_Error( 'wrong_file_type', __( 'Sorry, this file type is not permitted for security reasons.' ) ); //A WP-core string..
+		if ( (!$type || !$ext) && !current_user_can( 'unfiltered_upload' ) ) {
+			return new WP_Error( 'wrong_file_type', __( 'Sorry, this file type is not permitted for security reasons.', 'add-from-server' ) );
+		}
 
 		// Is the file allready in the uploads folder?
-		if ( preg_match( '|^' . preg_quote( str_replace( '\\', '/', $uploads['basedir'] ) ) . '(.*)$|i', $file, $mat ) ) {
+		if ( preg_match( '|^' . preg_quote( wp_normalize_path( $uploads['basedir'] ), '|' ) . '(.*)$|i', $file, $mat ) ) {
 
 			$filename = basename( $file );
 			$new_file = $file;
@@ -279,8 +284,9 @@ class Add_From_Server {
 			$url = $uploads['baseurl'] . $mat[1];
 
 			$attachment = get_posts( array( 'post_type' => 'attachment', 'meta_key' => '_wp_attached_file', 'meta_value' => ltrim( $mat[1], '/' ) ) );
-			if ( !empty($attachment) )
+			if ( !empty($attachment) ) {
 				return new WP_Error( 'file_exists', __( 'Sorry, That file already exists in the WordPress media library.', 'add-from-server' ) );
+			}
 
 			// Ok, Its in the uploads folder, But NOT in WordPress's media library.
 			if ( 'file' == $import_date ) {
@@ -292,8 +298,9 @@ class Add_From_Server {
 					$month = $datemat[2];
 
 					// If the files datetime is set, and it's in the same region of upload directory, set the minute details to that too, else, override it.
-					if ( $time && date( 'Y-m', $time ) == "$year-$month" )
+					if ( $time && date( 'Y-m', $time ) == "$year-$month" ) {
 						list($hour, $min, $sec, $day) = explode( ';', date( 'H;i;s;j', $time ) );
+					}
 
 					$time = mktime( $hour, $min, $sec, $month, $day, $year );
 				}
@@ -301,8 +308,9 @@ class Add_From_Server {
 
 				// A new time has been found! Get the new uploads folder:
 				// A writable uploads dir will pass this test. Again, there's no point overriding this one.
-				if ( !(($uploads = wp_upload_dir( $time )) && false === $uploads['error']) )
+				if ( !(($uploads = wp_upload_dir( $time )) && false === $uploads['error']) ) {
 					return new WP_Error( 'upload_error', $uploads['error'] );
+				}
 				$url = $uploads['baseurl'] . $mat[1];
 			}
 		} else {
@@ -320,8 +328,9 @@ class Add_From_Server {
 			// Compute the URL
 			$url = $uploads['url'] . '/' . $filename;
 
-			if ( 'file' == $import_date )
+			if ( 'file' == $import_date ) {
 				$time = gmdate( 'Y-m-d H:i:s', @filemtime( $file ) );
+			}
 		}
 
 		// Apply upload filters
@@ -335,10 +344,12 @@ class Add_From_Server {
 
 		// use image exif/iptc data for title and caption defaults if possible
 		if ( $image_meta = @wp_read_image_metadata( $new_file ) ) {
-			if ( '' != trim( $image_meta['title'] ) )
+			if ( '' != trim( $image_meta['title'] ) ) {
 				$title = trim( $image_meta['title'] );
-			if ( '' != trim( $image_meta['caption'] ) )
+			}
+			if ( '' != trim( $image_meta['caption'] ) ) {
 				$content = trim( $image_meta['caption'] );
+			}
 		}
 
 		if ( $time ) {
@@ -363,8 +374,7 @@ class Add_From_Server {
 
 		$attachment = apply_filters( 'afs-import_details', $attachment, $file, $post_id, $import_date );
 
-		// Win32 fix:
-		$new_file = str_replace( strtolower( str_replace( '\\', '/', $uploads['basedir'] ) ), $uploads['basedir'], $new_file );
+		$new_file = str_replace( wp_normalize_path( $uploads['basedir'] ), $uploads['basedir'], $new_file );
 
 		// Save the data
 		$id = wp_insert_attachment( $attachment, $new_file, $post_id );
@@ -382,8 +392,9 @@ class Add_From_Server {
 		global $pagenow;
 		$post_id = isset($_REQUEST['post_id']) ? intval( $_REQUEST['post_id'] ) : 0;
 		$import_to_gallery = isset($_POST['gallery']) && 'on' == $_POST['gallery'];
-		if ( !$import_to_gallery && !isset($_REQUEST['cwd']) )
+		if ( !$import_to_gallery && !isset($_REQUEST['cwd']) ) {
 			$import_to_gallery = true; // cwd should always be set, if it's not, and neither is gallery, this must be the first page load.
+		}
 		$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'file';
 
 		if ( 'upload.php' == $pagenow ) {
@@ -445,21 +456,16 @@ class Add_From_Server {
 		$files = $this->find_files( $cwd );
 
 		$parts = explode( '/', ltrim( str_replace( $this->get_root(), '/', $cwd ), '/' ) );
-		if ( $parts[0] != '' ) {
-			$parts = array_merge( array( '' ), $parts );
-		}
-		$dir = $cwd;
-		$dirparts = '';
-		for ( $i = count( $parts ) - 1; $i >= 0; $i-- ) {
-			$piece = $parts[$i];
-			$adir = implode( '/', array_slice( $parts, 0, $i + 1 ) );
-			if ( strlen( $adir ) > 1 )
-				$adir = ltrim( $adir, '/' );
-			$durl = esc_url( add_query_arg( array( 'adirectory' => $adir ), $url ) );
-			$dirparts = '<a href="' . $durl . '">' . $piece . '/</a>' . $dirparts;
-			$dir = dirname( $dir );
-		}
-		unset($dir, $piece, $adir, $durl);
+
+		$parts = array_filter( $parts );	
+		array_walk( $parts, function( &$item, $index ) use( $url, $parts ) {
+			$path = implode( '/', array_slice( $parts, 0, $index ) );
+			$path = ltrim( $path, '/' ) ?: '/';
+			$item_url = add_query_arg( array( 'adirectory' => $path ), $url );
+
+			$item = sprintf( '<a href="%s">/%s</a>', esc_url( $item_url ), esc_html( $item ) );
+		} );
+		$dirparts = implode( '<span style="text-decoration: underline">&nbsp;</span>', $parts );
 
 		?>
 		<div class="frmsvr_wrap">
@@ -484,10 +490,9 @@ class Add_From_Server {
 						?>
 						<tr>
 							<td>&nbsp;</td>
-							<?php /*  <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> */ ?>
 							<td>
-								<a href="<?php echo add_query_arg( array( 'adirectory' => rawurlencode( $parent ) ), $url ) ?>"
-								   title="<?php echo esc_attr( dirname( $cwd ) ) ?>"><?php _e( 'Parent Folder', 'add-from-server' ) ?></a>
+								<a href="<?php echo esc_url( add_query_arg( array( 'adirectory' => rawurlencode( $parent ) ), $url ) ); ?>"
+								   title="<?php echo esc_attr( dirname( $cwd ) ) ?>"><?php _e( 'Parent Folder', 'add-from-server' ); ?></a>
 							</td>
 						</tr>
 					<?php endif; ?>
@@ -510,7 +515,6 @@ class Add_From_Server {
 						?>
 						<tr>
 							<td>&nbsp;</td>
-							<?php /* <td class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>' name='files[]' value='<?php echo esc_attr($file) ?>' /></td> */ ?>
 							<td>
 								<a href="<?php echo $folder_url ?>"><?php echo esc_html( rtrim( $filename, '/' ) . DIRECTORY_SEPARATOR ); ?></a>
 							</td>
@@ -538,38 +542,30 @@ class Add_From_Server {
 					foreach ( array( 'meets_guidelines' => $files, 'unreadable' => $unreadable_files, 'doesnt_meets_guidelines' => $rejected_files ) as $key => $_files ) :
 						$file_meets_guidelines = $unfiltered_upload || ('meets_guidelines' == $key);
 						$unreadable = 'unreadable' == $key;
-						foreach ( $_files as $file ) :
+						foreach ( $_files as $file_index => $file ) :
 							$classes = array();
 
-							if ( !$file_meets_guidelines )
+							if ( !$file_meets_guidelines ) {
 								$classes[] = 'doesnt-meet-guidelines';
-							if ( $unreadable )
+							}
+							if ( $unreadable ) {
 								$classes[] = 'unreadable';
+							}
 
-							if ( preg_match( '/\.(.+)$/i', $file, $ext_match ) )
-								$classes[] = 'filetype-' . $ext_match[1];
-
-							$filename = preg_replace( '!^' . preg_quote( $cwd ) . '!', '', $file );
+							$filename = preg_replace( '!^' . preg_quote( $cwd, '!' ) . '!', '', $file );
 							$filename = ltrim( $filename, '/' );
-							$sanname = preg_replace( '![^a-zA-Z0-9]!', '', $filename );
 
-							$i = 0;
-							while ( in_array( $sanname, $names ) )
-								$sanname = preg_replace( '![^a-zA-Z0-9]!', '', $filename ) . '-' . ++$i;
-							$names[] = $sanname;
 							?>
-							<tr class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>"
-								title="<?php if ( !$file_meets_guidelines ) {
-									_e( 'Sorry, this file type is not permitted for security reasons. Please see the FAQ.', 'add-from-server' );
+							<tr class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" title="<?php if ( !$file_meets_guidelines ) {
+									esc_attr_e( 'Sorry, this file type is not permitted for security reasons. Please see the FAQ.', 'add-from-server' );
 								} elseif ( $unreadable ) {
-									_e( 'Sorry, but this file is unreadable by your Webserver. Perhaps check your File Permissions?', 'add-from-server' );
+									esc_attr_e( 'Sorry, but this file is unreadable by your Webserver. Perhaps check your File Permissions?', 'add-from-server' );
 								} ?>">
-								<th class='check-column'><input type='checkbox' id='file-<?php echo $sanname; ?>'
-																name='files[]'
-																value='<?php echo esc_attr( $filename ) ?>' <?php disabled( !$file_meets_guidelines || $unreadable ); ?> />
+								<th class='check-column'>
+									<input type='checkbox' id='file-<?php echo (int)$file_index; ?>' name='files[]' value='<?php echo esc_attr( $filename ); ?>' <?php disabled( !$file_meets_guidelines || $unreadable ); ?> />
 								</th>
-								<td><label
-										for='file-<?php echo $sanname; ?>'><?php echo esc_html( $filename ) ?></label>
+								<td>
+									<label for='file-<?php echo (int)$file_index; ?>'><?php echo esc_html( $filename ); ?></label>
 								</td>
 							</tr>
 						<?php endforeach; endforeach; ?>
@@ -585,23 +581,15 @@ class Add_From_Server {
 				<fieldset>
 					<legend><?php _e( 'Import Options', 'add-from-server' ); ?></legend>
 
-					<?php if ( $post_id != 0 ) : ?>
-						<input type="checkbox" name="gallery"
-							   id="gallery-import" <?php checked( $import_to_gallery ); ?> /> <label
-							for="gallery-import"><?php _e( 'Attach imported files to this post', 'add-from-server' ) ?></label>
+					<?php if ( $post_id ) : ?>
+						<input type="checkbox" name="gallery" id="gallery-import" <?php checked( $import_to_gallery ); ?> /><label for="gallery-import"><?php _e( 'Attach imported files to this post', 'add-from-server' ) ?></label>
 						<br class="clear"/>
 					<?php endif; ?>
 					<?php _e( 'Set the imported date to the', 'add-from-server' ); ?>
-					<input type="radio" name="import-date" id="import-time-currenttime"
-						   value="current" <?php checked( 'current', $import_date ); ?> /> <label
-						for="import-time-currenttime"><?php _e( 'Current Time', 'add-from-server' ); ?></label>
-					<input type="radio" name="import-date" id="import-time-filetime"
-						   value="file" <?php checked( 'file', $import_date ); ?> /> <label
-						for="import-time-filetime"><?php _e( 'File Time', 'add-from-server' ); ?></label>
-					<?php if ( $post_id != 0 ) : ?>
-						<input type="radio" name="import-date" id="import-time-posttime"
-							   value="post" <?php checked( 'post', $import_date ); ?> /> <label
-							for="import-time-posttime"><?php _e( 'Post Time', 'add-from-server' ); ?></label>
+					<input type="radio" name="import-date" id="import-time-currenttime" value="current" <?php checked( 'current', $import_date ); ?> /> <label for="import-time-currenttime"><?php _e( 'Current Time', 'add-from-server' ); ?></label>
+					<input type="radio" name="import-date" id="import-time-filetime" value="file" <?php checked( 'file', $import_date ); ?> /> <label for="import-time-filetime"><?php _e( 'File Time', 'add-from-server' ); ?></label>
+					<?php if ( $post_id ) : ?>
+						<input type="radio" name="import-date" id="import-time-posttime" value="post" <?php checked( 'post', $import_date ); ?> /> <label for="import-time-posttime"><?php _e( 'Post Time', 'add-from-server' ); ?></label>
 					<?php endif; ?>
 				</fieldset>
 				<br class="clear"/>
@@ -653,48 +641,34 @@ class Add_From_Server {
 			$durl = add_query_arg( array( 'adirectory' => rawurlencode( $adir ) ), $url );
 			$pieces[] = sprintf( '<a href="%s">%s</a>', esc_url( $durl ), esc_html( $text ) );
 		}
+
 		if ( !empty( $pieces ) ) {
 			printf( '<p>' .  __( '<strong>Quick Jump:</strong> %s', 'add-from-server' ) . '<p>', implode( ' | ', $pieces ) );
 		}
 	}
 
 	function find_files( $folder ) {
-		if ( strlen( $folder ) > 1 )
-			$folder = untrailingslashit( $folder );
-
-		if ( !is_readable( $folder ) )
+		if ( !is_readable( $folder ) ) {
 			return array();
-
-		$files = array();
-		if ( $dir = @opendir( $folder ) ) {
-			while ( ($file = readdir( $dir )) !== false ) {
-				if ( in_array( $file, array( '.', '..' ) ) ) {
-					continue;
-				}
-				$files[] = $folder . '/' . $file;
-			}
 		}
-		@closedir( $dir );
 
-		return $files;
+		return glob( rtrim( $folder, '/' ) . '/*' );
 	}
 
 	function language_notice( $force = false ) {
-		if ( 'en_us' === get_locale() ) {
-			return false;
-		}
-
 		$message_english = 'Hi there!
 I notice you use WordPress in a Language other than English (US), Did you know you can translate WordPress Plugins into your native language as well?
 If you\'d like to help out with translating this plugin into %1$s you can head over to <a href="%2$s">translate.WordPress.org page</a> and suggest translations for any languages which you know.
 Thanks! Dion.';
+		/* translators: %1$s = The Locale (de_DE, en_US, fr_FR, he_IL, etc). %2$s = The translate.wordpress.org link to the plugin overview */
 		$message = __( 'Hi there!
 I notice you use WordPress in a Language other than English (US), Did you know you can translate WordPress Plugins into your native language as well?
 If you\'d like to help out with translating this plugin into %1$s you can head over to <a href="%2$s">translate.WordPress.org page</a> and suggest translations for any languages which you know.
 Thanks! Dion.', 'add-from-server' );
 
-		if ( $message == $message_english && ! $force ) {
-			return;
+		// Don't display the message for English (US) or what we'll assume to be fully translated localised builds.
+		if ( 'en_us' === get_locale() || ( $message == $message_english && ! $force  ) ) {
+			return false;
 		}
 
 		$translate_url = 'https://translate.wordpress.org/projects/wp-plugins/add-from-server/stable';
