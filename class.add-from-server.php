@@ -15,11 +15,7 @@ class add_from_server {
 		add_action('admin_init', array(&$this, 'admin_init'));
 		add_action('admin_menu', array(&$this, 'admin_menu'));
 	}
-	
-	function requires_32() {
-		echo '<div class="error"><p>' . __('<strong>Add From Server:</strong> Sorry, This plugin requires WordPress 3.2+. Please upgrade your WordPress installation or deactivate this plugin.', 'add-from-server') . '</p></div>';
-	}
-	
+
 	function load_translations() {
 		//Load any translation files needed:
 		load_plugin_textdomain( 'add-from-server' );
@@ -29,11 +25,6 @@ class add_from_server {
 
 		//Register our JS & CSS
 		wp_register_style ('add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), $this->version);
-
-		if ( ! function_exists('submit_button') ) {
-			add_action('admin_notices', array(&$this, 'requires_32') );
-			return;
-		}
 
 		//Enqueue JS & CSS
 		add_action('load-media_page_add-from-server', array(&$this, 'add_styles') );
