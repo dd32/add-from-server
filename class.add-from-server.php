@@ -218,7 +218,7 @@ class Add_From_Server {
 
 			$cwd = trailingslashit( wp_unslash( $_POST['cwd'] ) );
 			$post_id = isset($_REQUEST['post_id']) ? intval( $_REQUEST['post_id'] ) : 0;
-			$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'file';
+			$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'current';
 
 			$import_to_gallery = isset($_POST['gallery']) && 'on' == $_POST['gallery'];
 			if ( !$import_to_gallery && !isset($_REQUEST['cwd']) ) {
@@ -247,7 +247,7 @@ class Add_From_Server {
 	}
 
 	// Handle an individual file import.
-	function handle_import_file($file, $post_id = 0, $import_date = 'file') {
+	function handle_import_file( $file, $post_id = 0, $import_date = 'current' ) {
 		set_time_limit( 0 );
 
 		// Initially, Base it on the -current- time.
@@ -395,7 +395,7 @@ class Add_From_Server {
 		if ( !$import_to_gallery && !isset($_REQUEST['cwd']) ) {
 			$import_to_gallery = true; // cwd should always be set, if it's not, and neither is gallery, this must be the first page load.
 		}
-		$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'file';
+		$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'current';
 
 		if ( 'upload.php' == $pagenow ) {
 			$url = admin_url( 'upload.php?page=add-from-server' );
@@ -456,16 +456,18 @@ class Add_From_Server {
 		$files = $this->find_files( $cwd );
 
 		$parts = explode( '/', ltrim( str_replace( $this->get_root(), '/', $cwd ), '/' ) );
+		if ( $parts[0] != '' ) {
+			$parts = array_merge( (array)'', $parts );
+		}
 
-		$parts = array_filter( $parts );	
 		array_walk( $parts, function( &$item, $index ) use( $url, $parts ) {
 			$path = implode( '/', array_slice( $parts, 0, $index ) );
 			$path = ltrim( $path, '/' ) ?: '/';
 			$item_url = add_query_arg( array( 'adirectory' => $path ), $url );
 
-			$item = sprintf( '<a href="%s">/%s</a>', esc_url( $item_url ), esc_html( $item ) );
+			$item = sprintf( '<a href="%s">%s/</a>', esc_url( $item_url ), esc_html( $item ) );
 		} );
-		$dirparts = implode( '<span style="text-decoration: underline">&nbsp;</span>', $parts );
+		$dirparts = implode( '', $parts );
 
 		?>
 		<div class="frmsvr_wrap">
@@ -485,7 +487,7 @@ class Add_From_Server {
 					<tbody>
 					<?php
 					$parent = dirname( $cwd );
-					if ( (strpos( $parent, $this->get_root() ) === 0) && is_readable( $parent ) ) :
+					if ( $parent != $cwd && (strpos( $parent, $this->get_root() ) === 0) && is_readable( $parent ) ) :
 						$parent = preg_replace( '!^' . preg_quote( $this->get_root(), '!' ) . '!i', '', $parent );
 						?>
 						<tr>
@@ -499,7 +501,7 @@ class Add_From_Server {
 					<?php
 					$directories = array();
 					foreach ( (array)$files as $key => $file ) {
-						if ( '/' == substr( $file, -1 ) ) {
+						if ( is_dir( $file ) ) {
 							$directories[] = $file;
 							unset($files[$key]);
 						}
@@ -516,7 +518,7 @@ class Add_From_Server {
 						<tr>
 							<td>&nbsp;</td>
 							<td>
-								<a href="<?php echo $folder_url ?>"><?php echo esc_html( rtrim( $filename, '/' ) . DIRECTORY_SEPARATOR ); ?></a>
+								<a href="<?php echo esc_url( $folder_url ); ?>"><?php echo esc_html( rtrim( $filename, '/' ) . '/' ); ?></a>
 							</td>
 						</tr>
 					<?php
@@ -667,7 +669,7 @@ If you\'d like to help out with translating this plugin into %1$s you can head o
 Thanks! Dion.', 'add-from-server' );
 
 		// Don't display the message for English (US) or what we'll assume to be fully translated localised builds.
-		if ( 'en_us' === get_locale() || ( $message == $message_english && ! $force  ) ) {
+		if ( 'en_US' === get_locale() || ( $message == $message_english && ! $force  ) ) {
 			return false;
 		}
 

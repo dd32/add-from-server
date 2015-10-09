@@ -1,8 +1,3 @@
-.wrap .frmsvr_wrap,
-.wrap .frmsvr_wrap form {
-	margin: 1em;
-}
-
 .frmsvr_wrap .widefat tbody tr.doesnt-meet-guidelines,
 .frmsvr_wrap .widefat tbody tr.unreadable {
 	background-color: #FFE8EE;
@@ -10,7 +5,5 @@
 
 .frmsvr_wrap fieldset {
 	padding: 5px;
-	border: 1px #ebebeb solid;
-	margin-bottom: 0.7em;
 	margin-top: 0.7em;
 }
