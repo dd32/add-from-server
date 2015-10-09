@@ -2,7 +2,7 @@
 
 class Add_From_Server {
 
-	var $version = '3.3';
+	var $version = '3.3.1';
 	var $basename = '';
 
 	function __construct( $plugin ) {

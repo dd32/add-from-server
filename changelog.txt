@@ -1,3 +1,6 @@
+= 3.3.1 =
+ * Fix plugin activation
+
 = 3.3 =
  * The plugin now requires WordPress 4.0 and PHP 5.4 as a minumum requirement.
  * Updated to use WordPress.org translation system, please submit translations through https://translate.wordpress.org/projects/wp-plugins/add-from-server/stable
