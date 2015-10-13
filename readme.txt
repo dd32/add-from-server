@@ -13,6 +13,9 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 
 == Changelog ==
 
+= 3.3.2 =
+ * Fix a typo that caused subsequent plugin activations to fail if the server doesn't meet the Add From Server requirements
+
 = 3.3.1 =
  * Fix plugin activation
 

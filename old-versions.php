@@ -4,7 +4,7 @@ class Add_From_Server {
 	function __construct( $plugin_basename ) {
 
 		// Handle activation gracefully with a block screen.
-		if ( isset( $_REQUEST['action'] ) && ( 'activate' == $_REQUEST['action'] || 'error_scrape' == $_REQUEST['action'] ) && isset( $_REQUEST['plugin'] ) && $plugin_basename = $_REQUEST['plugin'] ) {
+		if ( isset( $_REQUEST['action'] ) && ( 'activate' == $_REQUEST['action'] || 'error_scrape' == $_REQUEST['action'] ) && isset( $_REQUEST['plugin'] ) && $plugin_basename == $_REQUEST['plugin'] ) {
 			load_plugin_textdomain( 'add-from-server' );
 			die( sprintf(
 				__( 'This plugin requires WordPress %1$s or greater, and PHP %2$s or greater. You are currently running WordPress %3$s and PHP %4$s. Please contact your website host or server administrator for more information. The plugin has been deactivated.', 'add-from-server' ),
