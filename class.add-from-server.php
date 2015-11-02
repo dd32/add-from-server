@@ -2,7 +2,7 @@
 
 class Add_From_Server {
 
-	var $version = '3.3.1';
+	var $version = '3.3.2';
 	var $basename = '';
 
 	function __construct( $plugin ) {
@@ -183,7 +183,8 @@ class Add_From_Server {
 			$input = get_option( 'frmsvr_root' );
 		}
 
-		$input = wp_normalize_path( $input );
+		// WP < 4.4 Compat: ucfirt
+		$input = ucfirst( wp_normalize_path( $input ) );
 
 		return $input;
 	}
@@ -276,7 +277,8 @@ class Add_From_Server {
 		}
 
 		// Is the file allready in the uploads folder?
-		if ( preg_match( '|^' . preg_quote( wp_normalize_path( $uploads['basedir'] ), '|' ) . '(.*)$|i', $file, $mat ) ) {
+		// WP < 4.4 Compat: ucfirt
+		if ( preg_match( '|^' . preg_quote( ucfirst( wp_normalize_path( $uploads['basedir'] ) ), '|' ) . '(.*)$|i', $file, $mat ) ) {
 
 			$filename = basename( $file );
 			$new_file = $file;
@@ -374,7 +376,8 @@ class Add_From_Server {
 
 		$attachment = apply_filters( 'afs-import_details', $attachment, $file, $post_id, $import_date );
 
-		$new_file = str_replace( wp_normalize_path( $uploads['basedir'] ), $uploads['basedir'], $new_file );
+		// WP < 4.4 Compat: ucfirt
+		$new_file = str_replace( ucfirst( wp_normalize_path( $uploads['basedir'] ) ), $uploads['basedir'], $new_file );
 
 		// Save the data
 		$id = wp_insert_attachment( $attachment, $new_file, $post_id );
@@ -440,7 +443,8 @@ class Add_From_Server {
 			$cwd = $this->get_root();
 		}
 
-		$cwd = wp_normalize_path( $cwd );
+		// WP < 4.4 Compat: ucfirt
+		$cwd = ucfirst( wp_normalize_path( $cwd ) );
 
 		if ( strlen( $cwd ) > 1 ) {
 			$cwd = untrailingslashit( $cwd );
@@ -607,17 +611,17 @@ class Add_From_Server {
 		$quickjumps = array();
 		$quickjumps[] = array(	
 			__( 'WordPress Root', 'add-from-server' ),
-			wp_normalize_path( ABSPATH )
+			ucfirst( wp_normalize_path( ABSPATH ) ) // WP < 4.4 Compat: ucfirt
 		);
 		if ( ($uploads = wp_upload_dir()) && false === $uploads['error'] ) {
 			$quickjumps[] = array(
 				__( 'Uploads Folder', 'add-from-server' ),
-				wp_normalize_path( $uploads['path'] )
+				ucfirst( wp_normalize_path( $uploads['path'] ) ) // WP < 4.4 Compat: ucfirt
 			);
 		}
 		$quickjumps[] = array(
 			__( 'Content Folder', 'add-from-server' ),
-			wp_normalize_path( WP_CONTENT_DIR )
+			ucfirst( wp_normalize_path( WP_CONTENT_DIR ) ) // WP < 4.4 Compat: ucfirt
 		);
 
 		$quickjumps = apply_filters( 'frmsvr_quickjumps', $quickjumps );
@@ -629,7 +633,7 @@ class Add_From_Server {
 		$pieces = array();
 		foreach ( $quickjumps as $jump ) {
 			list( $text, $adir ) = $jump;
-			$adir = wp_normalize_path( $adir );
+			$adir = ucfirst( wp_normalize_path( $adir ) ); // WP < 4.4 Compat: ucfirt
 
 			// Validate it's within the locked directory
 			if ( strpos( $adir, $this->get_root() ) === false )

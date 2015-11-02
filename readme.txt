@@ -15,6 +15,7 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 
 = 3.3.2 =
  * Fix a typo that caused subsequent plugin activations to fail if the server doesn't meet the Add From Server requirements
+ * Fix a path mismatch on certain windows configurations (No longer need to specify uppercase disk markers)
 
 = 3.3.1 =
  * Fix plugin activation
