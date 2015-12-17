@@ -664,12 +664,12 @@ class Add_From_Server {
 	function language_notice( $force = false ) {
 		$message_english = 'Hi there!
 I notice you use WordPress in a Language other than English (US), Did you know you can translate WordPress Plugins into your native language as well?
-If you\'d like to help out with translating this plugin into %1$s you can head over to <a href="%2$s">translate.WordPress.org page</a> and suggest translations for any languages which you know.
+If you\'d like to help out with translating this plugin into %1$s you can head over to <a href="%2$s">translate.WordPress.org</a> and suggest translations for any languages which you know.
 Thanks! Dion.';
 		/* translators: %1$s = The Locale (de_DE, en_US, fr_FR, he_IL, etc). %2$s = The translate.wordpress.org link to the plugin overview */
 		$message = __( 'Hi there!
 I notice you use WordPress in a Language other than English (US), Did you know you can translate WordPress Plugins into your native language as well?
-If you\'d like to help out with translating this plugin into %1$s you can head over to <a href="%2$s">translate.WordPress.org page</a> and suggest translations for any languages which you know.
+If you\'d like to help out with translating this plugin into %1$s you can head over to <a href="%2$s">translate.WordPress.org</a> and suggest translations for any languages which you know.
 Thanks! Dion.', 'add-from-server' );
 
 		// Don't display the message for English (US) or what we'll assume to be fully translated localised builds.
