@@ -465,11 +465,15 @@ class Add_From_Server {
 		}
 
 		array_walk( $parts, function( &$item, $index ) use( $url, $parts ) {
-			$path = implode( '/', array_slice( $parts, 0, $index ) );
+			$path = implode( '/', array_slice( $parts, 0, $index + 1 ) );
 			$path = ltrim( $path, '/' ) ?: '/';
 			$item_url = add_query_arg( array( 'adirectory' => $path ), $url );
 
-			$item = sprintf( '<a href="%s">%s/</a>', esc_url( $item_url ), esc_html( $item ) );
+			if ( $index == count( $parts ) - 1 ) {
+				$item = esc_html( $item ) . '/';
+			} else {
+				$item = sprintf( '<a href="%s">%s/</a>', esc_url( $item_url ), esc_html( $item ) );
+			}
 		} );
 		$dirparts = implode( '', $parts );
 
