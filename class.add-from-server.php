@@ -215,10 +215,16 @@ class Add_From_Server {
 
 		if ( !empty($_POST['files']) && !empty($_POST['cwd']) ) {
 
+			check_admin_referer( 'afs_import' );
+
 			$files = wp_unslash( $_POST['files'] );
 
 			$cwd = trailingslashit( wp_unslash( $_POST['cwd'] ) );
-			$post_id = isset($_REQUEST['post_id']) ? intval( $_REQUEST['post_id'] ) : 0;
+			if ( false === strpos( $cwd, $this->get_root() ) ) {
+				return;
+			}
+
+			$post_id = isset($_REQUEST['post_id']) ? absint( $_REQUEST['post_id'] ) : 0;
 			$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'current';
 
 			$import_to_gallery = isset($_POST['gallery']) && 'on' == $_POST['gallery'];
@@ -342,15 +348,67 @@ class Add_From_Server {
 		$type = $return['type'];
 
 		$title = preg_replace( '!\.[^.]+$!', '', basename( $file ) );
-		$content = '';
+		$content = $excerpt = '';
 
-		// use image exif/iptc data for title and caption defaults if possible
-		if ( $image_meta = @wp_read_image_metadata( $new_file ) ) {
-			if ( '' != trim( $image_meta['title'] ) ) {
-				$title = trim( $image_meta['title'] );
+		if ( preg_match( '#^audio#', $type ) ) {
+			$meta = wp_read_audio_metadata( $new_file );
+	
+			if ( ! empty( $meta['title'] ) ) {
+				$title = $meta['title'];
 			}
-			if ( '' != trim( $image_meta['caption'] ) ) {
-				$content = trim( $image_meta['caption'] );
+	
+			if ( ! empty( $title ) ) {
+	
+				if ( ! empty( $meta['album'] ) && ! empty( $meta['artist'] ) ) {
+					/* translators: 1: audio track title, 2: album title, 3: artist name */
+					$content .= sprintf( __( '"%1$s" from %2$s by %3$s.', 'add-from-server' ), $title, $meta['album'], $meta['artist'] );
+				} elseif ( ! empty( $meta['album'] ) ) {
+					/* translators: 1: audio track title, 2: album title */
+					$content .= sprintf( __( '"%1$s" from %2$s.', 'add-from-server' ), $title, $meta['album'] );
+				} elseif ( ! empty( $meta['artist'] ) ) {
+					/* translators: 1: audio track title, 2: artist name */
+					$content .= sprintf( __( '"%1$s" by %2$s.', 'add-from-server' ), $title, $meta['artist'] );
+				} else {
+					$content .= sprintf( __( '"%s".', 'add-from-server' ), $title );
+				}
+	
+			} elseif ( ! empty( $meta['album'] ) ) {
+	
+				if ( ! empty( $meta['artist'] ) ) {
+					/* translators: 1: audio album title, 2: artist name */
+					$content .= sprintf( __( '%1$s by %2$s.', 'add-from-server' ), $meta['album'], $meta['artist'] );
+				} else {
+					$content .= $meta['album'] . '.';
+				}
+	
+			} elseif ( ! empty( $meta['artist'] ) ) {
+	
+				$content .= $meta['artist'] . '.';
+	
+			}
+	
+			if ( ! empty( $meta['year'] ) )
+				$content .= ' ' . sprintf( __( 'Released: %d.' ), $meta['year'] );
+	
+			if ( ! empty( $meta['track_number'] ) ) {
+				$track_number = explode( '/', $meta['track_number'] );
+				if ( isset( $track_number[1] ) )
+					$content .= ' ' . sprintf( __( 'Track %1$s of %2$s.', 'add-from-server' ), number_format_i18n( $track_number[0] ), number_format_i18n( $track_number[1] ) );
+				else
+					$content .= ' ' . sprintf( __( 'Track %1$s.', 'add-from-server' ), number_format_i18n( $track_number[0] ) );
+			}
+	
+			if ( ! empty( $meta['genre'] ) )
+				$content .= ' ' . sprintf( __( 'Genre: %s.', 'add-from-server' ), $meta['genre'] );
+	
+		// Use image exif/iptc data for title and caption defaults if possible.
+		} elseif ( 0 === strpos( $type, 'image/' ) && $image_meta = @wp_read_image_metadata( $new_file ) ) {
+			if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
+				$title = $image_meta['title'];
+			}
+	
+			if ( trim( $image_meta['caption'] ) ) {
+				$excerpt = $image_meta['caption'];
 			}
 		}
 
@@ -370,6 +428,7 @@ class Add_From_Server {
 			'post_title' => $title,
 			'post_name' => $title,
 			'post_content' => $content,
+			'post_excerpt' => $excerpt,
 			'post_date' => $post_date,
 			'post_date_gmt' => $post_date_gmt
 		);
@@ -603,6 +662,7 @@ class Add_From_Server {
 					<?php endif; ?>
 				</fieldset>
 				<br class="clear"/>
+				<?php wp_nonce_field( 'afs_import' ); ?>
 				<input type="hidden" name="cwd" value="<?php echo esc_attr( $cwd ); ?>"/>
 				<?php submit_button( __( 'Import', 'add-from-server' ), 'primary', 'import', false ); ?>
 			</form>

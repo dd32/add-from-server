@@ -1,6 +1,8 @@
 = 3.3.2 =
+ * Security Fix: Fixes a CSRF vulnerability which could be used to trick a user into importing a large file to their site. Props to Edwin Molenaar (https://www.linkedin.com/in/edwinmolenaar)
  * Fix a typo that caused subsequent plugin activations to fail if the server doesn't meet the Add From Server requirements
  * Fix a path mismatch on certain windows configurations (No longer need to specify uppercase disk markers)
+ * Import Audio metadata and store image/audio metadata in the same manner as core.
 
 = 3.3.1 =
  * Fix plugin activation
