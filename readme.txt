@@ -36,17 +36,21 @@ Warning: This plugin now requires WordPress 4.0 & PHP 5.4. Updates to support Wo
 Warning: This plugin now requires WordPress 4.0 & PHP 5.4. Updates to support WordPress 4.3 & WordPress.org Language Pack Translations
 
 == FAQ ==
- Q: What placeholders can I use in the Root path option?
- You can use %role% and %username% only. In the case of Role, The first role which the user has is used, This can mean that in complex installs, that using %role% is unreliable.
 
- Q: Why does the file I want to import have a red background?
- WordPress only allows the importing/uploading of certain file types to improve your security. If you wish to add extra file types, you can use a plugin such as: http://wordpress.org/extend/plugins/pjw-mime-config/ You can also enable "Unfiltered uploads" globally for WordPress if you'd like to override this security function. Please see the WordPress support forum for details.
+= What placeholders can I use in the Root path option? =
+You can use `%role%` and `%username%` only.
+In the case of `%role%`, the first role which the user has is used, this can mean that in complex installs where a user has many roles that using %role% could be unreliable.
 
- Q: Where are the files saved?
- If you import a file which is outside your standard upload directory (usually wp-content/uploads/) then it will be copied to your current upload directory setting as normal. If you however import a file which -is already within the uploads directory- (for example, wp-content/uploads/2011/02/superplugin.zip) then the file will not be copied, and will be used as-is.
+= Why does the file I want to import have a red background? =
+WordPress only allows the importing/uploading of certain file types to improve your security.
+If you wish to add extra file types, you can use a plugin such as: http://wordpress.org/extend/plugins/pjw-mime-config/ You can also enable "Unfiltered uploads" globally for WordPress if you'd like to override this security function. Please see the WordPress support forum for details.
 
- Q: I have a a bug report
- Then please email me! wordpress at dd32.id.au is best.
+= Where are the files saved? =
+If you import a file which is outside your standard upload directory (usually wp-content/uploads/) then it will be copied to your current upload directory setting as normal.
+If you however import a file which **is already within the uploads directory** (for example, wp-content/uploads/2011/02/superplugin.zip) then the file will not be copied, and will be used as-is.
+
+= I have a a bug report =
+You can report bugs in the <a href="https://wordpress.org/support/plugin/add-from-server">plugins Support Forum here</a>
 
 == Screenshots ==
 
