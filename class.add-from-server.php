@@ -739,7 +739,7 @@ If you\'d like to help out with translating this plugin into %1$s you can head o
 Thanks! Dion.', 'add-from-server' );
 
 		// Don't display the message for English (US) or what we'll assume to be fully translated localised builds.
-		if ( 'en_US' === get_locale() || ( $message == $message_english && ! $force  ) ) {
+		if ( 'en_US' === get_locale() || ( $message != $message_english && ! $force  ) ) {
 			return false;
 		}
 
