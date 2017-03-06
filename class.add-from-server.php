@@ -738,8 +738,13 @@ I notice you use WordPress in a Language other than English (US), Did you know y
 If you\'d like to help out with translating this plugin into %1$s you can head over to <a href="%2$s">translate.WordPress.org</a> and suggest translations for any languages which you know.
 Thanks! Dion.', 'add-from-server' );
 
-		// Don't display the message for English (US) or what we'll assume to be fully translated localised builds.
-		if ( 'en_US' === get_locale() || ( $message != $message_english && ! $force  ) ) {
+		$locale = get_locale();
+		if ( function_exists( 'get_user_locale' ) ) {
+			$locale = get_user_locale();
+		}
+
+		// Don't display the message for English (Any) or what we'll assume to be fully translated localised builds.
+		if ( 'en_' === substr( $locale, 0, 3 ) || ( $message != $message_english && ! $force  ) ) {
 			return false;
 		}
 
