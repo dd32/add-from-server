@@ -1,7 +1,7 @@
 === Add From Server ===
 Contributors: dd32
 Tags: admin, media, uploads, post, import, files
-Requires at least: 4.0
+Requires at least: 4.5
 Stable tag: 3.3.2
 
 "Add From Server" is a quick plugin which allows you to import media & files into the WordPress uploads manager from the Webservers filesystem
@@ -12,6 +12,12 @@ The heart of a CMS is the ability to upload and insert content, WordPress does a
 Add From Server is designed to help ease this pain, You can upload a bunch of files via FTP (Or your favourite transmission method) and simply import those files from the webserver directly into WordPress.
 
 == Changelog ==
+
+= 3.3.3 =
+ * Fixes some scenario's where the translation warning sticks around for translated (and other english locales)
+ * Fixes a PHP Warning
+ * Support per-user locales
+ * Bumps required version of WordPress to 4.5+
 
 = 3.3.2 =
  * Security Fix: Fixes a CSRF vulnerability which could be used to trick a user into importing a large file to their site. Props to Edwin Molenaar (https://www.linkedin.com/in/edwinmolenaar)
