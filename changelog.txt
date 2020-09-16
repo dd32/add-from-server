@@ -1,3 +1,6 @@
+= 3.4 =
+
+
 = 3.3.3 =
  * Fixes some scenario's where the translation warning sticks around for translated (and other english locales)
  * Fixes a PHP Warning
