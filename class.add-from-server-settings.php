@@ -9,8 +9,21 @@ class Settings {
 
 		settings_fields( 'add_from_server' );
 
+		if (
+			str_contains( get_option( 'frmsvr_root', '%' ), '%' )
+			&&
+			! defined( 'ADD_FROM_SERVER' )
+		) {
+			printf(
+				'<div class="notice error"><p>%s</p></div>',
+				'You previously used the "Root Directory" option with a placeholder, such as "%username% or "%role%".<br>' .
+				'Unfortunately this feature is no longer supported. As a result, Add From Server has been disabled for users who have restricted upload privledges.<br>' .
+				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php">options.php</a>.'
+			);
+		}
+
 		$uac = get_option( 'frmsvr_uac', 'allusers' );
-		$root = Plugin::instance()->get_root( 'raw' );
+
 		?>
 		<table class="form-table">
 			<tr valign="top">
@@ -60,49 +73,7 @@ class Settings {
 					</fieldset>
 				</td>
 			</tr>
-			<tr valign="top">
-				<th scope="row"><?php _e( 'Root Directory', 'add-from-server' ); ?></th>
-
-				<td>
-					<fieldset>
-						<legend class="screen-reader-text">
-							<span><?php _e( 'Root Directory', 'add-from-server' ); ?></span></legend>
-						<label for="frmsvr_root-default">
-							<?php
-							$default_root = '/';
-							if ( preg_match( '!(\w:)!', __FILE__, $matches ) )
-								$default_root = strtolower( $matches[1] );
-							?>
-							<input name="frmsvr_root" type="radio" id="frmsvr_root-default"
-								   value="<?php echo esc_attr( $default_root ); ?>" <?php checked( $root, $default_root ); ?> />
-							<?php _e( 'Do not lock browsing to a specific directory', 'add-from-server' ); ?>
-						</label>
-						<br/>
-						<label for="frmsvr_root-specify">
-							<input name="frmsvr_root" type="radio" id="frmsvr_root-specify"
-								   value="specific" <?php checked( $root != $default_root ); ?> />
-							<?php _e( 'Lock browsing to the directory specified below', 'add-from-server' ); ?>
-						</label>
-						<br/>
-						<input type="text" name="frmsvr_root-specified" id="frmsvr_root-specify-specified"
-							   class="large-text code"
-							   value="<?php echo esc_attr( str_replace( '/', DIRECTORY_SEPARATOR, $root ) . (strlen( $root ) > 1 ? DIRECTORY_SEPARATOR : '') ); ?>"/>
-						<br/>
-						<small><em><?php
-								printf( __( 'You may use placeholders such as %s and %s in the path.', 'add-from-server' ), '%username%', '%role%' );
-								echo '&nbsp;&nbsp;';
-								printf( __( 'For reference, Your WordPress Root path is: <code>%s</code>', 'add-from-server' ), ABSPATH );
-								?>
-							</em></small>
-					</fieldset>
-				</td>
-			</tr>
 		</table>
-		<script type="text/javascript">
-			jQuery('#frmsvr_root-specify-specified').change(function () {
-				jQuery('#frmsvr_root-specify').attr('checked', 'checked');
-			});
-		</script>
 		<?php
 		submit_button( __( 'Save Changes', 'add-from-server' ), 'primary', 'submit' );
 		echo '</form>';

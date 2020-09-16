@@ -32,4 +32,7 @@ if (
 	include __DIR__ . '/class.add-from-server.php';
 }
 
+// Load PHP8 compat functions.
+include __DIR__ . '/compat.php';
+
 Plugin::instance();

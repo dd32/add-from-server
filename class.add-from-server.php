@@ -11,8 +11,8 @@ class Plugin {
 	}
 
 	protected function __construct() {
-		add_action( 'admin_init', array( $this, 'admin_init' ) );
-		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		add_action( 'admin_init', [ $this, 'admin_init' ] );
+		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 	}
 
 	function admin_init() {
@@ -20,20 +20,18 @@ class Plugin {
 		wp_register_style( 'add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), VERSION );
 
 		// Enqueue JS & CSS
-		add_action( 'load-media_page_add-from-server', array( $this, 'add_styles' ) );
-		add_action( 'media_upload_server', array( $this, 'add_styles' ) );
+		add_action( 'load-media_page_add-from-server', [ $this, 'add_styles' ] );
+		add_action( 'media_upload_server', [ $this, 'add_styles' ] );
 
-		add_filter( 'plugin_action_links_' . PLUGIN, array( $this, 'add_configure_link' ) );
+		add_filter( 'plugin_action_links_' . PLUGIN, [ $this, 'add_configure_link' ] );
 
 		if ( $this->user_allowed() ) {
 			// Add actions/filters
-			add_filter( 'media_upload_tabs', array( $this, 'tabs' ) );
-			add_action( 'media_upload_server', array( $this, 'tab_handler' ) );
+			add_filter( 'media_upload_tabs', [ $this, 'tabs' ] );
+			add_action( 'media_upload_server', [ $this, 'tab_handler' ] );
 		}
 
 		// Register our settings:
-		register_setting( 'add_from_server', 'frmsvr_root', array( $this, 'sanitize_option_root' ) );
-		// register_setting('add-from-server', 'frmsvr_last_folder');
 		register_setting( 'add_from_server', 'frmsvr_uac' );
 		register_setting( 'add_from_server', 'frmsvr_uac_users' );
 		register_setting( 'add_from_server', 'frmsvr_uac_role' );
@@ -42,9 +40,9 @@ class Plugin {
 
 	function admin_menu() {
 		if ( $this->user_allowed() ) {
-			add_media_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'read', 'add-from-server', array( $this, 'menu_page' ) );
+			add_media_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'read', 'add-from-server', [ $this, 'menu_page' ] );
 		}
-		add_options_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'manage_options', 'add-from-server-settings', array( $this, 'options_page' ) );
+		add_options_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'manage_options', 'add-from-server-settings', [ $this, 'options_page' ] );
 	}
 
 	function add_configure_link( $_links ) {
@@ -114,27 +112,28 @@ class Plugin {
 	}
 
 	function get_root( $context = 'use' ) {
-		static $static_root = null;
-		if ( $static_root )
-			return $static_root;
+		// Lock users to either
+		// a) The 'ADD_FROM_SERVER' constant.
+		// b) Their home directory.
+		// c) The parent directory of the current install.
 
-		$root = get_option( 'frmsvr_root', false );
-		if ( strpos( $root, '%' ) !== false && 'raw' != $context ) {
-			$user = wp_get_current_user();
-
-			$root = str_replace( '%username%', $user->user_login, $root );
-			$root = str_replace( '%role%', $user->roles[0], $root );
-		}
-		if ( ! $root ) {
-			if ( '/' == substr( __FILE__, 0, 1 ) ) {
-				$root = '/';
-			} elseif ( preg_match( '!^[a-zA-Z]:!', __FILE__, $root_win_match ) ) {
-				$root = $root_win_match[1];
-			}
+		if ( defined( 'ADD_FROM_SERVER' ) ) {
+			$root = ADD_FROM_SERVER;
+		} elseif ( str_starts_with( __FILE__, '/home/' ) ) {
+			$root = implode( '/', array_slice( explode( '/', __FILE__ ), 0, 2 ) );
+		} else {
+			$root = dirname( ABSPATH );
 		}
 
-		if ( strlen( $root ) > 1 ) {
-			$root = untrailingslashit( $root );
+		if (
+			str_contains( get_option( 'frmsvr_root', '%' ), '%' )
+			&&
+			! defined( 'ADD_FROM_SERVER' )
+			// &&
+			//! current_user_can( 'unfiltered_html' )
+		) {
+			// Precautions. The user is using the folder placeholder code. Abort.
+			$root = false;
 		}
 
 		return $root;
@@ -168,43 +167,6 @@ class Plugin {
 				return in_array( $user->user_login, $allowed_users );
 		}
 		return false;
-	}
-
-	function sanitize_option_root($input) {
-		$_input = $input;
-		if ( 'specific' == $input ) {
-			$input = wp_unslash( $_POST['frmsvr_root-specified'] );
-		}
-
-		if ( !$this->validate_option_root( $input ) ) {
-			$input = get_option( 'frmsvr_root' );
-		}
-
-		// WP < 4.4 Compat: ucfirt
-		$input = ucfirst( wp_normalize_path( $input ) );
-
-		return $input;
-	}
-
-	function validate_option_root($o) {
-		if ( strpos( $o, '%' ) !== false ) {
-			// Ensure only valid placeholders are used:
-			if ( preg_match_all( '!%(.*?)%!', $o, $placeholders ) ) {
-				$valid_ph = array( 'username', 'role' );
-				foreach ( $placeholders[1] as $ph ) {
-					if ( !in_array( $ph, $valid_ph ) ) {
-						add_settings_error( 'general', 'update_failed', sprintf( __( 'The placeholder %s is not valid in the root path.', 'add-from-server' ), '%' . $ph . '%' ), 'error' );
-						return false;
-					}
-				}
-				return true;
-			}
-		}
-		if ( !is_dir( $o ) || !is_readable( $o ) ) {
-			add_settings_error( 'general', 'update_failed', __( 'The root path specified could not be read.', 'add-from-server' ), 'error' );
-			return false;
-		}
-		return true;
 	}
 
 	// Handle the imports
