@@ -30,74 +30,41 @@ class Plugin {
 		// Register JS & CSS
 		wp_register_style( 'add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), VERSION );
 
-		// Enqueue JS & CSS
-		add_action( 'load-media_page_add-from-server', [ $this, 'add_styles' ] );
-		add_action( 'media_upload_server', [ $this, 'add_styles' ] );
-
 		add_filter( 'plugin_action_links_' . PLUGIN, [ $this, 'add_configure_link' ] );
-
-		// Add actions/filters
-		add_filter( 'media_upload_tabs', [ $this, 'tabs' ] );
-		add_action( 'media_upload_server', [ $this, 'tab_handler' ] );
 
 		// Handle the path selection early.
 		$this->path_selection_cookie();
 	}
 
 	function admin_menu() {
-		add_media_page(
+		$page_slug = add_media_page(
 			__( 'Add From Server', 'add-from-server' ),
 			__( 'Add From Server', 'add-from-server' ),
 			'upload_files',
 			'add-from-server',
 			[ $this, 'menu_page' ]
 		);
+		add_action( 'load-' . $page_slug, function() {
+			wp_enqueue_style( 'add-from-server' );
+		} );
 
 		add_options_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'manage_options', 'add-from-server-settings', [ $this, 'options_page' ] );
 	}
 
-	function add_configure_link( $_links ) {
-		$links = array();
-		if ( current_user_can( 'upload_files' ) ) {
-			$links[] = '<a href="' . admin_url( 'upload.php?page=add-from-server' ) . '">' . __( 'Import Files', 'add-from-server' ) . '</a>';
-		}
+	function add_configure_link( $links ) {
 		if ( current_user_can( 'manage_options' ) ) {
-			$links[] = '<a href="' . admin_url( 'options-general.php?page=add-from-server-settings' ) . '">' . __( 'Options', 'add-from-server' ) . '</a>';
+			array_unshift( $links, '<a href="' . admin_url( 'options-general.php?page=add-from-server-settings' ) . '">' . __( 'Options', 'add-from-server' ) . '</a>' );
 		}
 
-		return array_merge( $links, $_links );
-	}
-
-	// Add a tab to the media uploader:
-	function tabs( $tabs ) {
-		$tabs['server'] = __( 'Add From Server', 'add-from-server' );
-		return $tabs;
-	}
-
-	function add_styles() {
-		// Enqueue support files.
-		if ( 'media_upload_server' == current_filter() ) {
-			wp_enqueue_style( 'media' );
+		if ( current_user_can( 'upload_files' ) ) {
+			array_unshift( $links, '<a href="' . admin_url( 'upload.php?page=add-from-server' ) . '">' . __( 'Import Files', 'add-from-server' ) . '</a>' );
 		}
-		wp_enqueue_style( 'add-from-server' );
-	}
 
-	// Handle the actual page:
-	function tab_handler() {
-		global $body_id;
-
-		$body_id = 'media-upload';
-		iframe_header( __( 'Add From Server', 'add-from-server' ) );
-
-		$this->handle_imports();
-
-		$this->main_content();
-
-		iframe_footer();
+		return $links;
 	}
 
 	function menu_page() {
-		// Handle any imports:
+		// Handle any imports
 		$this->handle_imports();
 
 		echo '<div class="wrap">';
@@ -214,12 +181,7 @@ class Plugin {
 		// Initially, Base it on the -current- time.
 		$time = current_time( 'mysql', 1 );
 		// Next, If it's post to base the upload off:
-		if ( 'post' == $import_date && $post_id > 0 ) {
-			$post = get_post( $post_id );
-			if ( $post && substr( $post->post_date_gmt, 0, 4 ) > 0 ) {
-				$time = $post->post_date_gmt;
-			}
-		} elseif ( 'file' == $import_date ) {
+		if ( 'file' == $import_date ) {
 			$time = gmdate( 'Y-m-d H:i:s', @filemtime( $file ) );
 		}
 
@@ -415,24 +377,10 @@ class Plugin {
 
 	// Create the content for the page
 	function main_content() {
-		global $pagenow;
 
-		$post_id = isset($_REQUEST['post_id']) ? intval( $_REQUEST['post_id'] ) : 0;
-		$import_to_gallery = isset($_POST['gallery']) && 'on' == $_POST['gallery'];
-		if ( !$import_to_gallery && !isset($_REQUEST['cwd']) ) {
-			$import_to_gallery = true;
-		}
 		$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'current';
 
-		if ( 'upload.php' == $pagenow ) {
-			$url = admin_url( 'upload.php?page=add-from-server' );
-		} else {
-			$url = admin_url( 'media-upload.php?tab=server' );
-		}
-
-		if ( $post_id ) {
-			$url = add_query_arg( 'post_id', $post_id, $url );
-		}
+		$url = admin_url( 'upload.php?page=add-from-server' );
 
 		$root = $this->get_root();
 		$cwd  = $this->get_default_dir();
@@ -578,16 +526,9 @@ class Plugin {
 				<fieldset>
 					<legend><?php _e( 'Import Options', 'add-from-server' ); ?></legend>
 
-					<?php if ( $post_id ) : ?>
-						<input type="checkbox" name="gallery" id="gallery-import" <?php checked( $import_to_gallery ); ?> /><label for="gallery-import"><?php _e( 'Attach imported files to this post', 'add-from-server' ) ?></label>
-						<br class="clear"/>
-					<?php endif; ?>
 					<?php _e( 'Set the imported date to the', 'add-from-server' ); ?>
 					<input type="radio" name="import-date" id="import-time-currenttime" value="current" <?php checked( 'current', $import_date ); ?> /> <label for="import-time-currenttime"><?php _e( 'Current Time', 'add-from-server' ); ?></label>
 					<input type="radio" name="import-date" id="import-time-filetime" value="file" <?php checked( 'file', $import_date ); ?> /> <label for="import-time-filetime"><?php _e( 'File Time', 'add-from-server' ); ?></label>
-					<?php if ( $post_id ) : ?>
-						<input type="radio" name="import-date" id="import-time-posttime" value="post" <?php checked( 'post', $import_date ); ?> /> <label for="import-time-posttime"><?php _e( 'Post Time', 'add-from-server' ); ?></label>
-					<?php endif; ?>
 				</fieldset>
 				<br class="clear"/>
 				<?php wp_nonce_field( 'afs_import' ); ?>
