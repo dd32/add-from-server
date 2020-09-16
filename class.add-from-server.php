@@ -166,20 +166,18 @@ class Plugin {
 		$time = current_time( 'mysql', 1 );
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
-		if ( !(($uploads = wp_upload_dir( $time )) && false === $uploads['error']) ) {
+		if ( ! ( ( $uploads = wp_upload_dir( $time ) ) && false === $uploads['error'] ) ) {
 			return new WP_Error( 'upload_error', $uploads['error'] );
 		}
 
 		$wp_filetype = wp_check_filetype( $file, null );
-
-		extract( $wp_filetype );
-
-		if ( (!$type || !$ext) && !current_user_can( 'unfiltered_upload' ) ) {
+		$type = $wp_filetype['type'];
+		$ext  = $wp_filetype['ext'];
+		if ( ( !$type || !$ext ) && !current_user_can( 'unfiltered_upload' ) ) {
 			return new WP_Error( 'wrong_file_type', __( 'Sorry, this file type is not permitted for security reasons.', 'add-from-server' ) );
 		}
 
 		// Is the file allready in the uploads folder?
-		// WP < 4.4 Compat: ucfirt
 		if ( preg_match( '|^' . preg_quote( wp_normalize_path( $uploads['basedir'] ), '|' ) . '(.*)$|i', $file, $mat ) ) {
 
 			$filename = basename( $file );
@@ -189,7 +187,7 @@ class Plugin {
 
 			$attachment = get_posts( array( 'post_type' => 'attachment', 'meta_key' => '_wp_attached_file', 'meta_value' => ltrim( $mat[1], '/' ) ) );
 			if ( !empty($attachment) ) {
-				return new WP_Error( 'file_exists', __( 'Sorry, That file already exists in the WordPress media library.', 'add-from-server' ) );
+				return new WP_Error( 'file_exists', __( 'Sorry, that file already exists in the WordPress media library.', 'add-from-server' ) );
 			}
 
 			// Ok, Its in the uploads folder, But NOT in WordPress's media library.
