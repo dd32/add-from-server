@@ -113,7 +113,7 @@ class Plugin {
 		if ( defined( 'ADD_FROM_SERVER' ) ) {
 			$root = ADD_FROM_SERVER;
 		} elseif ( str_starts_with( __FILE__, '/home/' ) ) {
-			$root = implode( '/', array_slice( explode( '/', __FILE__ ), 0, 2 ) );
+			$root = implode( '/', array_slice( explode( '/', __FILE__ ), 0, 3 ) );
 		} else {
 			if ( str_starts_with( WP_CONTENT_DIR, ABSPATH ) ) {
 				$root = dirname( ABSPATH );
@@ -122,6 +122,7 @@ class Plugin {
 			}
 		}
 
+		// Precautions. The user is using the folder placeholder code. Abort for lower-privledge users.
 		if (
 			str_contains( get_option( 'frmsvr_root', '%' ), '%' )
 			&&
@@ -129,7 +130,6 @@ class Plugin {
 			&&
 			! current_user_can( 'unfiltered_html' )
 		) {
-			// Precautions. The user is using the folder placeholder code. Abort.
 			$root = false;
 		}
 
