@@ -104,18 +104,22 @@ class Plugin {
 		$settings->render();
 	}
 
-	function get_root( $context = 'use' ) {
+	function get_root() {
 		// Lock users to either
 		// a) The 'ADD_FROM_SERVER' constant.
 		// b) Their home directory.
-		// c) The parent directory of the current install.
+		// c) The parent directory of the current install or wp-content directory.
 
 		if ( defined( 'ADD_FROM_SERVER' ) ) {
 			$root = ADD_FROM_SERVER;
 		} elseif ( str_starts_with( __FILE__, '/home/' ) ) {
 			$root = implode( '/', array_slice( explode( '/', __FILE__ ), 0, 2 ) );
 		} else {
-			$root = dirname( ABSPATH );
+			if ( str_starts_with( WP_CONTENT_DIR, ABSPATH ) ) {
+				$root = dirname( ABSPATH );
+			} else {
+				$root = dirname( WP_CONTENT_DIR );
+			}
 		}
 
 		if (
