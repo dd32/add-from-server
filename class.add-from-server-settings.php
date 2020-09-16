@@ -4,7 +4,6 @@ namespace dd32\WordPress\AddFromServer;
 class Settings {
 	function render() {
 		echo '<div class="wrap">';
-		screen_icon( 'options-general' );
 		echo '<h1>' . __( 'Add From Server', 'add-from-server' ) . '</h1>';
 		echo '<form method="post" action="options.php">';
 
