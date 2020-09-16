@@ -37,11 +37,17 @@ class Plugin {
 		// Add actions/filters
 		add_filter( 'media_upload_tabs', [ $this, 'tabs' ] );
 		add_action( 'media_upload_server', [ $this, 'tab_handler' ] );
-
 	}
 
 	function admin_menu() {
-		add_media_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'upload_files', 'add-from-server', [ $this, 'menu_page' ] );
+		add_media_page(
+			__( 'Add From Server', 'add-from-server' ),
+			__( 'Add From Server', 'add-from-server' ),
+			'upload_files',
+			'add-from-server',
+			[ $this, 'menu_page' ]
+		);
+
 		add_options_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'manage_options', 'add-from-server-settings', [ $this, 'options_page' ] );
 	}
 
@@ -458,7 +464,6 @@ class Plugin {
 		<div class="frmsvr_wrap">
 			<form method="post" action="<?php echo esc_url( $url ); ?>">
 				<p><?php printf( __( '<strong>Current Directory:</strong> <span id="cwd">%s</span>', 'add-from-server' ), $dirparts ) ?></p>
-				<?php $this->display_quick_jumps( $url ); ?>
 				<?php if ( 'media-upload.php' == $GLOBALS['pagenow'] && $post_id > 0 ) : ?>
 					<p><?php _e( 'Once you have Imported your files, head over to <strong>Insert Media</strong> to add them to your post.', 'add-from-server' ); ?></p>
 				<?php endif; ?>
@@ -587,52 +592,6 @@ class Plugin {
 			<?php $this->language_notice(); ?>
 		</div>
 	<?php
-	}
-
-	function display_quick_jumps( $url ) {
-		$quickjumps = array();
-		$quickjumps[] = array(	
-			__( 'WordPress Root', 'add-from-server' ),
-			ucfirst( wp_normalize_path( ABSPATH ) ) // WP < 4.4 Compat: ucfirt
-		);
-		if ( ($uploads = wp_upload_dir()) && false === $uploads['error'] ) {
-			$quickjumps[] = array(
-				__( 'Uploads Folder', 'add-from-server' ),
-				ucfirst( wp_normalize_path( $uploads['path'] ) ) // WP < 4.4 Compat: ucfirt
-			);
-		}
-		$quickjumps[] = array(
-			__( 'Content Folder', 'add-from-server' ),
-			ucfirst( wp_normalize_path( WP_CONTENT_DIR ) ) // WP < 4.4 Compat: ucfirt
-		);
-
-		$quickjumps = apply_filters( 'frmsvr_quickjumps', $quickjumps );
-
-		if ( empty( $quickjumps ) ) {
-			return;
-		}
-
-		$pieces = array();
-		foreach ( $quickjumps as $jump ) {
-			list( $text, $adir ) = $jump;
-			$adir = ucfirst( wp_normalize_path( $adir ) ); // WP < 4.4 Compat: ucfirt
-
-			// Validate it's within the locked directory
-			if ( strpos( $adir, $this->get_root() ) === false )
-				continue;
-
-			$adir = preg_replace( '!^' . preg_quote( $this->get_root(), '!' ) . '!i', '', $adir );
-			if ( strlen( $adir ) > 1 ) {
-				$adir = ltrim( $adir, '/' );
-			}
-
-			$durl = add_query_arg( array( 'adirectory' => rawurlencode( $adir ) ), $url );
-			$pieces[] = sprintf( '<a href="%s">%s</a>', esc_url( $durl ), esc_html( $text ) );
-		}
-
-		if ( !empty( $pieces ) ) {
-			printf( '<p>' .  __( '<strong>Quick Jump:</strong> %s', 'add-from-server' ) . '<p>', implode( ' | ', $pieces ) );
-		}
 	}
 
 	function find_files( $folder ) {

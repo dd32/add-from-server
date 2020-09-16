@@ -20,8 +20,11 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 
 = 3.4 =
  * The plugin now requires WordPress 5.0+ and PHP 7.0+. It works on older versions, but update your websites please.
- * Bumps the version to stop the Vulnerability warnings
- * Cleans up code, and removes some features.
+ * Bumps the version to stop the invalid vulnerability warnings.
+ * Cleans up code.
+ * Removes the User Access Control.
+ * Removes the Root Directory Control.
+ * Removes the Quick Jump functionality.
 
 == FAQ ==
 
