@@ -47,15 +47,9 @@ class Plugin {
 		add_action( 'load-' . $page_slug, function() {
 			wp_enqueue_style( 'add-from-server' );
 		} );
-
-		add_options_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'manage_options', 'add-from-server-settings', [ $this, 'options_page' ] );
 	}
 
 	function add_configure_link( $links ) {
-		if ( current_user_can( 'manage_options' ) ) {
-			array_unshift( $links, '<a href="' . admin_url( 'options-general.php?page=add-from-server-settings' ) . '">' . __( 'Options', 'add-from-server' ) . '</a>' );
-		}
-
 		if ( current_user_can( 'upload_files' ) ) {
 			array_unshift( $links, '<a href="' . admin_url( 'upload.php?page=add-from-server' ) . '">' . __( 'Import Files', 'add-from-server' ) . '</a>' );
 		}
@@ -70,15 +64,11 @@ class Plugin {
 		echo '<div class="wrap">';
 		echo '<h1>' . __( 'Add From Server', 'add-from-server' ) . '</h1>';
 
+		$this->outdated_options_notice();
 		$this->main_content();
+		$this->language_notice();
 
 		echo '</div>';
-	}
-
-	function options_page() {
-		include __DIR__ . '/class.add-from-server-settings.php';
-		$settings = new Settings();
-		$settings->render();
 	}
 
 	function get_root() {
@@ -534,7 +524,6 @@ class Plugin {
 				<?php wp_nonce_field( 'afs_import' ); ?>
 				<?php submit_button( __( 'Import', 'add-from-server' ), 'primary', 'import', false ); ?>
 			</form>
-			<?php $this->language_notice(); ?>
 		</div>
 	<?php
 	}
@@ -563,6 +552,21 @@ Thanks! Dion.', 'add-from-server' );
 		$translate_url = 'https://translate.wordpress.org/projects/wp-plugins/add-from-server/stable';
 
 		echo '<div class="notice notice-info"><p>' . sprintf( nl2br( $message ), get_locale(), $translate_url ) . '</p></div>';
+	}
+
+	function outdated_options_notice() {
+		if (
+			str_contains( get_option( 'frmsvr_root', '%' ), '%' )
+			&&
+			! defined( 'ADD_FROM_SERVER' )
+		) {
+			printf(
+				'<div class="notice error"><p>%s</p></div>',
+				'You previously used the "Root Directory" option with a placeholder, such as "%username% or "%role%".<br>' .
+				'Unfortunately this feature is no longer supported. As a result, Add From Server has been disabled for users who have restricted upload privledges.<br>' .
+				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php">options.php</a>.'
+			);
+		}
 	}
 
 }
