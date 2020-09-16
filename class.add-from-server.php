@@ -1,5 +1,6 @@
 <?php
 namespace dd32\WordPress\AddFromServer;
+use WP_Error;
 
 const COOKIE = 'frmsvr_path';
 
@@ -7,9 +8,7 @@ class Plugin {
 
 	public static function instance() {
 		static $instance = false;
-		$class           = static::class;
-
-		return $instance ?: ( $instance = new $class );
+		return $instance ?: ( $instance = new (static::class) );
 	}
 
 	protected function __construct() {
@@ -124,40 +123,35 @@ class Plugin {
 	// Handle the imports
 	function handle_imports() {
 
-		if ( !empty($_POST['files']) && !empty($_POST['cwd']) ) {
+		if ( !empty( $_POST['files'] ) ) {
 
 			check_admin_referer( 'afs_import' );
 
 			$files = wp_unslash( $_POST['files'] );
 
-			$cwd = trailingslashit( wp_unslash( $_POST['cwd'] ) );
-			if ( false === strpos( $cwd, $this->get_root() ) ) {
-				return;
-			}
-
-			$post_id = isset($_REQUEST['post_id']) ? absint( $_REQUEST['post_id'] ) : 0;
-			$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'current';
-
-			$import_to_gallery = isset($_POST['gallery']) && 'on' == $_POST['gallery'];
-			if ( !$import_to_gallery && !isset($_REQUEST['cwd']) ) {
-				$import_to_gallery = true; // cwd should always be set, if it's not, and neither is gallery, this must be the first page load.
-			}
-
-			if ( !$import_to_gallery ) {
-				$post_id = 0;
+			$root = $this->get_root();
+			if ( ! $root ) {
+				return false;
 			}
 
 			flush();
 			wp_ob_end_flush_all();
 
 			foreach ( (array)$files as $file ) {
-				$filename = $cwd . $file;
-				$id = $this->handle_import_file( $filename, $post_id, $import_date );
-				if ( is_wp_error( $id ) ) {
-					echo '<div class="updated error"><p>' . sprintf( __( '<em>%s</em> was <strong>not</strong> imported due to an error: %s', 'add-from-server' ), esc_html( $file ), $id->get_error_message() ) . '</p></div>';
-				} else {
-					echo '<div class="updated"><p>' . sprintf( __( '<em>%s</em> has been added to Media library', 'add-from-server' ), esc_html( $file ) ) . '</p></div>';
+				$filename = trailingslashit( $root ) . ltrim( $file, '/' );
+
+				if ( $filename !== realpath( $filename ) ) {
+					continue;
 				}
+
+				$id = $this->handle_import_file( $filename );
+
+				if ( is_wp_error( $id ) ) {
+					echo '<div class="updated error"><p>' . sprintf( __( '<em>%s</em> was <strong>not</strong> imported due to an error: %s', 'add-from-server' ), esc_html( basename( $file ) ), $id->get_error_message() ) . '</p></div>';
+				} else {
+					echo '<div class="updated"><p>' . sprintf( __( '<em>%s</em> has been added to Media library', 'add-from-server' ), esc_html( basename( $file ) ) ) . '</p></div>';
+				}
+
 				flush();
 				wp_ob_end_flush_all();
 			}
@@ -165,15 +159,11 @@ class Plugin {
 	}
 
 	// Handle an individual file import.
-	function handle_import_file( $file, $post_id = 0, $import_date = 'current' ) {
+	function handle_import_file( $file ) {
 		set_time_limit( 0 );
 
 		// Initially, Base it on the -current- time.
 		$time = current_time( 'mysql', 1 );
-		// Next, If it's post to base the upload off:
-		if ( 'file' == $import_date ) {
-			$time = gmdate( 'Y-m-d H:i:s', @filemtime( $file ) );
-		}
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
 		if ( !(($uploads = wp_upload_dir( $time )) && false === $uploads['error']) ) {
@@ -190,7 +180,7 @@ class Plugin {
 
 		// Is the file allready in the uploads folder?
 		// WP < 4.4 Compat: ucfirt
-		if ( preg_match( '|^' . preg_quote( ucfirst( wp_normalize_path( $uploads['basedir'] ) ), '|' ) . '(.*)$|i', $file, $mat ) ) {
+		if ( preg_match( '|^' . preg_quote( wp_normalize_path( $uploads['basedir'] ), '|' ) . '(.*)$|i', $file, $mat ) ) {
 
 			$filename = basename( $file );
 			$new_file = $file;
@@ -203,30 +193,27 @@ class Plugin {
 			}
 
 			// Ok, Its in the uploads folder, But NOT in WordPress's media library.
-			if ( 'file' == $import_date ) {
-				$time = @filemtime( $file );
-				if ( preg_match( "|(\d+)/(\d+)|", $mat[1], $datemat ) ) { // So lets set the date of the import to the date folder its in, IF its in a date folder.
-					$hour = $min = $sec = 0;
-					$day = 1;
-					$year = $datemat[1];
-					$month = $datemat[2];
+			if ( preg_match( "|(\d+)/(\d+)|", $mat[1], $datemat ) ) { // So lets set the date of the import to the date folder its in, IF its in a date folder.
+				$hour = $min = $sec = 0;
+				$day = 1;
+				$year = $datemat[1];
+				$month = $datemat[2];
 
-					// If the files datetime is set, and it's in the same region of upload directory, set the minute details to that too, else, override it.
-					if ( $time && date( 'Y-m', $time ) == "$year-$month" ) {
-						list($hour, $min, $sec, $day) = explode( ';', date( 'H;i;s;j', $time ) );
-					}
-
-					$time = mktime( $hour, $min, $sec, $month, $day, $year );
+				// If the files datetime is set, and it's in the same region of upload directory, set the minute details to that too, else, override it.
+				if ( $time && date( 'Y-m', $time ) == "$year-$month" ) {
+					list($hour, $min, $sec, $day) = explode( ';', date( 'H;i;s;j', $time ) );
 				}
-				$time = gmdate( 'Y-m-d H:i:s', $time );
 
-				// A new time has been found! Get the new uploads folder:
-				// A writable uploads dir will pass this test. Again, there's no point overriding this one.
-				if ( !(($uploads = wp_upload_dir( $time )) && false === $uploads['error']) ) {
-					return new WP_Error( 'upload_error', $uploads['error'] );
-				}
-				$url = $uploads['baseurl'] . $mat[1];
+				$time = mktime( $hour, $min, $sec, $month, $day, $year );
 			}
+			$time = gmdate( 'Y-m-d H:i:s', $time );
+
+			// A new time has been found! Get the new uploads folder:
+			// A writable uploads dir will pass this test. Again, there's no point overriding this one.
+			if ( !(($uploads = wp_upload_dir( $time )) && false === $uploads['error']) ) {
+				return new WP_Error( 'upload_error', $uploads['error'] );
+			}
+			$url = $uploads['baseurl'] . $mat[1];
 		} else {
 			$filename = wp_unique_filename( $uploads['path'], basename( $file ) );
 
@@ -242,9 +229,6 @@ class Plugin {
 			// Compute the URL
 			$url = $uploads['url'] . '/' . $filename;
 
-			if ( 'file' == $import_date ) {
-				$time = gmdate( 'Y-m-d H:i:s', @filemtime( $file ) );
-			}
 		}
 
 		// Apply upload filters
@@ -318,39 +302,27 @@ class Plugin {
 			}
 		}
 
-		if ( $time ) {
-			$post_date_gmt = $time;
-			$post_date = $time;
-		} else {
-			$post_date = current_time( 'mysql' );
-			$post_date_gmt = current_time( 'mysql', 1 );
-		}
-
 		// Construct the attachment array
-		$attachment = array(
+		$attachment = [
 			'post_mime_type' => $type,
 			'guid' => $url,
-			'post_parent' => $post_id,
+			'post_parent' => 0,
 			'post_title' => $title,
 			'post_name' => $title,
 			'post_content' => $content,
 			'post_excerpt' => $excerpt,
-			'post_date' => $post_date,
-			'post_date_gmt' => $post_date_gmt
-		);
+			'post_date' => $time,
+			'post_date_gmt' => $time,
+		];
 
-		$attachment = apply_filters( 'afs-import_details', $attachment, $file, $post_id, $import_date );
-
-		// WP < 4.4 Compat: ucfirt
-		$new_file = str_replace( ucfirst( wp_normalize_path( $uploads['basedir'] ) ), $uploads['basedir'], $new_file );
+		$attachment = apply_filters( 'afs-import_details', $attachment, $file, 0, 'current' );
 
 		// Save the data
-		$id = wp_insert_attachment( $attachment, $new_file, $post_id );
+		$id = wp_insert_attachment( $attachment, $new_file, 0 );
 		if ( !is_wp_error( $id ) ) {
 			$data = wp_generate_attachment_metadata( $id, $new_file );
 			wp_update_attachment_metadata( $id, $data );
 		}
-		// update_post_meta( $id, '_wp_attached_file', $uploads['subdir'] . '/' . $filename );
 
 		return $id;
 	}
@@ -367,8 +339,6 @@ class Plugin {
 
 	// Create the content for the page
 	function main_content() {
-
-		$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'current';
 
 		$url = admin_url( 'upload.php?page=add-from-server' );
 
@@ -409,6 +379,8 @@ class Plugin {
 				'text' => basename( $path ) . '/',
 				'path' => substr( $path, strlen( $root ) + 1 )
 			];
+
+			// TODO: Shortcut: If the folder only has a singular child, link to that?
 		} );
 		// Prefix the parent directory.
 		if ( str_starts_with( dirname( $cwd ), $root ) ) {
@@ -495,7 +467,8 @@ class Plugin {
 								</th>
 								<td><label for="file-%3$d">%6$s</label></td>
 							</tr>',
-							$file['error'] ?: '', $error_str, // 1, 2
+							$file['error'] ?: '', // 1
+							$error_str, // 2
 							$file_id++, // 3
 							$file['file'], // 4
 							disabled( false, $file['readable'] && $file['importable'], false ), // 5
@@ -513,13 +486,6 @@ class Plugin {
 					</tfoot>
 				</table>
 
-				<fieldset>
-					<legend><?php _e( 'Import Options', 'add-from-server' ); ?></legend>
-
-					<?php _e( 'Set the imported date to the', 'add-from-server' ); ?>
-					<input type="radio" name="import-date" id="import-time-currenttime" value="current" <?php checked( 'current', $import_date ); ?> /> <label for="import-time-currenttime"><?php _e( 'Current Time', 'add-from-server' ); ?></label>
-					<input type="radio" name="import-date" id="import-time-filetime" value="file" <?php checked( 'file', $import_date ); ?> /> <label for="import-time-filetime"><?php _e( 'File Time', 'add-from-server' ); ?></label>
-				</fieldset>
 				<br class="clear"/>
 				<?php wp_nonce_field( 'afs_import' ); ?>
 				<?php submit_button( __( 'Import', 'add-from-server' ), 'primary', 'import', false ); ?>
@@ -556,7 +522,7 @@ Thanks! Dion.', 'add-from-server' );
 
 	function outdated_options_notice() {
 		if (
-			str_contains( get_option( 'frmsvr_root', '%' ), '%' )
+			str_contains( get_option( 'frmsvr_root', '' ), '%' )
 			&&
 			! defined( 'ADD_FROM_SERVER' )
 		) {
