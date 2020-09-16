@@ -19,12 +19,13 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
 == Changelog ==
 
 = 3.4 =
- * The plugin now requires WordPress 5.0+ and PHP 7.0+. It works on older versions, but update your websites please.
+ * The plugin now requires WordPress 5.1+ and PHP 7.0+. No reason other than why not.
  * Bumps the version to stop the invalid vulnerability warnings.
  * Cleans up code.
  * Removes the User Access Control.
  * Removes the Root Directory Control.
  * Removes the Quick Jump functionality.
+ * Removes the ability to be able to select the date for imported media. It's always today. Or, the 1st of the month if it's stored in a dated folder.
 
 == FAQ ==
 

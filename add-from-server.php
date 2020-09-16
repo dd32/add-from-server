@@ -14,7 +14,7 @@ if ( !is_admin() ) {
 	return;
 }
 
-const MIN_WP  = '5.0';
+const MIN_WP  = '5.1';
 const MIN_PHP = '7.0';
 const VERSION = '3.4';
 
