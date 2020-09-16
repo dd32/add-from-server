@@ -11,8 +11,17 @@ class Plugin {
 	}
 
 	protected function __construct() {
-		add_action( 'admin_init', [ $this, 'admin_init' ] );
-		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
+		add_action( 'init', [ $this, 'init' ] );
+	}
+
+	function init() {
+		if (
+			current_user_can( 'upload_files' ) &&
+			current_user_can( 'unfiltered_html' )
+		) {
+			add_action( 'admin_init', [ $this, 'admin_init' ] );
+			add_action( 'admin_menu', [ $this, 'admin_menu' ] );
+		}
 	}
 
 	function admin_init() {
@@ -25,29 +34,20 @@ class Plugin {
 
 		add_filter( 'plugin_action_links_' . PLUGIN, [ $this, 'add_configure_link' ] );
 
-		if ( $this->user_allowed() ) {
-			// Add actions/filters
-			add_filter( 'media_upload_tabs', [ $this, 'tabs' ] );
-			add_action( 'media_upload_server', [ $this, 'tab_handler' ] );
-		}
-
-		// Register our settings:
-		register_setting( 'add_from_server', 'frmsvr_uac' );
-		register_setting( 'add_from_server', 'frmsvr_uac_users' );
-		register_setting( 'add_from_server', 'frmsvr_uac_role' );
+		// Add actions/filters
+		add_filter( 'media_upload_tabs', [ $this, 'tabs' ] );
+		add_action( 'media_upload_server', [ $this, 'tab_handler' ] );
 
 	}
 
 	function admin_menu() {
-		if ( $this->user_allowed() ) {
-			add_media_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'read', 'add-from-server', [ $this, 'menu_page' ] );
-		}
+		add_media_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'upload_files', 'add-from-server', [ $this, 'menu_page' ] );
 		add_options_page( __( 'Add From Server', 'add-from-server' ), __( 'Add From Server', 'add-from-server' ), 'manage_options', 'add-from-server-settings', [ $this, 'options_page' ] );
 	}
 
 	function add_configure_link( $_links ) {
 		$links = array();
-		if ( $this->user_allowed() ) {
+		if ( current_user_can( 'upload_files' ) ) {
 			$links[] = '<a href="' . admin_url( 'upload.php?page=add-from-server' ) . '">' . __( 'Import Files', 'add-from-server' ) . '</a>';
 		}
 		if ( current_user_can( 'manage_options' ) ) {
@@ -59,9 +59,7 @@ class Plugin {
 
 	// Add a tab to the media uploader:
 	function tabs( $tabs ) {
-		if ( $this->user_allowed() ) {
-			$tabs['server'] = __( 'Add From Server', 'add-from-server' );
-		}
+		$tabs['server'] = __( 'Add From Server', 'add-from-server' );
 		return $tabs;
 	}
 
@@ -76,9 +74,6 @@ class Plugin {
 	// Handle the actual page:
 	function tab_handler() {
 		global $body_id;
-		if ( !$this->user_allowed() ) {
-			return;
-		}
 
 		$body_id = 'media-upload';
 		iframe_header( __( 'Add From Server', 'add-from-server' ) );
@@ -88,10 +83,6 @@ class Plugin {
 	}
 
 	function menu_page() {
-		if ( !$this->user_allowed() ) {
-			return;
-		}
-
 		// Handle any imports:
 		$this->handle_imports();
 
@@ -102,10 +93,6 @@ class Plugin {
 	}
 
 	function options_page() {
-		if ( !current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
 		include __DIR__ . '/class.add-from-server-settings.php';
 		$settings = new Settings();
 		$settings->render();
@@ -129,44 +116,14 @@ class Plugin {
 			str_contains( get_option( 'frmsvr_root', '%' ), '%' )
 			&&
 			! defined( 'ADD_FROM_SERVER' )
-			// &&
-			//! current_user_can( 'unfiltered_html' )
+			&&
+			! current_user_can( 'unfiltered_html' )
 		) {
 			// Precautions. The user is using the folder placeholder code. Abort.
 			$root = false;
 		}
 
 		return $root;
-	}
-
-	function user_allowed() {
-		if ( !current_user_can( 'upload_files' ) ) {
-			return false;
-		}
-
-		switch ( get_option( 'frmsvr_uac', 'allusers' ) ) {
-			default:
-			case 'allusers':
-				return true;
-
-			case 'role':
-				$user = wp_get_current_user();
-				$roles = $user->roles;
-				$allowed_roles = get_option( 'frmsvr_uac_role', array() );
-				foreach ( $roles as $r ) {
-					if ( in_array( $r, $allowed_roles ) )
-						return true;
-				}
-				return false;
-
-			case 'listusers':
-				$user = wp_get_current_user();
-				$allowed_users = explode( "\n", get_option( 'frmsvr_uac_users', '' ) );
-				$allowed_users = array_map( 'trim', $allowed_users );
-				$allowed_users = array_filter( $allowed_users );
-				return in_array( $user->user_login, $allowed_users );
-		}
-		return false;
 	}
 
 	// Handle the imports
