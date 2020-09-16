@@ -1,6 +1,8 @@
 <?php
 namespace dd32\WordPress\AddFromServer;
 
+const COOKIE = 'frmsvr_path';
+
 class Plugin {
 
 	public static function instance() {
@@ -37,6 +39,9 @@ class Plugin {
 		// Add actions/filters
 		add_filter( 'media_upload_tabs', [ $this, 'tabs' ] );
 		add_action( 'media_upload_server', [ $this, 'tab_handler' ] );
+
+		// Handle the path selection early.
+		$this->path_selection_cookie();
 	}
 
 	function admin_menu() {
@@ -83,8 +88,11 @@ class Plugin {
 
 		$body_id = 'media-upload';
 		iframe_header( __( 'Add From Server', 'add-from-server' ) );
+
 		$this->handle_imports();
+
 		$this->main_content();
+
 		iframe_footer();
 	}
 
@@ -94,7 +102,9 @@ class Plugin {
 
 		echo '<div class="wrap">';
 		echo '<h1>' . __( 'Add From Server', 'add-from-server' ) . '</h1>';
+
 		$this->main_content();
+
 		echo '</div>';
 	}
 
@@ -134,6 +144,24 @@ class Plugin {
 		}
 
 		return $root;
+	}
+
+	function path_selection_cookie() {
+		if ( isset( $_REQUEST['path'] ) ) {
+			$_COOKIE[ COOKIE ] = $_REQUEST['path'];
+
+			$parts = parse_url( admin_url(), PHP_URL_HOST );
+
+			setcookie(
+				COOKIE,
+				wp_unslash( $_COOKIE[ COOKIE ] ),
+				time() + 30 * DAY_IN_SECONDS,
+				parse_url( admin_url(), PHP_URL_PATH ),
+				parse_url( admin_url(), PHP_URL_HOST ),
+				'https' === parse_url( admin_url(), PHP_URL_SCHEME ),
+				true
+			);
+		}
 	}
 
 	// Handle the imports
@@ -375,13 +403,24 @@ class Plugin {
 		return $id;
 	}
 
+	protected function get_default_dir() {
+		$root = $this->get_root();
+
+		if ( false !== str_starts_with( WP_CONTENT_DIR, $root ) ) {
+			return WP_CONTENT_DIR;
+		}
+
+		return $root;
+	}
+
 	// Create the content for the page
 	function main_content() {
 		global $pagenow;
+
 		$post_id = isset($_REQUEST['post_id']) ? intval( $_REQUEST['post_id'] ) : 0;
 		$import_to_gallery = isset($_POST['gallery']) && 'on' == $_POST['gallery'];
 		if ( !$import_to_gallery && !isset($_REQUEST['cwd']) ) {
-			$import_to_gallery = true; // cwd should always be set, if it's not, and neither is gallery, this must be the first page load.
+			$import_to_gallery = true;
 		}
 		$import_date = isset($_REQUEST['import-date']) ? $_REQUEST['import-date'] : 'current';
 
@@ -395,82 +434,92 @@ class Plugin {
 			$url = add_query_arg( 'post_id', $post_id, $url );
 		}
 
-		$cwd = trailingslashit( get_option( 'frmsvr_last_folder' ) ?: WP_CONTENT_DIR );
-
-		if ( isset($_REQUEST['directory']) ) {
-			$cwd .= stripslashes( urldecode( $_REQUEST['directory'] ) );
+		$root = $this->get_root();
+		$cwd  = $this->get_default_dir();
+		if ( ! empty( $_COOKIE[ COOKIE ] ) ) {
+			$cwd = realpath( trailingslashit( $root ) . wp_unslash( $_COOKIE[ COOKIE ] ) );
 		}
 
-		if ( isset($_REQUEST['adirectory']) && empty($_REQUEST['adirectory']) ) {
-			$_REQUEST['adirectory'] = '/'; // For good measure.
+		// Validate it.
+		if ( ! str_starts_with( $cwd, $root ) ) {
+			$cwd = $root;
 		}
 
-		if ( isset($_REQUEST['adirectory']) ) {
-			$cwd = stripslashes( urldecode( $_REQUEST['adirectory'] ) );
+		$cwd_relative = substr( $cwd, strlen( $root ) );
+
+		// Make a list of the directories the user can enter.
+		$dirparts = [
+			'<a href="' . esc_url( add_query_arg( 'path', '/', $url ) ) . '">' . esc_html( basename( $root ) ) . '</a>'
+		];
+
+		$dir_path = '';
+		foreach ( explode( '/', $cwd_relative ) as $dir ) {
+			$dir_path .= '/' . $dir;
+			$dirparts[] = '<a href="' . esc_url( add_query_arg( 'path', rawurlencode( $dir_path ), $url ) ) . '">' . esc_html( $dir ) . '/</a> ';
 		}
 
-		$cwd = preg_replace( '![^/]*/\.\./!', '', $cwd );
-		$cwd = preg_replace( '!//!', '/', $cwd );
+		$dirparts = implode( '', $dirparts );
 
-		if ( !is_readable( $cwd ) && is_readable( $this->get_root() . '/' . ltrim( $cwd, '/' ) ) ) {
-			$cwd = $this->get_root() . '/' . ltrim( $cwd, '/' );
+		// Get a list of files to show.
+		$nodes = glob( rtrim( $cwd, '/' ) . '/*' ) ?: [];
+
+		$directories = array_flip( array_filter( $nodes, function( $node ) {
+			return is_dir( $node );
+		} ) );
+		array_walk( $directories, function( &$data, $path ) use( $root ) {
+			$data = [
+				'text' => basename( $path ) . '/',
+				'path' => substr( $path, strlen( $root ) + 1 )
+			];
+		} );
+		// Prefix the parent directory.
+		if ( str_starts_with( dirname( $cwd ), $root ) ) {
+			$directories = array_merge(
+				[
+					dirname( $cwd ) => [
+						'text' => __( 'Parent Folder', 'add-from-server' ),
+						'path' => substr( dirname( $cwd ), strlen( $root ) + 1 ) ?: '/',
+					]
+				],
+				$directories
+			);
 		}
 
-		if ( !is_readable( $cwd ) && get_option( 'frmsvr_last_folder' ) ) {
-			$cwd = get_option( 'frmsvr_last_folder' );
-		}
+		$files = array_flip( array_filter( $nodes, function( $node ) {
+			return is_file( $node );
+		} ) );
+		array_walk( $files, function( &$data, $path ) use( $root ) {
+			$importable = ( false !== wp_check_filetype( $path )['type'] || current_user_can( 'unfiltered_upload' ) );
+			$readable   = is_readable( $path );
 
-		if ( !is_readable( $cwd ) ) {
-			$cwd = WP_CONTENT_DIR;
-		}
+			$data = [
+				'text'       => basename( $path ),
+				'file'       => substr( $path, strlen( $root ) + 1 ),
+				'importable' => $importable,
+				'readable'   => $readable,
+				'error'      => (
+					! $importable ? 'doesnt-meet-guidelines' : (
+						! $readable ? 'unreadable' : false
+					)
+				),
+			];
+		} );
 
-		if ( strpos( $cwd, $this->get_root() ) === false ) {
-			$cwd = $this->get_root();
-		}
-
-		// WP < 4.4 Compat: ucfirt
-		$cwd = ucfirst( wp_normalize_path( $cwd ) );
-
-		if ( strlen( $cwd ) > 1 ) {
-			$cwd = untrailingslashit( $cwd );
-		}
-
-		if ( !is_readable( $cwd ) ) {
-			echo '<div class="error"><p>' . __( '<strong>Error:</strong> This users root directory is not readable. Please have your site administrator correct the <em>Add From Server</em> root directory settings.', 'add-from-server' ) . '</p></div>';
-			return;
-		}
-
-		update_option( 'frmsvr_last_folder', $cwd );
-
-		$files = $this->find_files( $cwd );
-
-		$parts = explode( '/', ltrim( str_replace( $this->get_root(), '/', $cwd ), '/' ) );
-		if ( $parts[0] != '' ) {
-			$parts = array_merge( (array)'', $parts );
-		}
-
-		// array_walk() + eAccelerator + anonymous function = bad news
-		foreach ( $parts as $index => &$item ) {
-			$this_path = implode( '/', array_slice( $parts, 0, $index + 1 ) );
-			$this_path = ltrim( $this_path, '/' ) ?: '/';
-			$item_url = add_query_arg( array( 'adirectory' => $this_path ), $url );
-
-			if ( $index == count( $parts ) - 1 ) {
-				$item = esc_html( $item ) . '/';
-			} else {
-				$item = sprintf( '<a href="%s">%s/</a>', esc_url( $item_url ), esc_html( $item ) );
-			}
-		}
-
-		$dirparts = implode( '', $parts );
+		// Importable files first.
+		uasort( $files, function( $a, $b ) {
+			return $a['error'] <=> $b['error'];
+		} );
 
 		?>
 		<div class="frmsvr_wrap">
 			<form method="post" action="<?php echo esc_url( $url ); ?>">
-				<p><?php printf( __( '<strong>Current Directory:</strong> <span id="cwd">%s</span>', 'add-from-server' ), $dirparts ) ?></p>
-				<?php if ( 'media-upload.php' == $GLOBALS['pagenow'] && $post_id > 0 ) : ?>
-					<p><?php _e( 'Once you have Imported your files, head over to <strong>Insert Media</strong> to add them to your post.', 'add-from-server' ); ?></p>
-				<?php endif; ?>
+				<p><?php
+					printf(
+						__( '<strong>Current Directory:</strong> %s', 'add-from-server' ),
+						'<span id="cwd">' . $dirparts . '</span>'
+					);
+				?></p>
+
 				<table class="widefat">
 					<thead>
 					<tr>
@@ -480,91 +529,43 @@ class Plugin {
 					</thead>
 					<tbody>
 					<?php
-					$parent = dirname( $cwd );
-					if ( $parent != $cwd && (strpos( $parent, $this->get_root() ) === 0) && is_readable( $parent ) ) :
-						$parent = preg_replace( '!^' . preg_quote( $this->get_root(), '!' ) . '!i', '', $parent );
-						?>
-						<tr>
-							<td>&nbsp;</td>
-							<td>
-								<a href="<?php echo esc_url( add_query_arg( array( 'adirectory' => rawurlencode( $parent ) ), $url ) ); ?>"
-								   title="<?php echo esc_attr( dirname( $cwd ) ) ?>"><?php _e( 'Parent Folder', 'add-from-server' ); ?></a>
-							</td>
-						</tr>
-					<?php endif; ?>
-					<?php
-					$directories = array();
-					foreach ( (array)$files as $key => $file ) {
-						if ( is_dir( $file ) ) {
-							$directories[] = $file;
-							unset($files[$key]);
-						}
+
+					foreach ( $directories as $dir ) {
+						printf(
+							'<tr>
+								<td>&nbsp;</td>
+								<td><a href="%s">%s</a></td>
+							</tr>',
+							esc_url( add_query_arg( 'path', $dir['path'], $url ) ),
+							esc_html( $dir['text'] )
+						);
 					}
 
-					sort( $directories );
-					sort( $files );
-
-					foreach ( (array)$directories as $file ) :
-						$filename = preg_replace( '!^' . preg_quote( $cwd ) . '!i', '', $file );
-						$filename = ltrim( $filename, '/' );
-						$folder_url = add_query_arg( array( 'directory' => rawurlencode( $filename ), 'import-date' => $import_date, 'gallery' => $import_to_gallery ), $url );
-						?>
-						<tr>
-							<td>&nbsp;</td>
-							<td>
-								<a href="<?php echo esc_url( $folder_url ); ?>"><?php echo esc_html( rtrim( $filename, '/' ) . '/' ); ?></a>
-							</td>
-						</tr>
-					<?php
-					endforeach;
-					$names = $rejected_files = $unreadable_files = array();
-					$unfiltered_upload = current_user_can( 'unfiltered_upload' );
-					foreach ( (array)$files as $key => $file ) {
-						if ( !$unfiltered_upload ) {
-							$wp_filetype = wp_check_filetype( $file );
-							if ( false === $wp_filetype['type'] ) {
-								$rejected_files[] = $file;
-								unset($files[$key]);
-								continue;
-							}
+					$file_id = 0;
+					foreach ( $files as $file ) {
+						$error_str = '';
+						if ( 'doesnt-meet-guidelines' === $file['error'] ) {
+							$error_str = __( 'Sorry, this file type is not permitted for security reasons. Please see the FAQ.', 'add-from-server' );
+						} else if ( 'unreadable' === $file['error'] ) {
+							$error_str = __( 'Sorry, but this file is unreadable by your Webserver. Perhaps check your File Permissions?', 'add-from-server' );
 						}
-						if ( !is_readable( $file ) ) {
-							$unreadable_files[] = $file;
-							unset($files[$key]);
-							continue;
-						}
-					}
 
-					foreach ( array( 'meets_guidelines' => $files, 'unreadable' => $unreadable_files, 'doesnt_meets_guidelines' => $rejected_files ) as $key => $_files ) :
-						$file_meets_guidelines = $unfiltered_upload || ('meets_guidelines' == $key);
-						$unreadable = 'unreadable' == $key;
-						foreach ( $_files as $file_index => $file ) :
-							$classes = array();
-
-							if ( !$file_meets_guidelines ) {
-								$classes[] = 'doesnt-meet-guidelines';
-							}
-							if ( $unreadable ) {
-								$classes[] = 'unreadable';
-							}
-
-							$filename = preg_replace( '!^' . preg_quote( $cwd, '!' ) . '!', '', $file );
-							$filename = ltrim( $filename, '/' );
-
-							?>
-							<tr class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" title="<?php if ( !$file_meets_guidelines ) {
-									esc_attr_e( 'Sorry, this file type is not permitted for security reasons. Please see the FAQ.', 'add-from-server' );
-								} elseif ( $unreadable ) {
-									esc_attr_e( 'Sorry, but this file is unreadable by your Webserver. Perhaps check your File Permissions?', 'add-from-server' );
-								} ?>">
-								<th class='check-column'>
-									<input type='checkbox' id='file-<?php echo (int)$file_index; ?>' name='files[]' value='<?php echo esc_attr( $filename ); ?>' <?php disabled( !$file_meets_guidelines || $unreadable ); ?> />
+						printf(
+							'<tr class="%1$s" title="%2$s">
+								<th class="check-column">
+									<input type="checkbox" id="file-%3$d" name="files[]" value="%4$s" %5$s />
 								</th>
-								<td>
-									<label for='file-<?php echo (int)$file_index; ?>'><?php echo esc_html( $filename ); ?></label>
-								</td>
-							</tr>
-						<?php endforeach; endforeach; ?>
+								<td><label for="file-%3$d">%6$s</label></td>
+							</tr>',
+							$file['error'] ?: '', $error_str, // 1, 2
+							$file_id++, // 3
+							$file['file'], // 4
+							disabled( false, $file['readable'] && $file['importable'], false ), // 5
+							esc_html( $file['text'] ) // 6
+						);
+					}
+					?>
+
 					</tbody>
 					<tfoot>
 					<tr>
@@ -590,20 +591,11 @@ class Plugin {
 				</fieldset>
 				<br class="clear"/>
 				<?php wp_nonce_field( 'afs_import' ); ?>
-				<input type="hidden" name="cwd" value="<?php echo esc_attr( $cwd ); ?>"/>
 				<?php submit_button( __( 'Import', 'add-from-server' ), 'primary', 'import', false ); ?>
 			</form>
 			<?php $this->language_notice(); ?>
 		</div>
 	<?php
-	}
-
-	function find_files( $folder ) {
-		if ( !is_readable( $folder ) ) {
-			return array();
-		}
-
-		return glob( rtrim( $folder, '/' ) . '/*' );
 	}
 
 	function language_notice( $force = false ) {
