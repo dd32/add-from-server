@@ -16,8 +16,10 @@ if ( !is_admin() ) {
 
 const MIN_WP  = '5.0';
 const MIN_PHP = '7.0';
-const PLUGIN  = plugin_basename( __FILE__ );
 const VERSION = '3.4';
+
+// Dynamic constants must be define()'d.
+define( __NAMESPACE__ . '\PLUGIN', plugin_basename( __FILE__ ) );
 
 // Old versions of WordPress or PHP
 if (

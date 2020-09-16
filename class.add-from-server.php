@@ -5,8 +5,9 @@ class Plugin {
 
 	public static function instance() {
 		static $instance = false;
+		$class           = static::class;
 
-		return $instance ?: ( $instance = new self::class );
+		return $instance ?: ( $instance = new $class );
 	}
 
 	protected function __construct() {
