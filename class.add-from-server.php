@@ -1,32 +1,28 @@
 <?php
+namespace dd32\WordPress\AddFromServer;
 
-class Add_From_Server {
+class Plugin {
 
-	var $version = '3.4';
-	var $basename = '';
+	public static function instance() {
+		static $instance = false;
 
-	function __construct( $plugin ) {
-		$this->basename = $plugin;
-		// Register general hooks.
-		add_action( 'init', array( $this, 'load_translations' ) ); // must run before admin_menu
+		return $instance ?: ( $instance = new self::class );
+	}
+
+	protected function __construct() {
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 	}
 
-	function load_translations() {
-		// Load any translation files needed:
-		load_plugin_textdomain( 'add-from-server' );
-	}
-
 	function admin_init() {
-		// Register our JS & CSS
-		wp_register_style( 'add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), $this->version );
+		// Register JS & CSS
+		wp_register_style( 'add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), VERSION );
 
 		// Enqueue JS & CSS
 		add_action( 'load-media_page_add-from-server', array( $this, 'add_styles' ) );
 		add_action( 'media_upload_server', array( $this, 'add_styles' ) );
 
-		add_filter( 'plugin_action_links_' . $this->basename, array( $this, 'add_configure_link' ) );
+		add_filter( 'plugin_action_links_' . PLUGIN, array( $this, 'add_configure_link' ) );
 
 		if ( $this->user_allowed() ) {
 			// Add actions/filters
@@ -112,7 +108,7 @@ class Add_From_Server {
 		}
 
 		include __DIR__ . '/class.add-from-server-settings.php';
-		$settings = new Add_From_Server_Settings( $this );
+		$settings = new Settings();
 		$settings->render();
 	}
 

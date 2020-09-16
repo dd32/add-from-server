@@ -1,12 +1,7 @@
 <?php
+namespace dd32\WordPress\AddFromServer;
 
-class Add_From_Server_Settings {
-	var $main; // main Add From Server instance.
-
-	function __construct($afs) {
-		$this->main = $afs;
-	}
-
+class Settings {
 	function render() {
 		echo '<div class="wrap">';
 		screen_icon( 'options-general' );
@@ -16,7 +11,7 @@ class Add_From_Server_Settings {
 		settings_fields( 'add_from_server' );
 
 		$uac = get_option( 'frmsvr_uac', 'allusers' );
-		$root = $this->main->get_root( 'raw' );
+		$root = Plugin::instance()->get_root( 'raw' );
 		?>
 		<table class="form-table">
 			<tr valign="top">
@@ -112,7 +107,7 @@ class Add_From_Server_Settings {
 		<?php
 		submit_button( __( 'Save Changes', 'add-from-server' ), 'primary', 'submit' );
 		echo '</form>';
-		$this->main->language_notice( ( get_locale() !== 'en_US' ) );
+		Plugin::instance()->language_notice( ( get_locale() !== 'en_US' ) );
 		echo '</div>';
 	}
 }
