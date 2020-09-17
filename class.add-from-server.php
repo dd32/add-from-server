@@ -370,14 +370,36 @@ class Plugin {
 		$directories = array_flip( array_filter( $nodes, function( $node ) {
 			return is_dir( $node );
 		} ) );
-		array_walk( $directories, function( &$data, $path ) use( $root ) {
-			$data = [
-				'text' => basename( $path ) . '/',
-				'path' => substr( $path, strlen( $root ) + 1 )
-			];
 
-			// TODO: Shortcut: If the folder only has a singular child, link to that?
+		$get_import_root = function( $path ) use ( &$get_import_root ) {
+			if ( ! is_readable( $path ) ) {
+				return false;
+			}
+
+			$files = glob( $path . '/*' );
+			if ( ! $files ) {
+				return false;
+			}
+
+			if ( 1 === count( $files ) && is_dir( $files[0] ) ) {
+				return $get_import_root( $files[0] );
+			}
+
+			return $path;
+		};
+
+		array_walk( $directories, function( &$data, $path ) use( $root, $cwd_relative, $get_import_root ) {
+			$import_root = $get_import_root( $path );
+
+			$data = [
+				'text' => substr(
+						substr( $import_root, strlen( $root ) + 1 ),
+						strlen( $cwd_relative )
+					) . '/',
+				'path' => substr( $import_root, strlen( $root ) + 1 )
+			];
 		} );
+
 		// Prefix the parent directory.
 		if ( str_starts_with( dirname( $cwd ), $root ) ) {
 			$directories = array_merge(
@@ -437,6 +459,10 @@ class Plugin {
 					<?php
 
 					foreach ( $directories as $dir ) {
+						if ( ! $dir['path'] ) {
+							continue;
+						}
+
 						printf(
 							'<tr>
 								<td>&nbsp;</td>
