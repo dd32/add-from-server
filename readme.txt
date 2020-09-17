@@ -5,16 +5,25 @@ Requires at least: 5.0
 Tested up to: 5.2
 Stable tag: 3.4
 
-"Add From Server" is a quick plugin which allows you to import media & files into the WordPress uploads manager from the Webservers filesystem
+Add From Server is designed to help ease the pain of bad web hosts, allowing you to upload files via FTP or SSH and later import them into WordPress.
 
 == Description ==
 
-** Support for this plugin is NOT offered, This plugin still however works. Please don't expect	support	requests to be answered, or "This doesn't work"	reviews	to be responded	to. **
+This plugin is officially unsupported. Please do not expect new features or bugfixes. Features may be removed at any time.
 
-Please Note: This plugin is not designed to replace the media uploader. This plugin is not designed to be used for migration of sites. This plugin is not designed to re-import your media upload history. This plugin is not designed to Batch import your media. Etc. This plugin is 8 years old and designed for importing singular large files which could not be uploaded through the administration interface.
+Add From Server is designed to help ease the pain of bad web hosts, allowing you to upload files via FTP or SSH and later import them into WordPress.
 
-The heart of a CMS is the ability to upload and insert content, WordPress does a fantastic job at this, unfortunately, some web hosts have limited servers, or users simply do not have the ability to upload large files through their web browser.
-Add From Server is designed to help ease this pain, You can upload a bunch of files via FTP (Or your favourite transmission method) and simply import those files from the webserver directly into WordPress.
+This plugin is NOT designed to..
+ * Used as a replacement for the file uploader
+ * To be used for migration of websites
+ * To re-import your files after moving webhosting
+ * Batch import media
+
+This plugins IS designed to..
+ * Import files which are larger than your hosting allows to be uploaded.
+ * Import files which are too large for your internet connections upload speed.
+
+WordPress does a better job of file uploads than this plugin, so please consider your needs before you use it.
 
 == Changelog ==
 
@@ -26,6 +35,7 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
  * Removes the Root Directory Control. The root directory is now assumed. You can use the ADD_FROM_SERVER constant to change it.
  * Removes the Quick Jump functionality.
  * Removes the ability to be able to select the date for imported media. It's always today. Or, the 1st of the month if it's stored in a dated folder.
+ * Removed Media Manager integration, as it's no longer shown with the WordPress Block Editor. Classic Editor is not supported by this plugin.
 
 == FAQ ==
 
