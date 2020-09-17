@@ -1,3 +1,6 @@
+= 3.4.1 =
+ * Plugin now requires WordPress 5.4+
+
 = 3.4 =
  * The plugin now requires WordPress 5.1+ and PHP 7.0+. No reason other than why not.
  * Bumps the version to stop the invalid vulnerability warnings.
