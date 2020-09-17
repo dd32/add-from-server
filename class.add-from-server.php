@@ -16,10 +16,7 @@ class Plugin {
 	}
 
 	function init() {
-		if (
-			current_user_can( 'upload_files' ) &&
-			current_user_can( 'unfiltered_html' )
-		) {
+		if ( current_user_can( 'upload_files' ) ) {
 			add_action( 'admin_init', [ $this, 'admin_init' ] );
 			add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 		}
@@ -344,7 +341,7 @@ class Plugin {
 
 		$root = $this->get_root();
 		if ( ! $root ) {
-			wp_die( 'Invalid Configuration.' );
+			return; // Intervention required.
 		}
 
 		$cwd = $this->get_default_dir();
