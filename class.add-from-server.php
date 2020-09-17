@@ -503,7 +503,10 @@ class Plugin {
 					if ( isset( $file ) && $file['error'] ) {
 						// The last file was an error, display a expander.
 						printf(
-							'<tr class="hidden-toggle"><td>&nbsp;</td><td><a href="#">%1$s</a></td></tr>',
+							'<tr class="hidden-toggle">
+								<td>&nbsp;</td>
+								<td><a href="#">%1$s</a></td>
+							</tr>',
 							__( 'Show hidden files', 'add-from-server' )
 						);
 					}
