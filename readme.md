@@ -16,9 +16,9 @@ This plugin is officially unsupported. Please do not expect new features or bugf
 Add From Server is designed to help ease the pain of bad web hosts, allowing you to upload files via FTP or SSH and later import them into WordPress.
 
 This plugin is NOT designed to..
- * Used as a replacement for the file uploader
- * To be used for migration of websites
- * To re-import your files after moving webhosting
+ * Be used as a replacement for the file uploader
+ * Be used for migration of websites
+ * Re-import your files after moving webhosting
  * Batch import media
 
 This plugins IS designed to..
@@ -26,6 +26,9 @@ This plugins IS designed to..
  * Import files which are too large for your internet connections upload speed.
 
 WordPress does a better job of file uploads than this plugin, so please consider your needs before you use it.
+
+You may also want to look at using WP-CLI for media import purposes:
+https://developer.wordpress.org/cli/commands/media/import/
 
 ## Changelog
 
