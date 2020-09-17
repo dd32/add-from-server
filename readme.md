@@ -1,13 +1,14 @@
-=== Add From Server ===
-Contributors: dd32
-Tags: admin, media, uploads, post, import, files
-Requires at least: 5.0
-Tested up to: 5.2
-Stable tag: 3.4
+Add From Server
+===============
+* Contributors: dd32
+* Tags: admin, media, uploads, post, import, files
+* Requires at least: 5.0
+* Tested up to: 5.2
+* Stable tag: 3.4
 
 Add From Server is designed to help ease the pain of bad web hosts, allowing you to upload files via FTP or SSH and later import them into WordPress.
 
-== Description ==
+## Description
 
 This plugin is officially unsupported. Please do not expect new features or bugfixes. Features may be removed at any time.
 
@@ -25,9 +26,9 @@ This plugins IS designed to..
 
 WordPress does a better job of file uploads than this plugin, so please consider your needs before you use it.
 
-== Changelog ==
+## Changelog
 
-= 3.4 =
+### 3.4
  * The plugin now requires WordPress 5.1+ and PHP 7.0+. No reason other than why not.
  * Bumps the version to stop the invalid vulnerability warnings.
  * Cleans up code.
@@ -37,21 +38,21 @@ WordPress does a better job of file uploads than this plugin, so please consider
  * Removes the ability to be able to select the date for imported media. It's always today. Or, the 1st of the month if it's stored in a dated folder.
  * Removed Media Manager integration, as it's no longer shown with the WordPress Block Editor. Classic Editor is not supported by this plugin.
 
-== FAQ ==
+## Frequently Asked Questions
 
-= How can I import files from other folders? =
+### How can I import files from other folders?
 In 3.4, the plugin changed to limit the directories you can import files from.
 If you wish to import files from other folders, you need to add the ADD_FROM_SERVER constant to your wp-config.php file.
 For example:
 `define( 'ADD_FROM_SERVER', '/www/' );`
 
-= Why does the file I want to import have a red background? =
+### Why does the file I want to import have a red background?
 WordPress only allows the importing/uploading of certain file types to improve your security.
 If you wish to add extra file types, you can use a plugin such as: http://wordpress.org/extend/plugins/pjw-mime-config/ You can also enable "Unfiltered uploads" globally for WordPress if you'd like to override this security function. Please see the WordPress support forum for details.
 
-= Where are the files saved? =
+### Where are the files saved?
 If you import a file which is outside your standard upload directory (usually wp-content/uploads/) then it will be copied to your current upload directory setting as normal.
 If you however import a file which **is already within the uploads directory** (for example, wp-content/uploads/2011/02/superplugin.zip) then the file will not be copied, and will be used as-is.
 
-= I have a a bug report =
+### I have a a bug report
 You can report bugs on <a href="https://github.com/dd32/add-from-server">GitHub</a> and get support in the <a href="https://wordpress.org/support/plugin/add-from-server/">WordPress.org Support Forums</a>.
