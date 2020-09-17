@@ -1,5 +1,12 @@
 = 3.4 =
-
+ * The plugin now requires WordPress 5.1+ and PHP 7.0+. No reason other than why not.
+ * Bumps the version to stop the invalid vulnerability warnings.
+ * Cleans up code.
+ * Removes the User Access Control. Any user with File Upload ability can now use the plugin.
+ * Removes the Root Directory Control. The root directory is now assumed. You can use the ADD_FROM_SERVER constant to change it.
+ * Removes the Quick Jump functionality.
+ * Removes the ability to be able to select the date for imported media. It's always today. Or, the 1st of the month if it's stored in a dated folder.
+ * Removed Media Manager integration, as it's no longer shown with the WordPress Block Editor. Classic Editor is not supported by this plugin.
 
 = 3.3.3 =
  * Fixes some scenario's where the translation warning sticks around for translated (and other english locales)
