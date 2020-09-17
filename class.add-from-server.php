@@ -27,6 +27,7 @@ class Plugin {
 
 	function admin_init() {
 		// Register JS & CSS
+		wp_register_script( 'add-from-server', plugins_url( '/add-from-server.js', __FILE__ ), array( 'jquery' ), VERSION );
 		wp_register_style( 'add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), VERSION );
 
 		add_filter( 'plugin_action_links_' . PLUGIN, [ $this, 'add_configure_link' ] );
@@ -45,6 +46,7 @@ class Plugin {
 		);
 		add_action( 'load-' . $page_slug, function() {
 			wp_enqueue_style( 'add-from-server' );
+			wp_enqueue_script( 'add-from-server' );
 		} );
 	}
 
@@ -478,8 +480,16 @@ class Plugin {
 							esc_html( $file['text'] ) // 6
 						);
 					}
-					?>
 
+					if ( isset( $file ) && $file['error'] ) {
+						// The last file was an error, display a expander.
+						printf(
+							'<tr class="hidden-toggle"><td>&nbsp;</td><td><a href="#">%1$s</a></td></tr>',
+							__( 'Show hidden files', 'add-from-server' )
+						);
+					}
+
+					?>
 					</tbody>
 					<tfoot>
 					<tr>
