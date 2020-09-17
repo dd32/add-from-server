@@ -2,8 +2,8 @@ Add From Server
 ===============
 * Contributors: dd32
 * Tags: admin, media, uploads, post, import, files
-* Requires at least: 5.0
-* Tested up to: 5.2
+* Requires at least: 5.4
+* Tested up to: 5.5
 * Requires PHP: 7.0
 * Stable tag: 3.4
 
@@ -31,6 +31,9 @@ You may also want to look at using WP-CLI for media import purposes:
 https://developer.wordpress.org/cli/commands/media/import/
 
 ## Changelog
+
+### 3.4.1
+ * Plugin now requires WordPress 5.4+
 
 ### 3.4
  * The plugin now requires WordPress 5.1+ and PHP 7.0+. No reason other than why not.
