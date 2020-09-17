@@ -524,8 +524,10 @@ Thanks! Dion.', 'add-from-server' );
 	}
 
 	function outdated_options_notice() {
+		$old_root = get_option( 'frmsvr_root', '' );
+
 		if (
-			str_contains( get_option( 'frmsvr_root', '' ), '%' )
+			str_contains( $old_root, '%' )
 			&&
 			! defined( 'ADD_FROM_SERVER' )
 		) {
@@ -533,6 +535,17 @@ Thanks! Dion.', 'add-from-server' );
 				'<div class="notice error"><p>%s</p></div>',
 				'You previously used the "Root Directory" option with a placeholder, such as "%username% or "%role%".<br>' .
 				'Unfortunately this feature is no longer supported. As a result, Add From Server has been disabled for users who have restricted upload privledges.<br>' .
+				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php">options.php</a>.'
+			);
+		}
+
+		if ( $old_root && ! str_starts_with( $old_root, $this->get_root() ) ) {
+			printf(
+				'<div class="notice error"><p>%s</p></div>',
+				'Warning: Root Directory changed. You previously used <code>' . esc_html( $old_root ) . '</code> as your "Root Directory", ' .
+				'this has been changed to <code>' . esc_html( $this->get_root() ) . '</code>.<br>' .
+				'To restore your previous settings, add the following line to your <code>wp-config.php</code> file:<br>' .
+				'<code>define( "ADD_FROM_SERVER", "' . $old_root . '" );</code><br>' .
 				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php">options.php</a>.'
 			);
 		}
