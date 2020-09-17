@@ -567,7 +567,7 @@ Thanks! Dion.', 'add-from-server' );
 				'<div class="notice error"><p>%s</p></div>',
 				'You previously used the "Root Directory" option with a placeholder, such as "%username% or "%role%".<br>' .
 				'Unfortunately this feature is no longer supported. As a result, Add From Server has been disabled for users who have restricted upload privledges.<br>' .
-				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php">options.php</a>.'
+				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php#frmsvr_root">options.php</a>.'
 			);
 		}
 
@@ -578,7 +578,7 @@ Thanks! Dion.', 'add-from-server' );
 				'this has been changed to <code>' . esc_html( $this->get_root() ) . '</code>.<br>' .
 				'To restore your previous settings, add the following line to your <code>wp-config.php</code> file:<br>' .
 				'<code>define( "ADD_FROM_SERVER", "' . $old_root . '" );</code><br>' .
-				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php">options.php</a>.'
+				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php#frmsvr_root">options.php</a>.'
 			);
 		}
 	}
