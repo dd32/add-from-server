@@ -12,14 +12,8 @@ class Plugin {
 	}
 
 	protected function __construct() {
-		add_action( 'init', [ $this, 'init' ] );
-	}
-
-	function init() {
-		if ( current_user_can( 'upload_files' ) ) {
-			add_action( 'admin_init', [ $this, 'admin_init' ] );
-			add_action( 'admin_menu', [ $this, 'admin_menu' ] );
-		}
+		add_action( 'admin_init', [ $this, 'admin_init' ] );
+		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 	}
 
 	function admin_init() {
@@ -27,7 +21,7 @@ class Plugin {
 		wp_register_script( 'add-from-server', plugins_url( '/add-from-server.js', __FILE__ ), array( 'jquery' ), VERSION );
 		wp_register_style( 'add-from-server', plugins_url( '/add-from-server.css', __FILE__ ), array(), VERSION );
 
-		add_filter( 'plugin_action_links_' . PLUGIN, [ $this, 'add_configure_link' ] );
+		add_filter( 'plugin_action_links_' . PLUGIN, [ $this, 'add_upload_link' ] );
 
 		// Handle the path selection early.
 		$this->path_selection_cookie();
@@ -47,7 +41,7 @@ class Plugin {
 		} );
 	}
 
-	function add_configure_link( $links ) {
+	function add_upload_link( $links ) {
 		if ( current_user_can( 'upload_files' ) ) {
 			array_unshift( $links, '<a href="' . admin_url( 'upload.php?page=add-from-server' ) . '">' . __( 'Import Files', 'add-from-server' ) . '</a>' );
 		}
@@ -102,7 +96,7 @@ class Plugin {
 	}
 
 	function path_selection_cookie() {
-		if ( isset( $_REQUEST['path'] ) ) {
+		if ( isset( $_REQUEST['path'] ) && current_user_can( 'upload_files' ) ) {
 			$_COOKIE[ COOKIE ] = $_REQUEST['path'];
 
 			$parts = parse_url( admin_url(), PHP_URL_HOST );
