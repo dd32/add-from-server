@@ -341,7 +341,11 @@ class Plugin {
 		$url = admin_url( 'upload.php?page=add-from-server' );
 
 		$root = $this->get_root();
-		$cwd  = $this->get_default_dir();
+		if ( ! $root ) {
+			wp_die( 'Invalid Configuration.' );
+		}
+
+		$cwd = $this->get_default_dir();
 		if ( ! empty( $_COOKIE[ COOKIE ] ) ) {
 			$cwd = realpath( trailingslashit( $root ) . wp_unslash( $_COOKIE[ COOKIE ] ) );
 		}
@@ -355,6 +359,7 @@ class Plugin {
 
 		// Make a list of the directories the user can enter.
 		$dirparts = [
+			esc_html( trailingslashit( dirname( $root ) ) ),
 			'<a href="' . esc_url( add_query_arg( 'path', '/', $url ) ) . '">' . esc_html( basename( $root ) ) . '</a>'
 		];
 
