@@ -17,5 +17,3 @@ jobs:
         uses: StephaneBour/actions-php-lint@7.1
       - name: PHP syntax checker 7.0
         uses: StephaneBour/actions-php-lint@7.0
-      - name: PHP syntax checker 5.6
-        uses: StephaneBour/actions-php-lint@5.6
