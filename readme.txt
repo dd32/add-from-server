@@ -22,12 +22,18 @@ Add From Server is designed to help ease this pain, You can upload a bunch of fi
  * The plugin now requires WordPress 5.1+ and PHP 7.0+. No reason other than why not.
  * Bumps the version to stop the invalid vulnerability warnings.
  * Cleans up code.
- * Removes the User Access Control.
- * Removes the Root Directory Control.
+ * Removes the User Access Control. Any user with File Upload ability can now use the plugin.
+ * Removes the Root Directory Control. The root directory is now assumed. You can use the ADD_FROM_SERVER constant to change it.
  * Removes the Quick Jump functionality.
  * Removes the ability to be able to select the date for imported media. It's always today. Or, the 1st of the month if it's stored in a dated folder.
 
 == FAQ ==
+
+= How can I import files from other folders? =
+In 3.4, the plugin changed to limit the directories you can import files from.
+If you wish to import files from other folders, you need to add the ADD_FROM_SERVER constant to your wp-config.php file.
+For example:
+`define( 'ADD_FROM_SERVER', '/www/' );`
 
 = Why does the file I want to import have a red background? =
 WordPress only allows the importing/uploading of certain file types to improve your security.
