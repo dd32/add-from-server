@@ -366,6 +366,11 @@ class Plugin {
 
 		$dirparts = implode( '', $dirparts );
 
+		// Sort alphabetically correctly..
+		$sort_by_text = function( $a, $b ) {
+			return strtolower( $a['text'] ) <=> strtolower( $b['text'] );
+		};
+
 		// Get a list of files to show.
 		$nodes = glob( rtrim( $cwd, '/' ) . '/*' ) ?: [];
 
@@ -402,6 +407,9 @@ class Plugin {
 			];
 		} );
 
+		// Sort the directories case insensitively.
+		uasort( $directories, $sort_by_text );
+
 		// Prefix the parent directory.
 		if ( str_starts_with( dirname( $cwd ), $root ) ) {
 			$directories = array_merge(
@@ -435,10 +443,8 @@ class Plugin {
 			];
 		} );
 
-		// Importable files first.
-		uasort( $files, function( $a, $b ) {
-			return $a['error'] <=> $b['error'];
-		} );
+		// Sort case insensitively.
+		uasort( $files, $sort_by_text );
 
 		?>
 		<div class="frmsvr_wrap">
@@ -500,8 +506,8 @@ class Plugin {
 						);
 					}
 
-					if ( isset( $file ) && $file['error'] ) {
-						// The last file was an error, display a expander.
+					// If we have any files that are error flagged, add the hidden row.
+					if ( array_filter( array_column( $files, 'error' ) ) ) {
 						printf(
 							'<tr class="hidden-toggle">
 								<td>&nbsp;</td>

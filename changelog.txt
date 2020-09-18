@@ -1,3 +1,6 @@
+= 3.4.2 =
+ * Restore case insensitive alphabetical sorting
+
 = 3.4.1 =
  * Plugin now requires WordPress 5.4+
 
