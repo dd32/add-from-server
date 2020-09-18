@@ -1,4 +1,5 @@
 <?php
+namespace dd32\WordPress\AddFromServer;
 
 class Plugin {
 	function __construct() {
