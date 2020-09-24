@@ -354,12 +354,10 @@ class Plugin {
 
 		// Make a list of the directories the user can enter.
 		$dirparts = [];
-		if ( $cwd_relative || '/' !== $root ) {
-			$dirparts[] = esc_html( trailingslashit( dirname( $root ) ) );
-		}
+		$dirparts[] = '<a href="' . esc_url( add_query_arg( 'path', rawurlencode( '/' ), $url ) ) . '">' . esc_html( trailingslashit( $root ) ) . '</a> ';
 
 		$dir_path = '';
-		foreach ( explode( '/', $cwd_relative ) as $dir ) {
+		foreach ( array_filter( explode( '/', $cwd_relative ) ) as $dir ) {
 			$dir_path .= '/' . $dir;
 			$dirparts[] = '<a href="' . esc_url( add_query_arg( 'path', rawurlencode( $dir_path ), $url ) ) . '">' . esc_html( $dir ?: basename( $root ) ) . '/</a> ';
 		}
