@@ -565,6 +565,8 @@ Thanks! Dion.', 'add-from-server' );
 		$old_root = get_option( 'frmsvr_root', '' );
 
 		if (
+			$old_root
+			&&
 			str_contains( $old_root, '%' )
 			&&
 			! defined( 'ADD_FROM_SERVER' )
