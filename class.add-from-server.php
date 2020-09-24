@@ -420,6 +420,11 @@ class Plugin {
 
 		array_walk( $directories, function( &$data, $path ) use( $root, $cwd_relative, $get_import_root, $get_root_relative_path ) {
 			$import_root = $get_import_root( $path );
+			if ( ! $import_root ) {
+				// Unreadable, etc.
+				$data = false;
+				return;
+			}
 
 			$data = [
 				'text' => substr(
@@ -428,7 +433,11 @@ class Plugin {
 					) . '/',
 				'path' => $get_root_relative_path( $import_root )
 			];
+
+			$data['text'] = ltrim( $data['text'], '/' );
 		} );
+
+		$directories = array_filter( $directories );
 
 		// Sort the directories case insensitively.
 		uasort( $directories, $sort_by_text );
