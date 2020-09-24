@@ -387,7 +387,7 @@ class Plugin {
 			}
 
 			$has_files = false;
-			foreach ( $files as $file ) {
+			foreach ( $files as $i => $file ) {
 				if ( is_file( $file ) ) {
 					$has_files = true;
 					break;
@@ -395,12 +395,17 @@ class Plugin {
 					if ( $get_import_root( $file ) ) {
 						$has_files = true;
 						break;
+					} else {
+						unset( $files[ $i ] );
 					}
 				}
 			}
 			if ( ! $has_files ) {
 				return false;
 			}
+
+			// Rekey the array incase anything was removed.
+			$files = array_values( $files );
 
 			if ( 1 === count( $files ) && is_dir( $files[0] ) ) {
 				return $get_import_root( $files[0] );
