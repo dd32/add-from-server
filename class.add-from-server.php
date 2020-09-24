@@ -388,6 +388,22 @@ class Plugin {
 				return false;
 			}
 
+			$has_files = false;
+			foreach ( $files as $file ) {
+				if ( is_file( $file ) ) {
+					$has_files = true;
+					break;
+				} else {
+					if ( $get_import_root( $file ) ) {
+						$has_files = true;
+						break;
+					}
+				}
+			}
+			if ( ! $has_files ) {
+				return false;
+			}
+
 			if ( 1 === count( $files ) && is_dir( $files[0] ) ) {
 				return $get_import_root( $files[0] );
 			}
