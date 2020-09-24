@@ -11,7 +11,7 @@ Add From Server is designed to help ease the pain of bad web hosts, allowing you
 
 ## Description
 
-This plugin is officially unsupported. Please do not expect new features or bugfixes. Features may be removed at any time.
+This plugin offers limited support. Please do not expect new features or too many bugfixes. Features may be removed at any time.
 
 Add From Server is designed to help ease the pain of bad web hosts, allowing you to upload files via FTP or SSH and later import them into WordPress.
 
