@@ -1,3 +1,6 @@
+= 3.4.3 =
+ * Better handling for `/` as the root path
+
 = 3.4.2 =
  * Restore case insensitive alphabetical sorting
 

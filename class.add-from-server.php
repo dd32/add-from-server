@@ -353,15 +353,15 @@ class Plugin {
 		$cwd_relative = substr( $cwd, strlen( $root ) );
 
 		// Make a list of the directories the user can enter.
-		$dirparts = [
-			esc_html( trailingslashit( dirname( $root ) ) ),
-			'<a href="' . esc_url( add_query_arg( 'path', '/', $url ) ) . '">' . esc_html( basename( $root ) ) . '</a>'
-		];
+		$dirparts = [];
+		if ( $cwd_relative || '/' !== $root ) {
+			$dirparts[] = esc_html( trailingslashit( dirname( $root ) ) );
+		}
 
 		$dir_path = '';
 		foreach ( explode( '/', $cwd_relative ) as $dir ) {
 			$dir_path .= '/' . $dir;
-			$dirparts[] = '<a href="' . esc_url( add_query_arg( 'path', rawurlencode( $dir_path ), $url ) ) . '">' . esc_html( $dir ) . '/</a> ';
+			$dirparts[] = '<a href="' . esc_url( add_query_arg( 'path', rawurlencode( $dir_path ), $url ) ) . '">' . esc_html( $dir ?: basename( $root ) ) . '/</a> ';
 		}
 
 		$dirparts = implode( '', $dirparts );
@@ -395,15 +395,24 @@ class Plugin {
 			return $path;
 		};
 
-		array_walk( $directories, function( &$data, $path ) use( $root, $cwd_relative, $get_import_root ) {
+		$get_root_relative_path = function( $path ) use( $root ) {
+			$root_offset = strlen( $root );
+			if ( '/' !== $root ) {
+				$root_offset += 1;
+			}
+
+			return substr( $path, $root_offset );
+		};
+
+		array_walk( $directories, function( &$data, $path ) use( $root, $cwd_relative, $get_import_root, $get_root_relative_path ) {
 			$import_root = $get_import_root( $path );
 
 			$data = [
 				'text' => substr(
-						substr( $import_root, strlen( $root ) + 1 ),
+						$get_root_relative_path( $import_root ),
 						strlen( $cwd_relative )
 					) . '/',
-				'path' => substr( $import_root, strlen( $root ) + 1 )
+				'path' => $get_root_relative_path( $import_root )
 			];
 		} );
 
@@ -411,12 +420,12 @@ class Plugin {
 		uasort( $directories, $sort_by_text );
 
 		// Prefix the parent directory.
-		if ( str_starts_with( dirname( $cwd ), $root ) ) {
+		if ( str_starts_with( dirname( $cwd ), $root ) && dirname( $cwd ) != $cwd ) {
 			$directories = array_merge(
 				[
 					dirname( $cwd ) => [
 						'text' => __( 'Parent Folder', 'add-from-server' ),
-						'path' => substr( dirname( $cwd ), strlen( $root ) + 1 ) ?: '/',
+						'path' => $get_root_relative_path( dirname( $cwd ) ) ?: '/',
 					]
 				],
 				$directories
@@ -426,13 +435,13 @@ class Plugin {
 		$files = array_flip( array_filter( $nodes, function( $node ) {
 			return is_file( $node );
 		} ) );
-		array_walk( $files, function( &$data, $path ) use( $root ) {
+		array_walk( $files, function( &$data, $path ) use( $root, $get_root_relative_path ) {
 			$importable = ( false !== wp_check_filetype( $path )['type'] || current_user_can( 'unfiltered_upload' ) );
 			$readable   = is_readable( $path );
 
 			$data = [
 				'text'       => basename( $path ),
-				'file'       => substr( $path, strlen( $root ) + 1 ),
+				'file'       => $get_root_relative_path( $path ),
 				'importable' => $importable,
 				'readable'   => $readable,
 				'error'      => (
