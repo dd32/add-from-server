@@ -323,7 +323,7 @@ class Plugin {
 	protected function get_default_dir() {
 		$root = $this->get_root();
 
-		if ( false !== str_starts_with( WP_CONTENT_DIR, $root ) ) {
+		if ( str_starts_with( WP_CONTENT_DIR, $root ) ) {
 			return WP_CONTENT_DIR;
 		}
 
@@ -501,7 +501,7 @@ class Plugin {
 								<td>&nbsp;</td>
 								<td><a href="%s">%s</a></td>
 							</tr>',
-							esc_url( add_query_arg( 'path', $dir['path'], $url ) ),
+							esc_url( add_query_arg( 'path', rawurlencode( $dir['path'] ), $url ) ),
 							esc_html( $dir['text'] )
 						);
 					}
