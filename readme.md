@@ -5,7 +5,7 @@ Add From Server
 * Requires at least: 5.4
 * Tested up to: 5.5
 * Requires PHP: 7.0
-* Stable tag: 3.4.3
+* Stable tag: 3.4.4
 
 Add From Server is designed to help ease the pain of bad web hosts, allowing you to upload files via FTP or SSH and later import them into WordPress.
 
@@ -31,6 +31,9 @@ You may also want to look at using WP-CLI for media import purposes:
 https://developer.wordpress.org/cli/commands/media/import/
 
 ## Changelog
+
+### 3.4.4
+ * Simplify the date handling
 
 ### 3.4.3
  * Better handling for `/` as the root path
