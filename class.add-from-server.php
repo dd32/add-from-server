@@ -157,8 +157,10 @@ class Plugin {
 	function handle_import_file( $file ) {
 		set_time_limit( 0 );
 
+		$file = wp_normalize_path( $file );
+
 		// Initially, Base it on the -current- time.
-		$time = current_time( 'mysql', 1 );
+		$time = time();
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
 		if ( ! ( ( $uploads = wp_upload_dir( $time ) ) && false === $uploads['error'] ) ) {
@@ -172,7 +174,7 @@ class Plugin {
 			return new WP_Error( 'wrong_file_type', __( 'Sorry, this file type is not permitted for security reasons.', 'add-from-server' ) );
 		}
 
-		// Is the file allready in the uploads folder?
+		// Is the file already in the uploads folder?
 		if ( preg_match( '|^' . preg_quote( wp_normalize_path( $uploads['basedir'] ), '|' ) . '(.*)$|i', $file, $mat ) ) {
 
 			$filename = basename( $file );
@@ -185,21 +187,15 @@ class Plugin {
 				return new WP_Error( 'file_exists', __( 'Sorry, that file already exists in the WordPress media library.', 'add-from-server' ) );
 			}
 
+			$time = filemtime( $file ) ?: time();
+
 			// Ok, Its in the uploads folder, But NOT in WordPress's media library.
-			if ( preg_match( "|(\d+)/(\d+)|", $mat[1], $datemat ) ) { // So lets set the date of the import to the date folder its in, IF its in a date folder.
-				$hour = $min = $sec = 0;
-				$day = 1;
-				$year = $datemat[1];
-				$month = $datemat[2];
-
-				// If the files datetime is set, and it's in the same region of upload directory, set the minute details to that too, else, override it.
-				if ( $time && date( 'Y-m', $time ) == "$year-$month" ) {
-					list($hour, $min, $sec, $day) = explode( ';', date( 'H;i;s;j', $time ) );
+			if ( preg_match( '|^/?(?P<Ym>(?P<year>\d{4})/(?P<month>\d{2}))|', dirname( $mat[1] ), $datemat ) ) {
+				// The file date and the folder it's in are mismatched. Set it to the date of the folder.
+				if ( date( 'Y/m', $time ) !== $datemat['Ym'] ) {
+					$time = mktime( 0, 0, 0, $datemat['month'], 1, $datemat['year'] );
 				}
-
-				$time = mktime( $hour, $min, $sec, $month, $day, $year );
 			}
-			$time = gmdate( 'Y-m-d H:i:s', $time );
 
 			// A new time has been found! Get the new uploads folder:
 			// A writable uploads dir will pass this test. Again, there's no point overriding this one.
@@ -298,14 +294,14 @@ class Plugin {
 		// Construct the attachment array
 		$attachment = [
 			'post_mime_type' => $type,
-			'guid' => $url,
-			'post_parent' => 0,
-			'post_title' => $title,
-			'post_name' => $title,
-			'post_content' => $content,
-			'post_excerpt' => $excerpt,
-			'post_date' => $time,
-			'post_date_gmt' => $time,
+			'guid'           => $url,
+			'post_parent'    => 0,
+			'post_title'     => $title,
+			'post_name'      => $title,
+			'post_content'   => $content,
+			'post_excerpt'   => $excerpt,
+			'post_date'      => gmdate( 'Y-m-d H:i:s', $time ),
+			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $time ),
 		];
 
 		$attachment = apply_filters( 'afs-import_details', $attachment, $file, 0, 'current' );
