@@ -1,3 +1,6 @@
+= 3.4.5 =
+ * Fix a fatal error when WordPress or PHP requirements are not met.
+
 = 3.4.4 =
  * Simplify the date handling
 
