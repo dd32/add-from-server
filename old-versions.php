@@ -2,7 +2,11 @@
 namespace dd32\WordPress\AddFromServer;
 
 class Plugin {
-	function __construct() {
+	public static function instance() {
+		return new Plugin();
+	}
+
+	protected function __construct() {
 		global $wp_version;
 
 		$error = sprintf(
