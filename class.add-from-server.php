@@ -522,6 +522,13 @@ class Plugin {
 						} else if ( 'unreadable' === $file['error'] ) {
 							$error_str = __( 'Sorry, but this file is unreadable by your Webserver. Perhaps check your File Permissions?', 'add-from-server' );
 						}
+						
+						// Check for and exclude thumbnails images
+						preg_match_all('/.*\dx\d+\.(png|jpg|jpeg)/m', $file['text'], $matches, PREG_SET_ORDER, 0);
+						if (count($matches)) continue;
+						
+						// Check for and exclude updraft images
+						if (stripos($file['text'],'updraft-pre-smush-original') !== false) continue;
 
 						printf(
 							'<tr class="%1$s" title="%2$s">
