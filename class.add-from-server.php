@@ -160,7 +160,7 @@ class Plugin {
 		$file = wp_normalize_path( $file );
 
 		// Initially, Base it on the -current- time.
-		$time = time();
+		$time = date('Y/m',time());
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
 		if ( ! ( ( $uploads = wp_upload_dir( $time ) ) && false === $uploads['error'] ) ) {
