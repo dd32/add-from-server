@@ -160,10 +160,10 @@ class Plugin {
 		$file = wp_normalize_path( $file );
 
 		// Initially, Base it on the -current- time.
-		$time = date('Y/m',time());
+		$time = time();
 
 		// A writable uploads dir will pass this test. Again, there's no point overriding this one.
-		if ( ! ( ( $uploads = wp_upload_dir( $time ) ) && false === $uploads['error'] ) ) {
+		if ( ! ( ( $uploads = wp_upload_dir( date('Y/m', $time) ) ) && false === $uploads['error'] ) ) {
 			return new WP_Error( 'upload_error', $uploads['error'] );
 		}
 
@@ -199,7 +199,7 @@ class Plugin {
 
 			// A new time has been found! Get the new uploads folder:
 			// A writable uploads dir will pass this test. Again, there's no point overriding this one.
-			if ( !(($uploads = wp_upload_dir( $time )) && false === $uploads['error']) ) {
+			if ( !(($uploads = wp_upload_dir( date('Y/m', $time) )) && false === $uploads['error']) ) {
 				return new WP_Error( 'upload_error', $uploads['error'] );
 			}
 			$url = $uploads['baseurl'] . $mat[1];
@@ -300,7 +300,7 @@ class Plugin {
 			'post_name'      => $title,
 			'post_content'   => $content,
 			'post_excerpt'   => $excerpt,
-			'post_date'      => gmdate( 'Y-m-d H:i:s', $time ),
+			'post_date'      => current_time('mysql' ),
 			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $time ),
 		];
 
