@@ -62,10 +62,9 @@ https://developer.wordpress.org/cli/commands/media/import/
 ## Frequently Asked Questions
 
 ### How can I import files from other folders?
-In 3.4, the plugin changed to limit the directories you can import files from.
-If you wish to import files from other folders, you need to add the ADD_FROM_SERVER constant to your wp-config.php file.
-For example:
-`define( 'ADD_FROM_SERVER', '/www/' );`
+For security reasons, Add From Server is now limited to the `wp-content` directory.
+Files can only be imported from within the WordPress content directory.
+For multisite installations, each site is limited to its own upload directory.
 
 ### Why does the file I want to import have a red background?
 WordPress only allows the importing/uploading of certain file types to improve your security.
