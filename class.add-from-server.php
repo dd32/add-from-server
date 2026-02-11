@@ -135,7 +135,7 @@ class Plugin {
 			foreach ( (array)$files as $file ) {
 				$filename = trailingslashit( $root ) . ltrim( $file, '/' );
 
-				if ( $filename !== realpath( $filename ) ) {
+				if ( wp_normalize_path( $filename ) !== wp_normalize_path( realpath( $filename ) ) ) {
 					continue;
 				}
 
