@@ -66,35 +66,9 @@ class Plugin {
 	}
 
 	function get_root() {
-		// Lock users to either
-		// a) The 'ADD_FROM_SERVER' constant.
-		// b) Their home directory.
-		// c) The parent directory of the current install or wp-content directory.
-
-		if ( defined( 'ADD_FROM_SERVER' ) ) {
-			$root = ADD_FROM_SERVER;
-		} elseif ( str_starts_with( __FILE__, '/home/' ) ) {
-			$root = implode( '/', array_slice( explode( '/', __FILE__ ), 0, 3 ) );
-		} else {
-			if ( str_starts_with( WP_CONTENT_DIR, ABSPATH ) ) {
-				$root = dirname( ABSPATH );
-			} else {
-				$root = dirname( WP_CONTENT_DIR );
-			}
-		}
-
-		// Precautions. The user is using the folder placeholder code. Abort for lower-privledge users.
-		if (
-			str_contains( get_option( 'frmsvr_root', '%' ), '%' )
-			&&
-			! defined( 'ADD_FROM_SERVER' )
-			&&
-			! current_user_can( 'unfiltered_html' )
-		) {
-			$root = false;
-		}
-
-		return $root;
+		// Lock users to WP_CONTENT_DIR for security.
+		// For multisite, wp_upload_dir() will return the individual site's upload directory.
+		return WP_CONTENT_DIR;
 	}
 
 	function path_selection_cookie() {
@@ -136,6 +110,11 @@ class Plugin {
 				$filename = trailingslashit( $root ) . ltrim( $file, '/' );
 
 				if ( $filename !== realpath( $filename ) ) {
+					continue;
+				}
+
+				// Security: Ensure the file is within WP_CONTENT_DIR
+				if ( ! str_starts_with( wp_normalize_path( $filename ), wp_normalize_path( $root ) ) ) {
 					continue;
 				}
 
@@ -317,13 +296,8 @@ class Plugin {
 	}
 
 	protected function get_default_dir() {
-		$root = $this->get_root();
-
-		if ( str_starts_with( WP_CONTENT_DIR, $root ) ) {
-			return WP_CONTENT_DIR;
-		}
-
-		return $root;
+		// Always start at WP_CONTENT_DIR
+		return WP_CONTENT_DIR;
 	}
 
 	// Create the content for the page
@@ -601,13 +575,11 @@ Thanks! Dion.', 'add-from-server' );
 			$old_root
 			&&
 			str_contains( $old_root, '%' )
-			&&
-			! defined( 'ADD_FROM_SERVER' )
 		) {
 			printf(
 				'<div class="notice error"><p>%s</p></div>',
 				'You previously used the "Root Directory" option with a placeholder, such as "%username% or "%role%".<br>' .
-				'Unfortunately this feature is no longer supported. As a result, Add From Server has been disabled for users who have restricted upload privledges.<br>' .
+				'Unfortunately this feature is no longer supported. Add From Server is now limited to the wp-content directory for security reasons.<br>' .
 				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php#frmsvr_root">options.php</a>.'
 			);
 		}
@@ -617,8 +589,7 @@ Thanks! Dion.', 'add-from-server' );
 				'<div class="notice error"><p>%s</p></div>',
 				'Warning: Root Directory changed. You previously used <code>' . esc_html( $old_root ) . '</code> as your "Root Directory", ' .
 				'this has been changed to <code>' . esc_html( $this->get_root() ) . '</code>.<br>' .
-				'To restore your previous settings, add the following line to your <code>wp-config.php</code> file:<br>' .
-				'<code>define( "ADD_FROM_SERVER", "' . $old_root . '" );</code><br>' .
+				'Add From Server is now limited to the wp-content directory for security reasons.<br>' .
 				'To make this warning go away, empty the "frmsvr_root" option on <a href="options.php#frmsvr_root">options.php</a>.'
 			);
 		}
