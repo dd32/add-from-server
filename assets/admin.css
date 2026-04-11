@@ -1,0 +1,45 @@
+/* Add From Server — admin page styles */
+
+.afs-card {
+	max-width: 960px;
+	margin-top: 20px;
+}
+
+.afs-breadcrumbs {
+	margin-bottom: 12px;
+	font-family: Consolas, Monaco, monospace;
+	background: #f6f7f7;
+	padding: 8px 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 2px;
+}
+
+.afs-breadcrumbs .components-button.is-link {
+	text-decoration: none;
+}
+
+.afs-breadcrumbs .afs-sep {
+	color: #646970;
+}
+
+.afs-browser {
+	margin: 12px 0;
+}
+
+.afs-browser tbody tr.afs-file-disabled {
+	background-color: #fcf0f1;
+}
+
+.afs-browser .check-column {
+	width: 2em;
+	vertical-align: top;
+}
+
+.afs-actions {
+	margin-top: 16px;
+}
+
+.afs-loading {
+	padding: 40px;
+	text-align: center;
+}

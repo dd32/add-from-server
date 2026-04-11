@@ -1,19 +1,39 @@
-name: PHP Lint check
-on: [push, pull_request]
+name: Lint
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
 jobs:
-  lint:
-    name: PHP Linting
+  php-syntax:
+    name: PHP ${{ matrix.php }} syntax check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.4', '8.0', '8.1', '8.2', '8.3' ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: Syntax check
+        run: find add-from-server.php src tests -name '*.php' -print0 | xargs -0 -n1 php -l
+
+  phpcs:
+    name: WordPress Coding Standards
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: PHP syntax checker 7.4
-        uses: StephaneBour/actions-php-lint@7.4
-      - name: PHP syntax checker 7.3
-        uses: StephaneBour/actions-php-lint@7.3
-      - name: PHP syntax checker 7.2
-        uses: StephaneBour/actions-php-lint@7.2
-      - name: PHP syntax checker 7.1
-        uses: StephaneBour/actions-php-lint@7.1
-      - name: PHP syntax checker 7.0
-        uses: StephaneBour/actions-php-lint@7.0
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+      - name: Install dependencies
+        run: composer install --no-progress --no-interaction --prefer-dist
+      - name: Run PHPCS
+        run: ./vendor/bin/phpcs

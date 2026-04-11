@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<ruleset name="Add From Server">
+	<description>Coding standards for Add From Server.</description>
+
+	<file>./add-from-server.php</file>
+	<file>./src</file>
+	<file>./tests</file>
+
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<exclude-pattern>/tests/fixtures/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
+	<rule ref="WordPress">
+		<!-- We use namespaces + PSR-4; WP file-naming doesn't apply. -->
+		<exclude name="WordPress.Files.FileName"/>
+		<!-- Yoda conditions aren't required. -->
+		<exclude name="WordPress.PHP.YodaConditions"/>
+		<!-- Strict types + return types make these docblock rules redundant. -->
+		<exclude name="Squiz.Commenting.VariableComment.MissingVar"/>
+		<exclude name="Squiz.Commenting.VariableComment.Missing"/>
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag"/>
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
+		<exclude name="Squiz.Commenting.FunctionComment.Missing"/>
+		<exclude name="Squiz.Commenting.FileComment.Missing"/>
+		<exclude name="Squiz.Commenting.ClassComment.Missing"/>
+		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
+		<exclude name="Squiz.Commenting.InlineComment.SpacingBefore"/>
+		<exclude name="Generic.Commenting.DocComment.MissingShort"/>
+		<!-- Short ternaries are idiomatic in modern PHP. -->
+		<exclude name="Universal.Operators.DisallowShortTernary.Found"/>
+		<!-- Reserved keyword parameter names (e.g. $class) are fine for closures. -->
+		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames"/>
+		<!-- Short array syntax is fine. -->
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+		<!-- Globals in tests are expected. -->
+		<exclude name="WordPress.WP.GlobalVariablesOverride.Prohibited"/>
+		<!-- Allow targeted error silencing (e.g. @scandir, @filemtime). -->
+		<exclude name="WordPress.PHP.NoSilencedErrors.Discouraged"/>
+		<!-- These fire on every REST callback signature. -->
+		<exclude name="Squiz.Commenting.FunctionCommentThrowTag"/>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="add-from-server"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Tests intentionally contain function declarations, stubs and global $_GLOBALS manipulation. -->
+	<rule ref="Internal.NoCodeFound">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="PSR1.Files.SideEffects">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
+		<exclude-pattern>/tests/stubs.php</exclude-pattern>
+	</rule>
+	<rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+		<exclude-pattern>/tests/stubs.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<config name="minimum_supported_wp_version" value="6.4"/>
+	<config name="testVersion" value="7.4-"/>
+	<rule ref="PHPCompatibilityWP"/>
+</ruleset>

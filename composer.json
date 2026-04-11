@@ -1,0 +1,45 @@
+{
+	"name": "dd32/add-from-server",
+	"description": "Import files from the web server's filesystem into the WordPress Media Library.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Dion Hulse",
+			"homepage": "https://dd32.id.au/"
+		}
+	],
+	"require": {
+		"php": ">=7.4"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^9.6",
+		"yoast/phpunit-polyfills": "^2.0",
+		"wp-phpunit/wp-phpunit": "^6.4",
+		"squizlabs/php_codesniffer": "^3.9",
+		"wp-coding-standards/wpcs": "^3.0",
+		"phpcompatibility/phpcompatibility-wp": "^2.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"dd32\\WordPress\\AddFromServer\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"dd32\\WordPress\\AddFromServer\\Tests\\": "tests/"
+		}
+	},
+	"scripts": {
+		"test": "phpunit",
+		"test:unit": "phpunit --testsuite=unit",
+		"test:integration": "phpunit --testsuite=integration",
+		"lint": "phpcs",
+		"lint:fix": "phpcbf"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
+}

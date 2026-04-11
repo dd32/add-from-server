@@ -1,0 +1,21 @@
+{
+	"core": "WordPress/WordPress#trunk",
+	"phpVersion": "8.2",
+	"plugins": [ "." ],
+	"mappings": {
+		"wp-content/uploads/add-from-server-samples": "./tests/fixtures"
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": false,
+		"SCRIPT_DEBUG": true
+	},
+	"env": {
+		"tests": {
+			"config": {
+				"ADD_FROM_SERVER": "/var/www/html/wp-content/uploads"
+			}
+		}
+	}
+}

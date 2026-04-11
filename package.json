@@ -1,0 +1,25 @@
+{
+	"name": "add-from-server",
+	"version": "4.0.0",
+	"description": "Import files from the web server's filesystem into the WordPress Media Library.",
+	"license": "GPL-2.0-or-later",
+	"author": "Dion Hulse",
+	"homepage": "https://dd32.id.au/wordpress-plugins/add-from-server/",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/dd32/add-from-server.git"
+	},
+	"private": true,
+	"scripts": {
+		"wp-env": "wp-env",
+		"start": "wp-env start",
+		"stop": "wp-env stop",
+		"destroy": "wp-env destroy",
+		"test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/add-from-server ./vendor/bin/phpunit",
+		"test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/add-from-server ./vendor/bin/phpunit --testsuite=unit",
+		"lint:php": "wp-env run cli --env-cwd=wp-content/plugins/add-from-server ./vendor/bin/phpcs"
+	},
+	"devDependencies": {
+		"@wordpress/env": "^10.0.0"
+	}
+}

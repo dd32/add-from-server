@@ -1,79 +1,80 @@
 Add From Server
 ===============
 * Contributors: dd32
-* Tags: admin, media, uploads, post, import, files
-* Requires at least: 5.4
-* Tested up to: 5.5
-* Requires PHP: 7.0
-* Stable tag: 3.4.5
+* Tags: admin, media, uploads, post, import, files, block-editor
+* Requires at least: 6.4
+* Tested up to: 6.5
+* Requires PHP: 7.4
+* Stable tag: 4.0.0
 
 Add From Server is designed to help ease the pain of bad web hosts, allowing you to upload files via FTP or SSH and later import them into WordPress.
 
 ## Description
 
-This plugin offers limited support. Please do not expect new features or too many bugfixes. Features may be removed at any time.
+Add From Server is designed to import files which are larger than your hosting allows you to upload, or too large for your internet connection's upload speed. It is **not** a replacement for the file uploader, a migration tool, or a batch media importer.
 
-Add From Server is designed to help ease the pain of bad web hosts, allowing you to upload files via FTP or SSH and later import them into WordPress.
+Version 4.0 is a full modernization:
 
-This plugin is NOT designed to..
- * Be used as a replacement for the file uploader
- * Be used for migration of websites
- * Re-import your files after moving webhosting
- * Batch import media
+* A REST API (`/wp-json/add-from-server/v1`) with strict capability checks.
+* A modern React admin page built on `@wordpress/components`.
+* Block editor integration via a sidebar plugin — browse and import files without leaving the post editor.
+* A hardened Filesystem helper that confines all browsing and imports to a configurable root directory and rejects path traversal, symlink escapes and paths that canonically fall outside the root.
+* The legacy `frmsvr_root` option, language nag screen and other accumulated cruft have been removed. The root directory is now configured exclusively via the `ADD_FROM_SERVER` constant or the `add_from_server_root` filter.
+* PSR-4 autoloading, strict types, PHPUnit unit tests and a local environment powered by `@wordpress/env`.
 
-This plugins IS designed to..
- * Import files which are larger than your hosting allows to be uploaded.
- * Import files which are too large for your internet connections upload speed.
+## Installation
 
-WordPress does a better job of file uploads than this plugin, so please consider your needs before you use it.
+1. Install the plugin into `wp-content/plugins/add-from-server/`.
+2. Activate via the Plugins screen.
+3. Visit **Media → Add From Server**, or open the Add From Server panel in the block editor sidebar.
 
-You may also want to look at using WP-CLI for media import purposes:
-https://developer.wordpress.org/cli/commands/media/import/
+## Configuration
 
-## Changelog
+By default, Add From Server is confined to the parent of your `wp-content` directory. To point it somewhere else, define the constant in `wp-config.php`:
 
-### 3.4.5
- * Fix a fatal error when WordPress or PHP requirements are not met.
+```php
+define( 'ADD_FROM_SERVER', '/var/www/media/' );
+```
 
-### 3.4.4
- * Simplify the date handling
+Or use the filter (useful if you want to compute the path dynamically):
 
-### 3.4.3
- * Better handling for `/` as the root path
- * Better compatibility with certain WordPress docker images
- * Better handling for some empty folders
+```php
+add_filter( 'add_from_server_root', function ( $root ) {
+    return '/var/www/media/';
+} );
+```
 
-### 3.4.2
- * Restore case insensitive alphabetical sorting
+## Local development
 
-### 3.4.1
- * Plugin now requires WordPress 5.4+
+This plugin ships with a full local dev environment powered by [`@wordpress/env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/):
 
-### 3.4
- * The plugin now requires WordPress 5.1+ and PHP 7.0+. No reason other than why not.
- * Bumps the version to stop the invalid vulnerability warnings.
- * Cleans up code.
- * Removes the User Access Control. Any user with File Upload ability can now use the plugin.
- * Removes the Root Directory Control. The root directory is now assumed. You can use the ADD_FROM_SERVER constant to change it.
- * Removes the Quick Jump functionality.
- * Removes the ability to be able to select the date for imported media. It's always today. Or, the 1st of the month if it's stored in a dated folder.
- * Removed Media Manager integration, as it's no longer shown with the WordPress Block Editor. Classic Editor is not supported by this plugin.
+```bash
+composer install
+npm install
+npm run start     # boot WP at http://localhost:8888
+npm run test:php  # run the full PHPUnit suite (unit + integration)
+```
+
+The unit suite has no external dependencies:
+
+```bash
+./vendor/bin/phpunit --testsuite=unit
+```
 
 ## Frequently Asked Questions
 
 ### How can I import files from other folders?
-In 3.4, the plugin changed to limit the directories you can import files from.
-If you wish to import files from other folders, you need to add the ADD_FROM_SERVER constant to your wp-config.php file.
-For example:
-`define( 'ADD_FROM_SERVER', '/www/' );`
+Define the `ADD_FROM_SERVER` constant in `wp-config.php`, or use the `add_from_server_root` filter.
 
-### Why does the file I want to import have a red background?
-WordPress only allows the importing/uploading of certain file types to improve your security.
-If you wish to add extra file types, you can use a plugin such as: http://wordpress.org/extend/plugins/pjw-mime-config/ You can also enable "Unfiltered uploads" globally for WordPress if you'd like to override this security function. Please see the WordPress support forum for details.
+### Why does a file I want to import have a red background / appear disabled?
+WordPress only allows the importing/uploading of certain file types for security. You can use a plugin such as [pjw-mime-config](https://wordpress.org/plugins/pjw-mime-config/) to add additional file types.
 
 ### Where are the files saved?
-If you import a file which is outside your standard upload directory (usually wp-content/uploads/) then it will be copied to your current upload directory setting as normal.
-If you however import a file which **is already within the uploads directory** (for example, wp-content/uploads/2011/02/superplugin.zip) then the file will not be copied, and will be used as-is.
+If you import a file which is outside your uploads directory (usually `wp-content/uploads/`) it will be copied into your current uploads directory. If you import a file that is already **inside** the uploads directory, it will be attached in-place without being copied.
 
-### I have a a bug report
-You can report bugs on <a href="https://github.com/dd32/add-from-server">GitHub</a> and get support in the <a href="https://wordpress.org/support/plugin/add-from-server/">WordPress.org Support Forums</a>.
+### Where do I report bugs?
+Report bugs on [GitHub](https://github.com/dd32/add-from-server) and get support in the [WordPress.org support forums](https://wordpress.org/support/plugin/add-from-server/).
+
+## Changelog
+
+See [changelog.txt](./changelog.txt) for a complete history.
