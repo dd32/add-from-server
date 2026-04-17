@@ -1,10 +1,6 @@
 <?php
 /**
- * Unit tests for Importer capability + validation guards.
- *
- * These tests cover the pre-flight checks that don't require a full
- * WordPress environment. The happy-path import tests live in the
- * integration suite which boots wp-tests via wp-env.
+ * Tests for Importer pre-flight guards.
  *
  * @package dd32\WordPress\AddFromServer\Tests\Unit
  */
@@ -15,18 +11,17 @@ namespace dd32\WordPress\AddFromServer\Tests\Unit;
 
 use dd32\WordPress\AddFromServer\Filesystem;
 use dd32\WordPress\AddFromServer\Importer;
-use PHPUnit\Framework\TestCase;
 use WP_Error;
 
 /**
- * @covers \dd32\WordPress\AddFromServer\Importer
+ * @coversDefaultClass \dd32\WordPress\AddFromServer\Importer
  */
-final class ImporterTest extends TestCase {
+final class ImporterTest extends \WP_UnitTestCase {
 
 	private string $root;
 
-	protected function setUp(): void {
-		parent::setUp();
+	public function set_up(): void {
+		parent::set_up();
 
 		$base = sys_get_temp_dir() . '/afs-imp-' . bin2hex( random_bytes( 4 ) );
 		mkdir( $base . '/inside', 0777, true );
@@ -37,15 +32,13 @@ final class ImporterTest extends TestCase {
 
 		$this->root = $base . '/inside';
 
-		// current_user_can is stubbed globally in tests/stubs.php; we
-		// control what capabilities it reports via $GLOBALS.
-		$GLOBALS['afs_test_caps'] = array( 'upload_files' );
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
 	}
 
-	protected function tearDown(): void {
+	public function tear_down(): void {
 		$this->rrmdir( dirname( $this->root ) );
-		unset( $GLOBALS['afs_test_caps'] );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	private function rrmdir( string $dir ): void {
@@ -63,7 +56,8 @@ final class ImporterTest extends TestCase {
 	}
 
 	public function test_import_requires_upload_capability(): void {
-		$GLOBALS['afs_test_caps'] = array();
+		$subscriber_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
 
 		$importer = new Importer( new Filesystem( $this->root ) );
 		$result   = $importer->import( '/photo.jpg' );

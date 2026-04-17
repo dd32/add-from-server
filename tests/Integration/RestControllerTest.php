@@ -14,10 +14,6 @@ declare( strict_types=1 );
 
 namespace dd32\WordPress\AddFromServer\Tests\Integration;
 
-if ( ! class_exists( '\WP_UnitTestCase' ) ) {
-	return;
-}
-
 /**
  * @coversDefaultClass \dd32\WordPress\AddFromServer\RestController
  */

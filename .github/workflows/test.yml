@@ -7,27 +7,8 @@ on:
   pull_request:
 
 jobs:
-  unit:
-    name: PHP unit tests (PHP ${{ matrix.php }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        php: [ '7.4', '8.1', '8.2', '8.3' ]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          coverage: none
-          tools: composer:v2
-      - name: Install dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist
-      - name: Run unit tests
-        run: ./vendor/bin/phpunit --testsuite=unit
-
-  integration:
-    name: WordPress integration tests
+  phpunit:
+    name: PHPUnit (wp-env)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,5 +26,5 @@ jobs:
         run: npm install
       - name: Start wp-env
         run: npx wp-env start
-      - name: Run integration tests
-        run: npm run test:php -- --testsuite=integration
+      - name: Run PHPUnit
+        run: npm run test:php

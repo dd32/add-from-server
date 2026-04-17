@@ -37,13 +37,7 @@ This plugin ships with a full local dev environment powered by [`@wordpress/env`
 composer install
 npm install
 npm run start     # boot WP at http://localhost:8888
-npm run test:php  # run the full PHPUnit suite (unit + integration)
-```
-
-The unit suite has no external dependencies:
-
-```bash
-./vendor/bin/phpunit --testsuite=unit
+npm run test:php  # run the full PHPUnit suite inside wp-env
 ```
 
 ## Frequently Asked Questions

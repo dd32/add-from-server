@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the Filesystem class.
+ * Tests for the Filesystem class.
  *
  * @package dd32\WordPress\AddFromServer\Tests\Unit
  */
@@ -10,18 +10,17 @@ declare( strict_types=1 );
 namespace dd32\WordPress\AddFromServer\Tests\Unit;
 
 use dd32\WordPress\AddFromServer\Filesystem;
-use PHPUnit\Framework\TestCase;
 use WP_Error;
 
 /**
- * @covers \dd32\WordPress\AddFromServer\Filesystem
+ * @coversDefaultClass \dd32\WordPress\AddFromServer\Filesystem
  */
-final class FilesystemTest extends TestCase {
+final class FilesystemTest extends \WP_UnitTestCase {
 
 	private string $root;
 
-	protected function setUp(): void {
-		parent::setUp();
+	public function set_up(): void {
+		parent::set_up();
 
 		$base = sys_get_temp_dir() . '/afs-test-' . bin2hex( random_bytes( 4 ) );
 		mkdir( $base . '/inside/sub', 0777, true );
@@ -36,9 +35,9 @@ final class FilesystemTest extends TestCase {
 		$this->root = $base . '/inside';
 	}
 
-	protected function tearDown(): void {
+	public function tear_down(): void {
 		$this->rrmdir( dirname( $this->root ) );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	private function rrmdir( string $dir ): void {
