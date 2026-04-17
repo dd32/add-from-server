@@ -5,7 +5,7 @@
  * Description:       Import files from the web server's filesystem into the WordPress Media Library, with block editor integration.
  * Version:           4.0.0
  * Requires at least: 6.4
- * Requires PHP:      8.0
+ * Requires PHP:      7.4
  * Author:            Dion Hulse
  * Author URI:        https://dd32.id.au/
  * License:           GPL-2.0-or-later
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 
 const VERSION = '4.0.0';
 const MIN_WP  = '6.4';
-const MIN_PHP = '8.0';
+const MIN_PHP = '7.4';
 
 define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );
 define( __NAMESPACE__ . '\PLUGIN_DIR', __DIR__ );
