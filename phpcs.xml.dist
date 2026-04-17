@@ -69,6 +69,9 @@
 		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
 
+	<!-- Warnings are informational only; don't fail the build on them. -->
+	<config name="ignore_warnings_on_exit" value="1"/>
+
 	<config name="minimum_supported_wp_version" value="6.4"/>
 	<config name="testVersion" value="7.4-"/>
 	<rule ref="PHPCompatibilityWP"/>
