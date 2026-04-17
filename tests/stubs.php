@@ -3,43 +3,16 @@
  * Minimal WordPress stubs for unit tests that run without WP.
  *
  * Only the functions the Filesystem and related classes need to run.
+ * The WP_Error class stub lives in stubs/WP_Error.php so this file
+ * contains only function declarations (PSR-1 friendly).
  *
  * @package dd32\WordPress\AddFromServer\Tests
- *
- * phpcs:disable PSR1.Files.SideEffects
- * phpcs:disable PSR1.Classes.ClassDeclaration.MissingNamespace
- * phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
- * phpcs:disable PEAR.Files.IncludingFile
- * phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
- * phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed
  */
 
 declare( strict_types=1 );
 
 if ( ! class_exists( 'WP_Error' ) ) {
-	class WP_Error {
-		private string $code;
-		private string $message;
-		private array $data;
-
-		public function __construct( string $code = '', string $message = '', array $data = array() ) {
-			$this->code    = $code;
-			$this->message = $message;
-			$this->data    = $data;
-		}
-
-		public function get_error_code(): string {
-			return $this->code;
-		}
-
-		public function get_error_message(): string {
-			return $this->message;
-		}
-
-		public function get_error_data() {
-			return $this->data;
-		}
-	}
+	require_once __DIR__ . '/stubs/WP_Error.php';
 }
 
 if ( ! function_exists( 'is_wp_error' ) ) {

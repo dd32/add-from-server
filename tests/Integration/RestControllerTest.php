@@ -2,8 +2,10 @@
 /**
  * Integration tests for the REST API controller.
  *
- * Runs against a real WordPress environment via wp-env. These tests
- * are skipped if WP_TESTS_DIR is not configured.
+ * Runs against a real WordPress environment (wp-env + wp-phpunit).
+ * These tests are skipped if the WordPress test framework is not
+ * available in the current runtime, so the suite is safe to invoke
+ * from plain PHPUnit without WP loaded.
  *
  * @package dd32\WordPress\AddFromServer\Tests\Integration
  */
@@ -11,6 +13,10 @@
 declare( strict_types=1 );
 
 namespace dd32\WordPress\AddFromServer\Tests\Integration;
+
+if ( ! class_exists( '\WP_UnitTestCase' ) ) {
+	return;
+}
 
 /**
  * @coversDefaultClass \dd32\WordPress\AddFromServer\RestController
