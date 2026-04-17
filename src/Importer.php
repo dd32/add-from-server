@@ -80,7 +80,7 @@ class Importer {
 		$uploads_base = Filesystem::normalize( $uploads['basedir'] );
 		$normalized   = Filesystem::normalize( $resolved );
 
-		if ( str_starts_with( $normalized, $uploads_base ) ) {
+		if ( $normalized === $uploads_base || str_starts_with( $normalized, rtrim( $uploads_base, '/' ) . '/' ) ) {
 			$result = $this->adopt_existing_upload( $normalized, $uploads_base, $time );
 		} else {
 			$result = $this->copy_into_uploads( $normalized, $uploads );

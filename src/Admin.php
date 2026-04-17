@@ -9,8 +9,6 @@ declare( strict_types=1 );
 
 namespace dd32\WordPress\AddFromServer;
 
-use WP_Error;
-
 /**
  * Renders the admin page and enqueues its assets.
  *
@@ -77,7 +75,7 @@ class Admin {
 		wp_enqueue_script(
 			'add-from-server',
 			plugins_url( 'assets/admin.js', PLUGIN_FILE ),
-			array( 'wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n' ),
+			array( 'wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n', 'wp-dom-ready' ),
 			VERSION,
 			true
 		);

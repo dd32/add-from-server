@@ -59,11 +59,12 @@ class RestController {
 				'callback'            => array( $this, 'import' ),
 				'args'                => array(
 					'files' => array(
-						'type'     => 'array',
-						'required' => true,
-						'items'    => array(
+						'type'              => 'array',
+						'required'          => true,
+						'items'             => array(
 							'type' => 'string',
 						),
+						'sanitize_callback' => array( $this, 'sanitize_file_list' ),
 					),
 				),
 			)
@@ -94,6 +95,23 @@ class RestController {
 		// Strip nulls and control characters.
 		$value = preg_replace( '/[\x00-\x1F\x7F]/u', '', $value ) ?? '';
 		return $value;
+	}
+
+	/**
+	 * Sanitize the file list for the /import endpoint.
+	 *
+	 * @param array<int, mixed> $value Raw file list.
+	 * @return array<int, string>
+	 */
+	public function sanitize_file_list( $value ): array {
+		return array_values(
+			array_filter(
+				array_map(
+					[ $this, 'sanitize_path' ],
+					(array) $value
+				)
+			)
+		);
 	}
 
 	/**

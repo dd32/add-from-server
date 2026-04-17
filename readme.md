@@ -4,7 +4,7 @@ Add From Server
 * Tags: admin, media, uploads, post, import, files, block-editor
 * Requires at least: 6.4
 * Tested up to: 6.5
-* Requires PHP: 7.4
+* Requires PHP: 8.0
 * Stable tag: 4.0.0
 
 Add From Server is designed to help ease the pain of bad web hosts, allowing you to upload files via FTP or SSH and later import them into WordPress.
