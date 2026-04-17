@@ -4,7 +4,7 @@
  * Plugin URI:        https://dd32.id.au/wordpress-plugins/add-from-server/
  * Description:       Import files from the web server's filesystem into the WordPress Media Library, with block editor integration.
  * Version:           4.0.0
- * Requires at least: 6.4
+ * Requires at least: 6.9
  * Requires PHP:      7.4
  * Author:            Dion Hulse
  * Author URI:        https://dd32.id.au/
@@ -22,7 +22,7 @@ namespace dd32\WordPress\AddFromServer;
 defined( 'ABSPATH' ) || exit;
 
 const VERSION = '4.0.0';
-const MIN_WP  = '6.4';
+const MIN_WP  = '6.9';
 const MIN_PHP = '7.4';
 
 define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );

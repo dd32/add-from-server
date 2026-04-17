@@ -1,6 +1,6 @@
 = 4.0.0 =
  * Major modernization release.
- * Requires WordPress 6.4+ and PHP 7.4+.
+ * Requires WordPress 6.9+ and PHP 7.4+.
  * New: REST API (`/wp-json/add-from-server/v1`) for browsing and importing, with strict capability checks.
  * New: Block editor sidebar plugin — browse and import files directly from the post editor.
  * New: Modern React admin page built on @wordpress/components.
