@@ -31,7 +31,10 @@ class WP_Error {
 		return $this->message;
 	}
 
-	public function get_error_data() {
-		return $this->data;
+	public function get_error_data( $code = '' ) {
+		if ( '' === $code || $code === $this->code ) {
+			return $this->data;
+		}
+		return null;
 	}
 }

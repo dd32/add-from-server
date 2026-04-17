@@ -49,6 +49,7 @@ class BlockEditor {
 				'wp-data',
 				'wp-i18n',
 				'wp-icons',
+				'wp-blocks',
 			),
 			VERSION,
 			true
@@ -61,7 +62,7 @@ class BlockEditor {
 			'addFromServerSettings',
 			array(
 				'root'      => Filesystem::default_root(),
-				'restRoot'  => esc_url_raw( rest_url( RestController::NAMESPACE . '/' ) ),
+				'restRoot'  => esc_url_raw( rest_url( RestController::REST_NAMESPACE . '/' ) ),
 				'restNonce' => wp_create_nonce( 'wp_rest' ),
 			)
 		);

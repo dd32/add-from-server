@@ -19,7 +19,7 @@ use WP_REST_Server;
  */
 class RestController {
 
-	public const NAMESPACE = 'add-from-server/v1';
+	public const REST_NAMESPACE = 'add-from-server/v1';
 
 	/**
 	 * Register REST routes.
@@ -33,7 +33,7 @@ class RestController {
 	 */
 	public function register_routes(): void {
 		register_rest_route(
-			self::NAMESPACE,
+			self::REST_NAMESPACE,
 			'/browse',
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -51,7 +51,7 @@ class RestController {
 		);
 
 		register_rest_route(
-			self::NAMESPACE,
+			self::REST_NAMESPACE,
 			'/import',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -80,7 +80,7 @@ class RestController {
 		if ( ! current_user_can( 'upload_files' ) ) {
 			return new WP_Error(
 				'afs_forbidden',
-				__( 'Sorry, you are not allowed to import files.', 'add-from-server' ),
+				__( 'Sorry, you are not allowed to browse or import files.', 'add-from-server' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
