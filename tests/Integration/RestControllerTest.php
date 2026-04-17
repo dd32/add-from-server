@@ -41,7 +41,7 @@ final class RestControllerTest extends \WP_UnitTestCase {
 		$request  = new \WP_REST_Request( 'GET', '/add-from-server/v1/browse' );
 		$response = rest_get_server()->dispatch( $request );
 
-		$this->assertSame( 401, $response->get_status() );
+		$this->assertSame( 403, $response->get_status() );
 	}
 
 	public function test_browse_root_returns_listing_for_admin(): void {
@@ -74,6 +74,6 @@ final class RestControllerTest extends \WP_UnitTestCase {
 		$request->set_param( 'files', array( '/anything' ) );
 		$response = rest_get_server()->dispatch( $request );
 
-		$this->assertSame( 401, $response->get_status() );
+		$this->assertSame( 403, $response->get_status() );
 	}
 }
