@@ -19,7 +19,7 @@ use WP_REST_Server;
  */
 class RestController {
 
-	public const REST_NAMESPACE = 'add-from-server/v1';
+	public const NAMESPACE = 'add-from-server/v1';
 
 	/**
 	 * Register REST routes.
@@ -33,7 +33,7 @@ class RestController {
 	 */
 	public function register_routes(): void {
 		register_rest_route(
-			self::REST_NAMESPACE,
+			self::NAMESPACE,
 			'/browse',
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -51,7 +51,7 @@ class RestController {
 		);
 
 		register_rest_route(
-			self::REST_NAMESPACE,
+			self::NAMESPACE,
 			'/import',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,

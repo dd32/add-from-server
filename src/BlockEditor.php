@@ -62,7 +62,7 @@ class BlockEditor {
 			'addFromServerSettings',
 			array(
 				'root'      => Filesystem::default_root(),
-				'restRoot'  => esc_url_raw( rest_url( RestController::REST_NAMESPACE . '/' ) ),
+				'restRoot'  => esc_url_raw( rest_url( RestController::NAMESPACE . '/' ) ),
 				'restNonce' => wp_create_nonce( 'wp_rest' ),
 			)
 		);
