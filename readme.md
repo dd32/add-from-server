@@ -13,21 +13,6 @@ Add From Server is designed to help ease the pain of bad web hosts, allowing you
 
 Add From Server is designed to import files which are larger than your hosting allows you to upload, or too large for your internet connection's upload speed. It is **not** a replacement for the file uploader, a migration tool, or a batch media importer.
 
-Version 4.0 is a full modernization:
-
-* A REST API (`/wp-json/add-from-server/v1`) with strict capability checks.
-* A modern React admin page built on `@wordpress/components`.
-* Block editor integration via a sidebar plugin — browse and import files without leaving the post editor.
-* A hardened Filesystem helper that confines all browsing and imports to a configurable root directory and rejects path traversal, symlink escapes and paths that canonically fall outside the root.
-* The legacy `frmsvr_root` option, language nag screen and other accumulated cruft have been removed. The root directory is now configured exclusively via the `ADD_FROM_SERVER` constant or the `add_from_server_root` filter.
-* PSR-4 autoloading, strict types, PHPUnit unit tests and a local environment powered by `@wordpress/env`.
-
-## Installation
-
-1. Install the plugin into `wp-content/plugins/add-from-server/`.
-2. Activate via the Plugins screen.
-3. Visit **Media → Add From Server**, or open the Add From Server panel in the block editor sidebar.
-
 ## Configuration
 
 By default, Add From Server is confined to the parent of your `wp-content` directory. To point it somewhere else, define the constant in `wp-config.php`:
