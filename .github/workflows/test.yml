@@ -29,9 +29,6 @@ jobs:
   integration:
     name: WordPress integration tests
     runs-on: ubuntu-latest
-    # Integration tests require a wp-env + wp-phpunit environment which
-    # is still being stabilised on CI; failures here shouldn't block merges.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
