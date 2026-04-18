@@ -50,6 +50,7 @@ class BlockEditor {
 				'wp-i18n',
 				'wp-icons',
 				'wp-blocks',
+				'wp-blocks',
 			),
 			VERSION,
 			true
