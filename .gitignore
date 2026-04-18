@@ -1,0 +1,10 @@
+/vendor/
+/node_modules/
+composer.lock
+package-lock.json
+.phpunit.result.cache
+.phpcs.cache
+/build/
+/coverage/
+.DS_Store
+Thumbs.db

@@ -1,3 +1,18 @@
+= 4.0.0 =
+ * Major modernization release.
+ * Requires WordPress 6.9+ and PHP 7.4+.
+ * New: REST API (`/wp-json/add-from-server/v1`) for browsing and importing, with strict capability checks.
+ * New: Block editor sidebar plugin — browse and import files directly from the post editor.
+ * New: Modern React admin page built on @wordpress/components.
+ * New: Local environment powered by @wordpress/env (`npm start`).
+ * New: PHPUnit unit and integration test suites.
+ * Security: Hardened path resolution that rejects `..` traversal, symlink escapes and absolute paths outside the allowed root.
+ * Security: All output on the admin page now properly escaped.
+ * Security: REST endpoints enforce `upload_files` capability and sanitize all input.
+ * Change: Legacy `frmsvr_root` option removed. The root is now exclusively controlled by the `ADD_FROM_SERVER` constant or the `add_from_server_root` filter.
+ * Change: The language/translation nag screen has been removed.
+ * Change: PSR-4 autoloading and strict types throughout.
+
 = 3.4.5 =
  * Fix a fatal error when WordPress or PHP requirements are not met.
 

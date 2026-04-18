@@ -1,0 +1,30 @@
+name: Tests
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
+jobs:
+  phpunit:
+    name: PHPUnit (wp-env)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+      - name: Install PHP dependencies
+        run: composer install --no-progress --no-interaction --prefer-dist
+      - name: Install Node dependencies
+        run: npm install
+      - name: Start wp-env
+        run: npx wp-env start
+      - name: Run PHPUnit
+        run: npm run test:php
